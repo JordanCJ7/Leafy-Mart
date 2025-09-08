@@ -1,6 +1,8 @@
 
 
 import React, { useEffect, useState } from 'react';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile } from '../services/api';
 import API_BASE from '../services/api';
@@ -82,21 +84,9 @@ export default function Profile() {
 			}
 		}
 	};
-	return (
-		<div style={{ background: '#f1faee', minHeight: '100vh', fontFamily: 'Segoe UI, Arial, sans-serif' }}>
-			<nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem 3rem', background: '#e8f5e9', borderBottom: '1px solid #c8e6c9' }}>
-				<div style={{ fontWeight: 700, fontSize: '1.5rem', color: '#388e3c', display: 'flex', alignItems: 'center' }}>
-					<span style={{ marginRight: 8 }}>🌿</span>Feafly
-				</div>
-				<div style={{ fontSize: '1rem', color: '#388e3c' }}>Profile</div>
-				<div>
-					<button style={{ background: '#388e3c', color: '#fff', border: 'none', borderRadius: 6, padding: '0.5rem 1.25rem', fontWeight: 600, cursor: 'pointer' }} onClick={() => {
-						localStorage.removeItem('token');
-						localStorage.removeItem('user');
-						window.location.href = '/login';
-					}}>Logout</button>
-				</div>
-			</nav>
+		return (
+			<div style={{ background: '#f1faee', minHeight: '100vh', fontFamily: 'Segoe UI, Arial, sans-serif' }}>
+				<Navbar />
 			<main style={{ maxWidth: 600, margin: '3rem auto', padding: '2rem 1rem' }}>
 				<div style={{ background: 'linear-gradient(135deg, #ffffff 60%, #e8f5e9 100%)', borderRadius: 20, boxShadow: '0 6px 32px rgba(56,142,60,0.12)', border: '1px solid #e0e0e0', padding: '2.5rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', transition: 'box-shadow 0.3s' }}>
 					<img src="https://img.icons8.com/color/96/000000/plant-under-sun.png" alt="User avatar" style={{ width: 110, height: 110, borderRadius: '50%', marginBottom: 24, background: '#e8f5e9', border: '3px solid #43a047', boxShadow: '0 2px 12px rgba(56,142,60,0.10)', transition: 'box-shadow 0.3s' }} />
@@ -165,6 +155,7 @@ export default function Profile() {
 									)}
 							   </div>
 						   </main>
+						   <Footer />
 					   </div>
 				   );
 				}

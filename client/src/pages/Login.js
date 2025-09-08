@@ -1,6 +1,8 @@
 
 
 import React, { useState } from 'react';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { Link, useNavigate } from 'react-router-dom';
 import { loginUser } from '../services/api';
 
@@ -29,16 +31,8 @@ export default function Login() {
 		};
 
 	return (
-		<div style={{ background: '#f1faee', minHeight: '100vh', fontFamily: 'Segoe UI, Arial, sans-serif' }}>
-			<nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem 3rem', background: '#e8f5e9', borderBottom: '1px solid #c8e6c9' }}>
-				<div style={{ fontWeight: 700, fontSize: '1.5rem', color: '#388e3c', display: 'flex', alignItems: 'center' }}>
-					<span style={{ marginRight: 8 }}>🌿</span>Feafly
-				</div>
-				<div style={{ fontSize: '1rem', color: '#388e3c' }}>Login</div>
-				<div>
-					<Link to="/register"><button style={{ background: '#388e3c', color: '#fff', border: 'none', borderRadius: 6, padding: '0.5rem 1.25rem', fontWeight: 600, cursor: 'pointer' }}>Register</button></Link>
-				</div>
-			</nav>
+		<div style={{ background: '#f1faee', minHeight: '100vh', fontFamily: 'Segoe UI, Arial, sans-serif', display: 'flex', flexDirection: 'column' }}>
+			<Navbar />
 			<main style={{ maxWidth: 400, margin: '3rem auto', padding: '2rem 1rem' }}>
 				<div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 2px 16px rgba(56,142,60,0.08)', border: '1px solid #e0e0e0', padding: '2.5rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 					<h2 style={{ color: '#388e3c', fontWeight: 700, fontSize: '2rem', marginBottom: 16 }}>Login to Feafly</h2>
@@ -53,6 +47,7 @@ export default function Login() {
 					</div>
 				</div>
 			</main>
+			<Footer />
 		</div>
 	);
 }

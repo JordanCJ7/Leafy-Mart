@@ -1,6 +1,7 @@
-
-
 import React from 'react';
+
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 const products = [
 	{
@@ -43,20 +44,9 @@ const products = [
 
 export default function Home() {
 	return (
-		<div style={{ background: '#f1faee', minHeight: '100vh', fontFamily: 'Segoe UI, Arial, sans-serif' }}>
-			<nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem 3rem', background: '#e8f5e9', borderBottom: '1px solid #c8e6c9' }}>
-				<div style={{ fontWeight: 700, fontSize: '1.5rem', color: '#388e3c', display: 'flex', alignItems: 'center' }}>
-					<span style={{ marginRight: 8 }}>🌿</span>Feafly
-				</div>
-				<div style={{ fontSize: '1rem', color: '#388e3c' }}>Shop</div>
-				<div>
-					<button style={{ marginRight: 16, background: 'none', border: 'none', fontSize: '1.25rem', color: '#388e3c', cursor: 'pointer' }}>
-						<span role="img" aria-label="cart">🛒</span>
-					</button>
-					<button style={{ background: '#388e3c', color: '#fff', border: 'none', borderRadius: 6, padding: '0.5rem 1.25rem', fontWeight: 600, cursor: 'pointer' }}>Login</button>
-				</div>
-			</nav>
-			<main style={{ maxWidth: 1200, margin: '0 auto', padding: '2rem 1rem' }}>
+		<div style={{ background: '#f1faee', minHeight: '100vh', fontFamily: 'Segoe UI, Arial, sans-serif', display: 'flex', flexDirection: 'column' }}>
+			<Navbar />
+			<main style={{ flex: 1, maxWidth: 1200, margin: '0 auto', padding: '2rem 1rem' }}>
 				<h2 style={{ textAlign: 'center', fontSize: '2.25rem', fontWeight: 700, color: '#388e3c', marginBottom: '0.5rem' }}>
 					Find Your New Green Friend
 				</h2>
@@ -83,6 +73,7 @@ export default function Home() {
 					))}
 				</div>
 			</main>
+			<Footer />
 		</div>
 	);
 }
