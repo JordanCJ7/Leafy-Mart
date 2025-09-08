@@ -6,7 +6,9 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   isAdmin: { type: Boolean, default: false },
   wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
-  address: String
+  address: String,
+  phone: String,
+  // Add other details as needed, e.g. apartment, city, etc.
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

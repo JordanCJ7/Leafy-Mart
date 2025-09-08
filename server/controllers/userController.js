@@ -13,6 +13,10 @@ exports.getProfile = async (req, res) => {
 // Update user profile
 exports.updateProfile = async (req, res) => {
 	try {
+		console.log('=== updateProfile endpoint called ===');
+		console.log('Method:', req.method);
+		console.log('Headers:', JSON.stringify(req.headers, null, 2));
+		console.log('Body:', JSON.stringify(req.body, null, 2));
 		const user = await User.findByIdAndUpdate(req.user?._id || req.params.id, req.body, { new: true });
 		res.json(user);
 	} catch (err) {
