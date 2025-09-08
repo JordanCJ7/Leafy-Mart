@@ -15,7 +15,7 @@ app.use('/api/orders', require('./routes/orders'));
 app.use('/api/suppliers', require('./routes/suppliers'));
 app.use('/api/users', require('./routes/users'));
 
-app.get('/', (req, res) => res.send('SPSMS API Running'));
+app.get('/', (req, res) => res.send('Botanica Hub 🌿 API Running'));
 
 app.use(errorHandler);
 

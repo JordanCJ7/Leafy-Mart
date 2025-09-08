@@ -1,6 +1,6 @@
-# 🌱 Smart Plant Store Management System (SPSMS)
+# 🌱 Botanica Hub 🌿 (SPSMS)
 
-The **Smart Plant Store Management System (SPSMS)** is a web-based application designed to modernize and automate plant store operations. Built with the **MERN stack (MongoDB, Express.js, React, Node.js)**, it provides an efficient way for store owners to manage inventory, customer orders, suppliers, and payments while offering customers a seamless online shopping experience.
+The **Botanica Hub 🌿** is a web-based application designed to modernize and automate plant store operations. Built with the **MERN stack (MongoDB, Express.js, React, Node.js)**, it provides an efficient way for store owners to manage inventory, customer orders, suppliers, and payments while offering customers a seamless online shopping experience.
 
 ---
 
