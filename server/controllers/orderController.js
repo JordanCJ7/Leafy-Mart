@@ -21,6 +21,16 @@ exports.getUserOrders = async (req, res) => {
 	}
 };
 
+// Get all orders (admin only)
+exports.getAllOrders = async (req, res) => {
+	try {
+		const orders = await Order.find().populate('user', 'name email').sort({ createdAt: -1 });
+		res.json(orders);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+};
+
 // Update order status (admin)
 exports.updateOrderStatus = async (req, res) => {
 	try {

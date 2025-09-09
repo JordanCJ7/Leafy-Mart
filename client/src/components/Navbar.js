@@ -15,7 +15,7 @@ import {
 import './Navbar.css';
 
 const Navbar = () => {
-	const { isLoggedIn, user, logout } = useAuth();
+	const { isLoggedIn, user, logout, isLoading } = useAuth();
 	const navigate = useNavigate();
 
 	const handleLogout = () => {
@@ -32,7 +32,16 @@ const Navbar = () => {
 				</Link>
 			</div>
 			<ul className="navbar-links">
-				{isLoggedIn ? (
+				<li>
+					<Link to="/products">
+						<Leaf size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+						Products
+					</Link>
+				</li>
+				{isLoading ? (
+					// Show loading state
+					<li style={{ color: '#388e3c', fontSize: '0.9rem' }}>Loading...</li>
+				) : isLoggedIn ? (
 					// Show these links when user is logged in
 					<>
 						<li>

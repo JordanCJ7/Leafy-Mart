@@ -28,7 +28,12 @@ export default function Login() {
 		// Use AuthContext login method
 		login(res.token, res.user);
 		setError('');
-		navigate('/profile');
+		// Redirect admin users to admin dashboard, regular users to profile
+		if (res.user && res.user.isAdmin) {
+			navigate('/admin');
+		} else {
+			navigate('/profile');
+		}
 	};
 
 	return (

@@ -11,6 +11,7 @@ const Footer = () => {
         <p>&copy; {new Date().getFullYear()} Botanica Hub 🌿. All rights reserved.</p>
         <div className="footer-links">
           <a href="/">Home</a> |
+          <a href="/products">Products</a> |
           {isLoggedIn ? (
             <>
               <a href="/cart">Cart</a> |

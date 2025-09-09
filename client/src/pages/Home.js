@@ -1,35 +1,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
-
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import products from '../data/products';
-import { Link } from 'react-router-dom';
-import { ShoppingCart, Heart, Tag } from 'lucide-react';
+import { ShoppingCart, Heart, Tag, Star, Shield, Truck, Leaf, Users, Award, ArrowRight, CheckCircle, Sparkles } from 'lucide-react';
+import './Home.css';
 
 export default function Home() {
+	const navigate = useNavigate();
 	const [cart, setCart] = useState(() => JSON.parse(localStorage.getItem('cart') || '[]'));
 	const [wishlist, setWishlist] = useState(() => JSON.parse(localStorage.getItem('wishlist') || '[]'));
-
-	// Search and category filter
-	const [search, setSearch] = useState('');
-	const [category, setCategory] = useState('All');
 
 	const categories = useMemo(() => {
 		const setCats = new Set(products.map(p => p.category));
 		return ['All', ...Array.from(setCats)];
 	}, []);
-
-	const filteredProducts = useMemo(() => {
-		const q = search.trim().toLowerCase();
-		return products.filter(p => {
-			if (category !== 'All' && p.category !== category) return false;
-			if (!q) return true;
-			if (p.name.toLowerCase().includes(q)) return true;
-			if (p.tags.join(' ').toLowerCase().includes(q)) return true;
-			if ((p.desc || '').toLowerCase().includes(q)) return true;
-			return false;
-		});
-	}, [search, category]);
 
 	useEffect(() => { localStorage.setItem('cart', JSON.stringify(cart)); }, [cart]);
 	useEffect(() => { localStorage.setItem('wishlist', JSON.stringify(wishlist)); }, [wishlist]);
@@ -49,63 +34,229 @@ export default function Home() {
 	return (
 		<div style={{ background: '#f1faee', minHeight: '100vh', fontFamily: 'Segoe UI, Arial, sans-serif', display: 'flex', flexDirection: 'column' }}>
 			<Navbar />
-			<main style={{ flex: 1, maxWidth: 1200, margin: '0 auto', padding: '2rem 1rem' }}>
-				<h2 style={{ textAlign: 'center', fontSize: '2.25rem', fontWeight: 700, color: '#388e3c', marginBottom: '0.5rem' }}>
-					Find Your New Green Friend
-				</h2>
-				<p style={{ textAlign: 'center', color: '#388e3c', fontSize: '1.1rem', marginBottom: '1.5rem' }}>
-					Browse our curated selection of beautiful and healthy houseplants.
-				</p>
-				<div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: '2rem', flexWrap: 'wrap' }}>
-					<input value={search} onChange={e => setSearch(e.target.value)} type="text" placeholder="Search for plants..." style={{ width: 320, padding: '0.75rem', borderRadius: 8, border: '1px solid #a5d6a7', fontSize: '1rem' }} />
-					<select value={category} onChange={e => setCategory(e.target.value)} style={{ padding: '0.75rem', borderRadius: 8, border: '1px solid #a5d6a7', fontSize: '1rem', background: '#fff' }}>
-						{categories.map(c => <option key={c} value={c}>{c}</option>)}
-					</select>
-				</div>
+			
+			{/* Hero Section */}
+			<section style={{ 
+				background: 'linear-gradient(135deg, #2e7d32 0%, #43a047 50%, #66bb6a 100%)',
+				color: '#fff',
+				padding: '4rem 1rem',
+				textAlign: 'center',
+				position: 'relative',
+				overflow: 'hidden'
+			}}>
 				<div style={{ 
-					display: 'grid', 
-					/* show 4 items per row on wide screens; wrap naturally on smaller screens */
-					gridTemplateColumns: 'repeat(4, minmax(220px, 1fr))', 
-					gap: '2rem',
-					alignItems: 'start',
-					justifyContent: 'center',
-					maxWidth: '1200px',
-					margin: '0 auto'
-				}}>
-				{filteredProducts.length === 0 ? (
-						<div style={{ gridColumn: '1/-1', textAlign: 'center', color: '#666' }}>No products found.</div>
-					) : filteredProducts.map((p) => {
-						const inWishlist = wishlist.includes(p.id);
-					return (
-					<div key={p.id} style={{ background: '#fff', borderRadius: 12, boxShadow: '0 2px 16px rgba(56,142,60,0.08)', overflow: 'hidden', border: '1px solid #e0e0e0', position: 'relative', display: 'flex', flexDirection: 'column', height: '100%' }}>
-						<Link to={`/product/${p.id}`} style={{ display: 'block', color: 'inherit', textDecoration: 'none' }}>
-							<div style={{ height: 200, overflow: 'hidden' }}>
-								<img src={p.img} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-							</div>
+					position: 'absolute', 
+					top: 0, 
+					left: 0, 
+					right: 0, 
+					bottom: 0, 
+					background: `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.1)" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,117.3C672,107,768,117,864,128C960,139,1056,149,1152,133.3C1248,117,1344,75,1392,53.3L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>')`,
+					backgroundSize: 'cover',
+					backgroundPosition: 'bottom'
+				}}></div>
+				<div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+					<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }} className="hero-title">
+						<Sparkles size={32} style={{ marginRight: '12px', color: '#a5d6a7' }} />
+						<h1 style={{ fontSize: '3.5rem', fontWeight: 900, margin: 0, textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
+							Botanica Hub
+						</h1>
+						<Sparkles size={32} style={{ marginLeft: '12px', color: '#a5d6a7' }} />
+					</div>
+					<p style={{ fontSize: '1.4rem', marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem', opacity: 0.95, fontWeight: 300 }} className="hero-subtitle">
+						Transform your space into a green paradise with our premium collection of healthy, beautiful plants
+					</p>
+					<div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }} className="hero-buttons">
+						<Link to="/products" style={{ 
+							background: '#fff', 
+							color: '#2e7d32', 
+							padding: '1rem 2rem', 
+							borderRadius: '50px', 
+							textDecoration: 'none',
+							fontWeight: 700,
+							fontSize: '1.1rem',
+							display: 'inline-flex',
+							alignItems: 'center',
+							gap: '8px',
+							boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+							transition: 'transform 0.3s ease'
+						}} className="cta-button-primary">
+							Shop Now <ArrowRight size={20} />
 						</Link>
-						<button onClick={() => toggleWishlist(p.id)} style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(255,255,255,0.9)', border: 'none', fontSize: 18, color: inWishlist? '#d32f2f' : '#388e3c', cursor: 'pointer', padding: 6, borderRadius: 6 }} title="Toggle wishlist">
-							<Heart size={18} />
+						<button style={{ 
+							background: 'transparent', 
+							color: '#fff', 
+							border: '2px solid #fff',
+							padding: '1rem 2rem', 
+							borderRadius: '50px',
+							fontWeight: 700,
+							fontSize: '1.1rem',
+							cursor: 'pointer',
+							display: 'inline-flex',
+							alignItems: 'center',
+							gap: '8px',
+							transition: 'all 0.3s ease'
+						}} className="cta-button-secondary">
+							Learn More
 						</button>
-						<div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: '1 1 auto' }}>
-							<div style={{ fontWeight: 700, fontSize: '1.15rem', color: '#388e3c', marginBottom: 4 }}>{p.name}</div>
-							<div style={{ color: '#43a047', fontWeight: 600, marginBottom: 8 }}>{p.priceDisplay}</div>
-							<div style={{ color: '#555', fontSize: '0.98rem', marginBottom: 16 }}>{p.desc}</div>
-							<div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'space-between' }}>
-								<div style={{ color: '#777', fontSize: '0.95rem' }}>{p.category} · {p.tags.slice(0,2).join(', ')}</div>
-								<div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 8px', borderRadius: 20, background: p.stock>0? '#e8f5e9' : '#fff0f0' }}>
-									<Tag size={14} color={p.stock>0? '#2e7d32' : '#d32f2f'} />
-									<span style={{ color: p.stock>0? '#2e7d32' : '#d32f2f', fontWeight: 700 }}>{p.stock}</span>
+					</div>
+				</div>
+			</section>
+
+			{/* Features Section */}
+			<section style={{ padding: '4rem 1rem', background: '#fff' }}>
+				<div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+					<h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#2e7d32', marginBottom: '1rem' }}>
+						Why Choose Botanica Hub?
+					</h2>
+					<p style={{ color: '#666', fontSize: '1.2rem', marginBottom: '3rem', maxWidth: '600px', margin: '0 auto 3rem' }}>
+						We're committed to bringing you the finest plants with exceptional service
+					</p>
+					<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }} className="feature-grid">
+						{[
+							{ icon: <Shield size={48} />, title: 'Quality Guarantee', desc: 'Every plant comes with our 30-day health guarantee' },
+							{ icon: <Truck size={48} />, title: 'Fast Delivery', desc: 'Free delivery within 2-3 days across the island' },
+							{ icon: <Award size={48} />, title: 'Expert Care', desc: 'Professional guidance and plant care support' },
+							{ icon: <Users size={48} />, title: 'Community', desc: 'Join thousands of happy plant parents' },
+							{ icon: <Leaf size={48} />, title: 'Eco-Friendly', desc: 'Sustainable packaging and eco-conscious practices' },
+							{ icon: <Sparkles size={48} />, title: 'Fresh Stock', desc: 'Weekly fresh arrivals directly from our nursery' }
+						].map((feature, i) => (
+							<div key={i} style={{ 
+								background: '#f8f9fa', 
+								padding: '2.5rem 1.5rem', 
+								borderRadius: '16px',
+								border: '1px solid #e9ecef',
+								transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+							}} className="feature-card">
+								<div style={{ color: '#43a047', marginBottom: '1rem' }} className="feature-icon">{feature.icon}</div>
+								<h3 style={{ fontSize: '1.3rem', fontWeight: 700, color: '#2e7d32', marginBottom: '0.5rem' }}>
+									{feature.title}
+								</h3>
+								<p style={{ color: '#666', lineHeight: 1.6 }}>{feature.desc}</p>
+							</div>
+						))}
+					</div>
+				</div>
+			</section>
+
+			{/* Statistics Section */}
+			<section style={{ 
+				background: 'linear-gradient(45deg, #e8f5e9, #f1faee)', 
+				padding: '3rem 1rem' 
+			}}>
+				<div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+					<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem', textAlign: 'center' }}>
+						{[
+							{ number: '10,000+', label: 'Happy Customers' },
+							{ number: '500+', label: 'Plant Varieties' },
+							{ number: '99%', label: 'Survival Rate' },
+							{ number: '24/7', label: 'Plant Support' }
+						].map((stat, i) => (
+							<div key={i} style={{ padding: '1rem' }}>
+								<div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#2e7d32', marginBottom: '0.5rem' }} className="stat-number">
+									{stat.number}
+								</div>
+								<div style={{ color: '#666', fontSize: '1.1rem', fontWeight: 600 }}>
+									{stat.label}
 								</div>
 							</div>
-							<button onClick={() => addToCart(p)} disabled={p.stock<=0} style={{ width: '100%', marginTop: 'auto', padding: '0.75rem', background: p.stock>0? '#43a047' : '#bdbdbd', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, fontSize: '1rem', cursor: p.stock>0? 'pointer' : 'not-allowed', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-								<ShoppingCart size={16} /> Add to Cart
-							</button>
-						</div>
+						))}
 					</div>
-					)
-					})}
 				</div>
-			</main>
+			</section>
+
+			{/* Product Categories */}
+			<section id="categories" style={{ padding: '4rem 1rem', background: '#fff' }}>
+				<div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+					<h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#2e7d32', marginBottom: '1rem' }}>
+						Shop by Category
+					</h2>
+					<p style={{ color: '#666', fontSize: '1.2rem', marginBottom: '3rem' }}>
+						Find the perfect plants for your space and lifestyle
+					</p>
+					<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }} className="category-grid">
+						{categories.slice(1).map(cat => {
+							const categoryProducts = products.filter(p => p.category === cat);
+							const sampleProduct = categoryProducts[0];
+							return (
+								<div key={cat} style={{ 
+									background: '#f8f9fa', 
+									borderRadius: '16px', 
+									overflow: 'hidden',
+									border: '1px solid #e9ecef',
+									transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+									cursor: 'pointer'
+								}}
+								onClick={() => navigate('/products')}
+								className="category-card"
+								>
+									{sampleProduct && (
+										<div style={{ height: '200px', overflow: 'hidden' }}>
+											<img src={sampleProduct.img} alt={cat} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s ease' }} />
+										</div>
+									)}
+									<div style={{ padding: '1.5rem' }}>
+										<h3 style={{ fontSize: '1.3rem', fontWeight: 700, color: '#2e7d32', marginBottom: '0.5rem' }}>
+											{cat}
+										</h3>
+										<p style={{ color: '#666', marginBottom: '1rem' }}>
+											{categoryProducts.length} varieties available
+										</p>
+										<div style={{ 
+											color: '#43a047', 
+											fontWeight: 600,
+											display: 'inline-flex',
+											alignItems: 'center',
+											gap: '4px'
+										}}>
+											Explore <ArrowRight size={16} />
+										</div>
+									</div>
+								</div>
+							);
+						})}
+					</div>
+				</div>
+			</section>
+
+			{/* Testimonials Section */}
+			<section style={{ 
+				background: 'linear-gradient(135deg, #2e7d32, #43a047)', 
+				color: '#fff', 
+				padding: '4rem 1rem' 
+			}}>
+				<div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+					<h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '3rem' }}>
+						What Our Customers Say
+					</h2>
+					<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+						{[
+							{ name: 'Priya Sharma', text: 'Amazing quality plants! My snake plant is thriving after 6 months.', rating: 5 },
+							{ name: 'Rajesh Kumar', text: 'Fast delivery and excellent packaging. Highly recommended!', rating: 5 },
+							{ name: 'Anjali Patel', text: 'The plant care guidance is invaluable. Great customer service!', rating: 5 }
+						].map((review, i) => (
+							<div key={i} style={{ 
+								background: 'rgba(255,255,255,0.1)', 
+								padding: '2rem', 
+								borderRadius: '16px',
+								backdropFilter: 'blur(10px)'
+							}} className="testimonial-card">
+								<div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+									{[...Array(review.rating)].map((_, j) => (
+										<Star key={j} size={20} fill="#ffd700" color="#ffd700" />
+									))}
+								</div>
+								<p style={{ fontSize: '1.1rem', marginBottom: '1rem', fontStyle: 'italic' }}>
+									"{review.text}"
+								</p>
+								<p style={{ fontWeight: 600, opacity: 0.9 }}>
+									- {review.name}
+								</p>
+							</div>
+						))}
+					</div>
+				</div>
+			</section>
+
 			<Footer />
 		</div>
 	);

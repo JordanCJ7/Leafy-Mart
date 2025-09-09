@@ -14,6 +14,7 @@ app.use('/api/products', require('./routes/products'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/suppliers', require('./routes/suppliers'));
 app.use('/api/users', require('./routes/users'));
+app.use('/api/admin', require('./routes/admin'));
 
 app.get('/', (req, res) => res.send('Botanica Hub 🌿 API Running'));
 
