@@ -21,14 +21,14 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <Link to="/" className="navbar-logo">
+  <Link to={isAdmin ? "/admin/dashboard" : "/"} className="navbar-logo">
           <Leaf className="navbar-icon" />
           <span>Green Paradise</span>
         </Link>
 
   <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
           
-          {isLoggedIn && (
+          {isLoggedIn && !isAdmin && (
             <>
               <Link 
                 to="/products" 
@@ -78,16 +78,7 @@ function Navbar() {
             </>
           ) : (
             <>
-              {isAdmin && (
-                <Link 
-                  to="/admin/dashboard" 
-                  className={`navbar-item ${location.pathname.includes('/admin') ? 'active' : ''}`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <User size={16} className="nav-icon" />
-                  Admin
-                </Link>
-              )}
+              {/* Admin link intentionally hidden for admins; logo directs admins to dashboard */}
               <div className="navbar-user-dropdown">
                 <button 
                   className="navbar-user"
@@ -124,7 +115,7 @@ function Navbar() {
         </div>
 
         <div className="navbar-actions">
-          {isLoggedIn && (
+          {isLoggedIn && !isAdmin && (
             <Link to="/cart" className="navbar-action">
               <ShoppingCart size={20} />
             </Link>

@@ -5,7 +5,7 @@ import Footer from '../components/Footer';
 import './Profile.css';
 
 const Profile = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -442,101 +442,105 @@ const Profile = () => {
                   </div>
                 </div>
 
-                <div className="form-section">
-                  <h3>Plant Preferences</h3>
-                  
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Care Level</label>
-                      <select
-                        value={profileData.careLevel}
-                        onChange={(e) => handleInputChange('careLevel', e.target.value)}
-                      >
-                        <option value="Beginner">Beginner</option>
-                        <option value="Intermediate">Intermediate</option>
-                        <option value="Expert">Expert</option>
-                        <option value="Advanced">Advanced</option>
-                      </select>
+                {!isAdmin && (
+                  <div className="form-section">
+                    <h3>Plant Preferences</h3>
+                    
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label>Care Level</label>
+                        <select
+                          value={profileData.careLevel}
+                          onChange={(e) => handleInputChange('careLevel', e.target.value)}
+                        >
+                          <option value="Beginner">Beginner</option>
+                          <option value="Intermediate">Intermediate</option>
+                          <option value="Expert">Expert</option>
+                          <option value="Advanced">Advanced</option>
+                        </select>
+                      </div>
+                      
+                      <div className="form-group">
+                        <label>Planting Experience</label>
+                        <select
+                          value={profileData.plantingExperience}
+                          onChange={(e) => handleInputChange('plantingExperience', e.target.value)}
+                        >
+                          <option value="None">None</option>
+                          <option value="Some">Some</option>
+                          <option value="Experienced">Experienced</option>
+                        </select>
+                      </div>
                     </div>
                     
                     <div className="form-group">
-                      <label>Planting Experience</label>
-                      <select
-                        value={profileData.plantingExperience}
-                        onChange={(e) => handleInputChange('plantingExperience', e.target.value)}
-                      >
-                        <option value="None">None</option>
-                        <option value="Some">Some</option>
-                        <option value="Experienced">Experienced</option>
-                      </select>
+                      <label>Plant Types (Select all that apply)</label>
+                      <div className="checkbox-grid">
+                        {plantPreferenceOptions.map(option => (
+                          <label key={option} className="checkbox-item">
+                            <input
+                              type="checkbox"
+                              checked={profileData.plantPreferences.includes(option)}
+                              onChange={(e) => handleArrayChange('plantPreferences', option, e.target.checked)}
+                            />
+                            <span>{option}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="form-group">
+                      <label>Favorite Categories</label>
+                      <div className="checkbox-grid">
+                        {categoryOptions.map(option => (
+                          <label key={option} className="checkbox-item">
+                            <input
+                              type="checkbox"
+                              checked={profileData.favoriteCategories.includes(option)}
+                              onChange={(e) => handleArrayChange('favoriteCategories', option, e.target.checked)}
+                            />
+                            <span>{option}</span>
+                          </label>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="form-group">
-                    <label>Plant Types (Select all that apply)</label>
-                    <div className="checkbox-grid">
-                      {plantPreferenceOptions.map(option => (
-                        <label key={option} className="checkbox-item">
-                          <input
-                            type="checkbox"
-                            checked={profileData.plantPreferences.includes(option)}
-                            onChange={(e) => handleArrayChange('plantPreferences', option, e.target.checked)}
-                          />
-                          <span>{option}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="form-group">
-                    <label>Favorite Categories</label>
-                    <div className="checkbox-grid">
-                      {categoryOptions.map(option => (
-                        <label key={option} className="checkbox-item">
-                          <input
-                            type="checkbox"
-                            checked={profileData.favoriteCategories.includes(option)}
-                            onChange={(e) => handleArrayChange('favoriteCategories', option, e.target.checked)}
-                          />
-                          <span>{option}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                )}
 
-                <div className="form-section">
-                  <h3>Communication Preferences</h3>
-                  
-                  <div className="checkbox-list">
-                    <label className="checkbox-item">
-                      <input
-                        type="checkbox"
-                        checked={profileData.newsletter}
-                        onChange={(e) => handleInputChange('newsletter', e.target.checked)}
-                      />
-                      <span>Newsletter Subscription</span>
-                    </label>
+                {!isAdmin && (
+                  <div className="form-section">
+                    <h3>Communication Preferences</h3>
                     
-                    <label className="checkbox-item">
-                      <input
-                        type="checkbox"
-                        checked={profileData.careReminders}
-                        onChange={(e) => handleInputChange('careReminders', e.target.checked)}
-                      />
-                      <span>Plant Care Reminders</span>
-                    </label>
-                    
-                    <label className="checkbox-item">
-                      <input
-                        type="checkbox"
-                        checked={profileData.promotionalEmails}
-                        onChange={(e) => handleInputChange('promotionalEmails', e.target.checked)}
-                      />
-                      <span>Promotional Emails</span>
-                    </label>
+                    <div className="checkbox-list">
+                      <label className="checkbox-item">
+                        <input
+                          type="checkbox"
+                          checked={profileData.newsletter}
+                          onChange={(e) => handleInputChange('newsletter', e.target.checked)}
+                        />
+                        <span>Newsletter Subscription</span>
+                      </label>
+                      
+                      <label className="checkbox-item">
+                        <input
+                          type="checkbox"
+                          checked={profileData.careReminders}
+                          onChange={(e) => handleInputChange('careReminders', e.target.checked)}
+                        />
+                        <span>Plant Care Reminders</span>
+                      </label>
+                      
+                      <label className="checkbox-item">
+                        <input
+                          type="checkbox"
+                          checked={profileData.promotionalEmails}
+                          onChange={(e) => handleInputChange('promotionalEmails', e.target.checked)}
+                        />
+                        <span>Promotional Emails</span>
+                      </label>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className="form-actions">
                   <button 

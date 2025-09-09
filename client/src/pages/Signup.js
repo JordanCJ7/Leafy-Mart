@@ -64,7 +64,8 @@ const Signup = () => {
       if (data.success) {
         // Registration successful, automatically log them in with the returned token
         loginUser(data.user, data.token);
-        navigate('/products');
+        // Direct new users to the landing page
+        navigate('/');
       } else {
         setError(data.message || 'Registration failed');
       }

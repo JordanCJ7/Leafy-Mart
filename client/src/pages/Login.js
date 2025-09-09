@@ -17,7 +17,10 @@ const Login = () => {
   const location = useLocation();
   const { loginCustomer: loginUser, loginAdmin } = useAuth();
 
-  const from = location.state?.from?.pathname || '/products';
+  const rawFrom = location.state?.from?.pathname;
+  // Default landing page for regular users
+  const defaultLanding = '/';
+  const from = rawFrom || defaultLanding;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,7 +45,10 @@ const Login = () => {
           navigate('/admin/dashboard', { replace: true });
         } else {
           loginUser(data.user, data.token);
-          navigate(from, { replace: true });
+          // Prevent navigating back to login/signup after successful auth
+          const forbidden = ['/login', '/signup', '/register'];
+          const target = forbidden.includes(from) ? defaultLanding : from;
+          navigate(target, { replace: true });
         }
       } else {
         setError(data.message || 'Login failed');
