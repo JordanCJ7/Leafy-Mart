@@ -1,12 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import { Leaf, Phone, Mail, MapPin, Facebook, Instagram, Twitter } from 'lucide-react';
 import './Footer.css';
 
 const Footer = () => {
-  const { isLoggedIn, user } = useAuth();
-
   return (
     <footer className="footer">
       <div className="footer-content">
@@ -118,7 +115,7 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* User Account Links */}
+          {/* Customer Services */}
           <div>
             <h4 style={{ 
               fontSize: '1.2rem', 
@@ -126,88 +123,49 @@ const Footer = () => {
               color: '#2e7d32', 
               marginBottom: '1rem' 
             }}>
-              {isLoggedIn ? 'My Account' : 'Account'}
+              Customer Services
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {isLoggedIn ? (
-                <>
-                  <Link to="/profile" style={{ 
-                    color: '#555', 
-                    textDecoration: 'none', 
-                    fontSize: '0.95rem',
-                    transition: 'color 0.2s ease'
-                  }}
-                  onMouseOver={(e) => e.target.style.color = '#43a047'}
-                  onMouseOut={(e) => e.target.style.color = '#555'}>
-                    My Profile
-                  </Link>
-                  <Link to="/cart" style={{ 
-                    color: '#555', 
-                    textDecoration: 'none', 
-                    fontSize: '0.95rem',
-                    transition: 'color 0.2s ease'
-                  }}
-                  onMouseOver={(e) => e.target.style.color = '#43a047'}
-                  onMouseOut={(e) => e.target.style.color = '#555'}>
-                    My Cart
-                  </Link>
-                  <Link to="/wishlist" style={{ 
-                    color: '#555', 
-                    textDecoration: 'none', 
-                    fontSize: '0.95rem',
-                    transition: 'color 0.2s ease'
-                  }}
-                  onMouseOver={(e) => e.target.style.color = '#43a047'}
-                  onMouseOut={(e) => e.target.style.color = '#555'}>
-                    Wishlist
-                  </Link>
-                  <Link to="/order-tracking" style={{ 
-                    color: '#555', 
-                    textDecoration: 'none', 
-                    fontSize: '0.95rem',
-                    transition: 'color 0.2s ease'
-                  }}
-                  onMouseOver={(e) => e.target.style.color = '#43a047'}
-                  onMouseOut={(e) => e.target.style.color = '#555'}>
-                    Order Tracking
-                  </Link>
-                  {user && user.isAdmin && (
-                    <Link to="/admin" style={{ 
-                      color: '#555', 
-                      textDecoration: 'none', 
-                      fontSize: '0.95rem',
-                      transition: 'color 0.2s ease'
-                    }}
-                    onMouseOver={(e) => e.target.style.color = '#43a047'}
-                    onMouseOut={(e) => e.target.style.color = '#555'}>
-                      Admin Dashboard
-                    </Link>
-                  )}
-                </>
-              ) : (
-                <>
-                  <Link to="/login" style={{ 
-                    color: '#555', 
-                    textDecoration: 'none', 
-                    fontSize: '0.95rem',
-                    transition: 'color 0.2s ease'
-                  }}
-                  onMouseOver={(e) => e.target.style.color = '#43a047'}
-                  onMouseOut={(e) => e.target.style.color = '#555'}>
-                    Login
-                  </Link>
-                  <Link to="/register" style={{ 
-                    color: '#555', 
-                    textDecoration: 'none', 
-                    fontSize: '0.95rem',
-                    transition: 'color 0.2s ease'
-                  }}
-                  onMouseOver={(e) => e.target.style.color = '#43a047'}
-                  onMouseOut={(e) => e.target.style.color = '#555'}>
-                    Register
-                  </Link>
-                </>
-              )}
+              <Link to="/cart" style={{ 
+                color: '#555', 
+                textDecoration: 'none', 
+                fontSize: '0.95rem',
+                transition: 'color 0.2s ease'
+              }}
+              onMouseOver={(e) => e.target.style.color = '#43a047'}
+              onMouseOut={(e) => e.target.style.color = '#555'}>
+                Shopping Cart
+              </Link>
+              <Link to="/wishlist" style={{ 
+                color: '#555', 
+                textDecoration: 'none', 
+                fontSize: '0.95rem',
+                transition: 'color 0.2s ease'
+              }}
+              onMouseOver={(e) => e.target.style.color = '#43a047'}
+              onMouseOut={(e) => e.target.style.color = '#555'}>
+                Wishlist
+              </Link>
+              <Link to="/order-tracking" style={{ 
+                color: '#555', 
+                textDecoration: 'none', 
+                fontSize: '0.95rem',
+                transition: 'color 0.2s ease'
+              }}
+              onMouseOver={(e) => e.target.style.color = '#43a047'}
+              onMouseOut={(e) => e.target.style.color = '#555'}>
+                Order Tracking
+              </Link>
+              <Link to="/admin/login" style={{ 
+                color: '#555', 
+                textDecoration: 'none', 
+                fontSize: '0.95rem',
+                transition: 'color 0.2s ease'
+              }}
+              onMouseOver={(e) => e.target.style.color = '#43a047'}
+              onMouseOut={(e) => e.target.style.color = '#555'}>
+                Admin Login
+              </Link>
             </div>
           </div>
 

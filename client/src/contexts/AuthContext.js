@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { verifyAdminToken } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -10,86 +11,87 @@ export const useAuth = () => {
   return context;
 };
 
-// Helper function to validate token
-const isTokenValid = (token) => {
-  if (!token) return false;
-  
-  try {
-    // Basic JWT structure check
-    const parts = token.split('.');
-    if (parts.length !== 3) return false;
-    
-    // Decode the payload (basic check, not cryptographic verification)
-    const payload = JSON.parse(atob(parts[1]));
-    
-    // Check if token is expired
-    if (payload.exp && payload.exp < Date.now() / 1000) {
-      return false;
-    }
-    
-    return true;
-  } catch (error) {
-    return false;
-  }
-};
-
 export const AuthProvider = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    
-    if (token && userData && isTokenValid(token)) {
-      try {
-        const parsedUserData = JSON.parse(userData);
-        setIsLoggedIn(true);
-        setUser(parsedUserData);
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        // Clear invalid data
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setIsLoggedIn(false);
-        setUser(null);
-      }
-    } else {
-      // Clear invalid or expired data
-      if (token && !isTokenValid(token)) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-      }
-      setIsLoggedIn(false);
-      setUser(null);
-    }
-    
-    setIsLoading(false);
+    checkAuthStatus();
   }, []);
 
-  const login = (token, userData) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
+  const checkAuthStatus = async () => {
+    try {
+      // Check for customer token
+      const customerToken = localStorage.getItem('customerToken');
+      const customerData = localStorage.getItem('customerData');
+      
+      // Check for admin token
+      const adminToken = localStorage.getItem('adminToken');
+      
+      if (customerToken && customerData) {
+        setUser(JSON.parse(customerData));
+        setIsLoggedIn(true);
+        setIsAdmin(false);
+      } else if (adminToken) {
+        const response = await verifyAdminToken(adminToken);
+        if (response.valid) {
+          setUser(response.admin);
+          setIsLoggedIn(true);
+          setIsAdmin(true);
+        } else {
+          logout();
+        }
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      logout();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loginCustomer = (customerData, token) => {
+    localStorage.setItem('customerToken', token);
+    localStorage.setItem('customerData', JSON.stringify(customerData));
+    setUser(customerData);
     setIsLoggedIn(true);
-    setUser(userData);
+    setIsAdmin(false);
+  };
+
+  const loginAdmin = (adminData, token) => {
+    localStorage.setItem('adminToken', token);
+    localStorage.setItem('adminData', JSON.stringify(adminData));
+    setUser(adminData);
+    setIsLoggedIn(true);
+    setIsAdmin(true);
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setIsLoggedIn(false);
+    localStorage.removeItem('customerToken');
+    localStorage.removeItem('customerData');
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminData');
     setUser(null);
+    setIsLoggedIn(false);
+    setIsAdmin(false);
   };
 
   const value = {
-    isLoggedIn,
     user,
-    login,
+    isLoggedIn,
+    isAdmin,
+    loading,
+    loginCustomer,
+    loginAdmin,
     logout,
-    isLoading
+    checkAuthStatus
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };

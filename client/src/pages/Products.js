@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import products from '../data/products';
@@ -8,7 +7,6 @@ import { Heart, ShoppingCart, Star, Filter, Search, Grid, List } from 'lucide-re
 import './Products.css';
 
 const Products = () => {
-  const { isLoggedIn } = useAuth();
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -73,21 +71,15 @@ const Products = () => {
   }, [searchTerm, selectedCategory, priceRange, sortBy]);
 
   const addToCart = (product) => {
-    if (!isLoggedIn) {
-      alert('Please login to add items to cart');
-      return;
-    }
     console.log('Adding to cart:', product);
     // Implement cart functionality
+    alert('Item added to cart!');
   };
 
   const addToWishlist = (product) => {
-    if (!isLoggedIn) {
-      alert('Please login to add items to wishlist');
-      return;
-    }
     console.log('Adding to wishlist:', product);
     // Implement wishlist functionality
+    alert('Item added to wishlist!');
   };
 
   return (

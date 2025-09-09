@@ -1,59 +1,274 @@
-
-
 import React, { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Leaf, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { loginUser } from '../services/api';
+import { loginCustomer } from '../services/api';
 
-export default function Login() {
-	const [email, setEmail] = useState('');
-	const [password, setPassword] = useState('');
-	const [error, setError] = useState('');
-	const { login } = useAuth();
-	const navigate = useNavigate();
+const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-	const handleSubmit = async e => {
-		e.preventDefault();
-		if (!email || !password) {
-			setError('Please enter both email and password.');
-			return;
-		}
-		const res = await loginUser({ email, password });
-		if (res.error) {
-			setError(res.error);
-			return;
-		}
-		// Use AuthContext login method
-		login(res.token, res.user);
-		setError('');
-		// Redirect admin users to admin dashboard, regular users to profile
-		if (res.user && res.user.isAdmin) {
-			navigate('/admin');
-		} else {
-			navigate('/');
-		}
-	};
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { loginCustomer: loginUser } = useAuth();
 
-	return (
-		<div style={{ background: '#f1faee', minHeight: '100vh', fontFamily: 'Segoe UI, Arial, sans-serif', display: 'flex', flexDirection: 'column' }}>
-			<Navbar />
-			<main style={{ maxWidth: 400, margin: '3rem auto', padding: '2rem 1rem' }}>
-				<div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 2px 16px rgba(56,142,60,0.08)', border: '1px solid #e0e0e0', padding: '2.5rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-					<h2 style={{ color: '#388e3c', fontWeight: 700, fontSize: '2rem', marginBottom: 16 }}>Login to Feafly</h2>
-					<form style={{ width: '100%' }} onSubmit={handleSubmit}>
-						<input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', padding: '0.75rem', marginBottom: '1rem', borderRadius: 8, border: '1px solid #a5d6a7', fontSize: '1rem' }} />
-						<input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} style={{ width: '100%', padding: '0.75rem', marginBottom: '1rem', borderRadius: 8, border: '1px solid #a5d6a7', fontSize: '1rem' }} />
-						{error && <div style={{ color: '#d32f2f', marginBottom: '1rem', fontSize: '0.98rem' }}>{error}</div>}
-						<button type="submit" style={{ width: '100%', padding: '0.75rem', background: '#388e3c', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, fontSize: '1rem', marginBottom: 8 }}>Login</button>
-					</form>
-					<div style={{ marginTop: 8, fontSize: '0.98rem', color: '#388e3c' }}>
-						Don't have an account? <Link to="/register" style={{ color: '#43a047', fontWeight: 600 }}>Register</Link>
-					</div>
-				</div>
-			</main>
-			<Footer />
-		</div>
-	);
-}
+  const from = location.state?.from?.pathname || '/products';
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const data = await loginCustomer({ email, password });
+
+      if (data.success) {
+        loginUser(data.user, data.token);
+        navigate(from, { replace: true });
+      } else {
+        setError(data.message || 'Login failed');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #f1f8e9 0%, #e8f5e8 100%)',
+      fontFamily: 'Segoe UI, Arial, sans-serif'
+    }}>
+      <Navbar />
+      
+      <div style={{
+        padding: '3rem 1rem',
+        maxWidth: '400px',
+        margin: '0 auto'
+      }}>
+        <div style={{
+          background: '#fff',
+          borderRadius: '1rem',
+          boxShadow: '0 4px 20px rgba(56, 142, 60, 0.1)',
+          border: '1px solid #e8f5e8',
+          padding: '3rem 2rem',
+          textAlign: 'center'
+        }}>
+          {/* Header */}
+          <div style={{ marginBottom: '2rem' }}>
+            <div style={{
+              width: '60px',
+              height: '60px',
+              background: 'linear-gradient(135deg, #388e3c, #2e7d32)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1rem'
+            }}>
+              <Leaf size={28} color="#fff" />
+            </div>
+            <h1 style={{
+              color: '#2e7d32',
+              fontSize: '2rem',
+              fontWeight: '700',
+              margin: '0 0 0.5rem 0'
+            }}>
+              Welcome Back
+            </h1>
+            <p style={{
+              color: '#666',
+              fontSize: '1rem',
+              margin: 0
+            }}>
+              Sign in to your Green Paradise account
+            </p>
+          </div>
+
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} style={{ textAlign: 'left' }}>
+            {/* Email Field */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{
+                display: 'block',
+                color: '#2e7d32',
+                fontWeight: '600',
+                marginBottom: '0.5rem',
+                fontSize: '0.9rem'
+              }}>
+                Email Address
+              </label>
+              <div style={{ position: 'relative' }}>
+                <Mail size={18} style={{
+                  position: 'absolute',
+                  left: '1rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#666'
+                }} />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem 0.75rem 3rem',
+                    border: '2px solid #e8f5e8',
+                    borderRadius: '0.5rem',
+                    fontSize: '1rem',
+                    outline: 'none',
+                    transition: 'border-color 0.3s ease',
+                    boxSizing: 'border-box'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#388e3c'}
+                  onBlur={(e) => e.target.style.borderColor = '#e8f5e8'}
+                />
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{
+                display: 'block',
+                color: '#2e7d32',
+                fontWeight: '600',
+                marginBottom: '0.5rem',
+                fontSize: '0.9rem'
+              }}>
+                Password
+              </label>
+              <div style={{ position: 'relative' }}>
+                <Lock size={18} style={{
+                  position: 'absolute',
+                  left: '1rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#666'
+                }} />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 3rem 0.75rem 3rem',
+                    border: '2px solid #e8f5e8',
+                    borderRadius: '0.5rem',
+                    fontSize: '1rem',
+                    outline: 'none',
+                    transition: 'border-color 0.3s ease',
+                    boxSizing: 'border-box'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#388e3c'}
+                  onBlur={(e) => e.target.style.borderColor = '#e8f5e8'}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '1rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#666'
+                  }}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div style={{
+                background: '#ffebee',
+                border: '1px solid #f44336',
+                color: '#d32f2f',
+                padding: '0.75rem',
+                borderRadius: '0.5rem',
+                marginBottom: '1.5rem',
+                fontSize: '0.9rem'
+              }}>
+                {error}
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: '100%',
+                padding: '0.875rem',
+                background: loading ? '#a5d6a7' : 'linear-gradient(135deg, #388e3c, #2e7d32)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '0.5rem',
+                fontSize: '1rem',
+                fontWeight: '600',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.3s ease',
+                marginBottom: '1.5rem'
+              }}
+              onMouseOver={(e) => {
+                if (!loading) {
+                  e.target.style.transform = 'translateY(-1px)';
+                  e.target.style.boxShadow = '0 4px 12px rgba(56, 142, 60, 0.3)';
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!loading) {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = 'none';
+                }
+              }}
+            >
+              {loading ? 'Signing In...' : 'Sign In'}
+            </button>
+
+            {/* Register Link */}
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ color: '#666', margin: 0 }}>
+                Don't have an account?{' '}
+                <Link 
+                  to="/signup" 
+                  style={{
+                    color: '#388e3c',
+                    textDecoration: 'none',
+                    fontWeight: '600'
+                  }}
+                  onMouseOver={(e) => e.target.style.textDecoration = 'underline'}
+                  onMouseOut={(e) => e.target.style.textDecoration = 'none'}
+                >
+                  Sign Up
+                </Link>
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default Login;

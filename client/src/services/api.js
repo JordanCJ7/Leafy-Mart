@@ -1,16 +1,8 @@
-
-// API service for backend communication
+// API service for Plant Store Management System
 const API_BASE = 'http://localhost:5000/api';
 
-const getAuthHeaders = () => {
-	const token = localStorage.getItem('token');
-	return {
-		'Content-Type': 'application/json',
-		'Authorization': `Bearer ${token}`
-	};
-};
-
-export async function registerUser(data) {
+// Customer Authentication
+export async function registerCustomer(data) {
 	const res = await fetch(`${API_BASE}/auth/register`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -19,7 +11,7 @@ export async function registerUser(data) {
 	return res.json();
 }
 
-export async function loginUser(data) {
+export async function loginCustomer(data) {
 	const res = await fetch(`${API_BASE}/auth/login`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -28,8 +20,8 @@ export async function loginUser(data) {
 	return res.json();
 }
 
-export async function getUserProfile(id, token) {
-	const res = await fetch(`${API_BASE}/users/${id}`, {
+export async function getUserProfile(token) {
+	const res = await fetch(`${API_BASE}/auth/profile`, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json',
@@ -39,70 +31,113 @@ export async function getUserProfile(id, token) {
 	return res.json();
 }
 
-// Admin API functions
-export async function getAllProducts() {
-	const res = await fetch(`${API_BASE}/products`, {
-		method: 'GET',
-		headers: getAuthHeaders()
-	});
-	return res.json();
-}
-
-export async function addProduct(data) {
-	const res = await fetch(`${API_BASE}/products`, {
+// Admin Authentication
+export async function adminLogin(data) {
+	const res = await fetch(`${API_BASE}/auth/admin/login`, {
 		method: 'POST',
-		headers: getAuthHeaders(),
+		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(data)
 	});
 	return res.json();
 }
 
-export async function updateProduct(id, data) {
-	const res = await fetch(`${API_BASE}/products/${id}`, {
+export async function verifyAdminToken(token) {
+	const res = await fetch(`${API_BASE}/auth/admin/verify`, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+	return res.json();
+}
+
+// Customer Management
+export async function createCustomer(data) {
+	const res = await fetch(`${API_BASE}/customers`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(data)
+	});
+	return res.json();
+}
+
+export async function getAllCustomers(params = {}) {
+	const queryParams = new URLSearchParams();
+	if (params.page) queryParams.append('page', params.page);
+	if (params.limit) queryParams.append('limit', params.limit);
+	if (params.search) queryParams.append('search', params.search);
+	
+	const url = `${API_BASE}/customers${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+	const res = await fetch(url);
+	return res.json();
+}
+
+export async function getCustomerById(id) {
+	const res = await fetch(`${API_BASE}/customers/${id}`);
+	return res.json();
+}
+
+export async function updateCustomer(id, data) {
+	const res = await fetch(`${API_BASE}/customers/${id}`, {
 		method: 'PUT',
-		headers: getAuthHeaders(),
+		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(data)
 	});
 	return res.json();
 }
 
-export async function deleteProduct(id) {
-	const res = await fetch(`${API_BASE}/products/${id}`, {
+export async function deleteCustomer(id, token) {
+	const res = await fetch(`${API_BASE}/customers/${id}`, {
 		method: 'DELETE',
-		headers: getAuthHeaders()
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
 	});
 	return res.json();
 }
 
-export async function getAllOrders() {
-	const res = await fetch(`${API_BASE}/orders`, {
+export async function getCustomerStats(token) {
+	const res = await fetch(`${API_BASE}/customers/stats`, {
 		method: 'GET',
-		headers: getAuthHeaders()
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
 	});
 	return res.json();
 }
 
-export async function updateOrderStatus(id, status) {
-	const res = await fetch(`${API_BASE}/orders/${id}/status`, {
-		method: 'PATCH',
-		headers: getAuthHeaders(),
-		body: JSON.stringify({ status })
+// Order Management
+export async function processPurchase(data) {
+	const res = await fetch(`${API_BASE}/customers/purchase`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(data)
 	});
 	return res.json();
 }
 
-export async function getAllUsers() {
-	const res = await fetch(`${API_BASE}/users`, {
+// Products (existing functionality)
+export async function getAllProducts() {
+	const res = await fetch(`${API_BASE}/products`);
+	return res.json();
+}
+
+export async function getProductById(id) {
+	const res = await fetch(`${API_BASE}/products/${id}`);
+	return res.json();
+}
+
+// Admin Dashboard
+export async function getDashboardStats(token) {
+	const res = await fetch(`${API_BASE}/admin/dashboard`, {
 		method: 'GET',
-		headers: getAuthHeaders()
-	});
-	return res.json();
-}
-
-export async function getDashboardStats() {
-	const res = await fetch(`${API_BASE}/admin/stats`, {
-		method: 'GET',
-		headers: getAuthHeaders()
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
 	});
 	return res.json();
 }

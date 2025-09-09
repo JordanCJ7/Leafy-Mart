@@ -1,125 +1,121 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { Leaf, ShoppingCart, Menu, User, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { 
-	ShoppingCart, 
-	Heart, 
-	User, 
-	Package, 
-	Settings, 
-	LogOut, 
-	LogIn, 
-	UserPlus,
-	Info,
-	Mail,
-	Leaf
-} from 'lucide-react';
 import './Navbar.css';
 
-const Navbar = () => {
-	const { isLoggedIn, user, logout, isLoading } = useAuth();
-	const navigate = useNavigate();
+function Navbar() {
+  const location = useLocation();
+  const { isLoggedIn, isAdmin, user, logout } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
-	const handleLogout = () => {
-		logout();
-		navigate('/login');
-	};
+  const handleLogout = () => {
+    logout();
+    setIsMenuOpen(false);
+  };
 
-	return (
-		<nav className="navbar">
-			<div className="navbar-logo">
-				<Link to="/">
-					<Leaf size={20} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-					Botanica Hub
-				</Link>
-			</div>
-			<ul className="navbar-links">
-				<li>
-					<Link to="/products">
-						<Leaf size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-						Products
-					</Link>
-				</li>
-				<li>
-						<Link to="/about">
-							<Info size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-							About
-						</Link>
-				</li>
-				<li>
-						<Link to="/contact">
-							<Mail size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-							Contact
-						</Link>
-				</li>
-				{isLoading ? (
-					// Show loading state
-					<li style={{ color: '#388e3c', fontSize: '0.9rem' }}>Loading...</li>
-				) : isLoggedIn ? (
-					// Show these links when user is logged in
-					<>
-						<li>
-							<Link to="/cart">
-								<ShoppingCart size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-								Cart
-							</Link>
-						</li>
-						<li>
-							<Link to="/wishlist">
-								<Heart size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-								Wishlist
-							</Link>
-						</li>
-						<li>
-							<Link to="/profile">
-								<User size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-								Profile
-							</Link>
-						</li>
-						<li>
-							<Link to="/order-tracking">
-								<Package size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-								Orders
-							</Link>
-						</li>
-						{user && user.isAdmin && (
-							<li>
-								<Link to="/admin">
-									<Settings size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-									Admin
-								</Link>
-							</li>
-						)}
-						<li>
-							<button 
-								onClick={handleLogout}
-								className="logout-btn"
-							>
-								<LogOut size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-								Logout
-							</button>
-						</li>
-					</>
-				) : (
-					// Show these links when user is not logged in
-					<>
-						<li>
-							<Link to="/login">
-								<LogIn size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-								Login
-							</Link>
-						</li>
-						<li>
-							<Link to="/register">
-								<UserPlus size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-								Register
-							</Link>
-						</li>
-					</>
-				)}
-			</ul>
-		</nav>
-	);
-};
+  return (
+    <nav className="navbar">
+      <div className="navbar-container">
+        <Link to="/" className="navbar-logo">
+          <Leaf className="navbar-icon" />
+          <span>Green Paradise</span>
+        </Link>
+
+        <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
+          <Link 
+            to="/" 
+            className={`navbar-item ${location.pathname === '/' ? 'active' : ''}`}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Home
+          </Link>
+          
+          {isLoggedIn && (
+            <>
+              <Link 
+                to="/products" 
+                className={`navbar-item ${location.pathname === '/products' ? 'active' : ''}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Plants
+              </Link>
+              <Link 
+                to="/about" 
+                className={`navbar-item ${location.pathname === '/about' ? 'active' : ''}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                About
+              </Link>
+              <Link 
+                to="/contact" 
+                className={`navbar-item ${location.pathname === '/contact' ? 'active' : ''}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Contact
+              </Link>
+            </>
+          )}
+
+          {!isLoggedIn ? (
+            <>
+              <Link 
+                to="/login" 
+                className={`navbar-item ${location.pathname === '/login' ? 'active' : ''}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Sign In
+              </Link>
+              <Link 
+                to="/signup" 
+                className={`navbar-item ${location.pathname === '/signup' || location.pathname === '/register' ? 'active' : ''}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Sign Up
+              </Link>
+            </>
+          ) : (
+            <>
+              {isAdmin && (
+                <Link 
+                  to="/admin/dashboard" 
+                  className={`navbar-item ${location.pathname.includes('/admin') ? 'active' : ''}`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Admin
+                </Link>
+              )}
+              <div className="navbar-user">
+                <User size={18} />
+                <span>{user?.name || user?.username}</span>
+              </div>
+              <button 
+                className="navbar-item navbar-logout"
+                onClick={handleLogout}
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+            </>
+          )}
+        </div>
+
+        <div className="navbar-actions">
+          {isLoggedIn && (
+            <Link to="/cart" className="navbar-action">
+              <ShoppingCart size={20} />
+            </Link>
+          )}
+          <button 
+            className="navbar-toggle"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            <Menu size={20} />
+          </button>
+        </div>
+      </div>
+    </nav>
+  );
+}
 
 export default Navbar;
