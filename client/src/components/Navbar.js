@@ -1,12 +1,13 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Leaf, ShoppingCart, Menu, User, LogOut, Settings } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Leaf, ShoppingCart, Menu, User, LogOut, Settings, Info, Phone, LogIn, UserPlus } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import './Navbar.css';
 
 function Navbar() {
   const location = useLocation();
   const { isLoggedIn, isAdmin, user, logout } = useAuth();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
 
@@ -14,6 +15,7 @@ function Navbar() {
     logout();
     setIsMenuOpen(false);
     setIsUserMenuOpen(false);
+  navigate('/login');
   };
 
   return (
@@ -24,14 +26,7 @@ function Navbar() {
           <span>Green Paradise</span>
         </Link>
 
-        <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
-          <Link 
-            to="/" 
-            className={`navbar-item ${location.pathname === '/' ? 'active' : ''}`}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            Home
-          </Link>
+  <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
           
           {isLoggedIn && (
             <>
@@ -40,6 +35,7 @@ function Navbar() {
                 className={`navbar-item ${location.pathname === '/products' ? 'active' : ''}`}
                 onClick={() => setIsMenuOpen(false)}
               >
+                <Leaf size={16} className="nav-icon" />
                 Plants
               </Link>
               <Link 
@@ -47,6 +43,7 @@ function Navbar() {
                 className={`navbar-item ${location.pathname === '/about' ? 'active' : ''}`}
                 onClick={() => setIsMenuOpen(false)}
               >
+                <Info size={16} className="nav-icon" />
                 About
               </Link>
               <Link 
@@ -54,6 +51,7 @@ function Navbar() {
                 className={`navbar-item ${location.pathname === '/contact' ? 'active' : ''}`}
                 onClick={() => setIsMenuOpen(false)}
               >
+                <Phone size={16} className="nav-icon" />
                 Contact
               </Link>
             </>
@@ -66,6 +64,7 @@ function Navbar() {
                 className={`navbar-item ${location.pathname === '/login' ? 'active' : ''}`}
                 onClick={() => setIsMenuOpen(false)}
               >
+                <LogIn size={16} className="nav-icon" />
                 Sign In
               </Link>
               <Link 
@@ -73,6 +72,7 @@ function Navbar() {
                 className={`navbar-item ${location.pathname === '/signup' || location.pathname === '/register' ? 'active' : ''}`}
                 onClick={() => setIsMenuOpen(false)}
               >
+                <UserPlus size={16} className="nav-icon" />
                 Sign Up
               </Link>
             </>
@@ -84,6 +84,7 @@ function Navbar() {
                   className={`navbar-item ${location.pathname.includes('/admin') ? 'active' : ''}`}
                   onClick={() => setIsMenuOpen(false)}
                 >
+                  <User size={16} className="nav-icon" />
                   Admin
                 </Link>
               )}

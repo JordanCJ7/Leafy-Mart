@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { User, Lock, LogIn } from 'lucide-react';
 
 const AdminLogin = () => {
@@ -8,6 +9,7 @@ const AdminLogin = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { loginAdmin } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,10 +34,8 @@ const AdminLogin = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Store admin token
-        localStorage.setItem('adminToken', data.token);
-        localStorage.setItem('adminUser', JSON.stringify(data.admin));
-        
+        // Use AuthContext to store admin state consistently
+        loginAdmin(data.admin || data.user || {}, data.token);
         // Navigate to admin dashboard
         navigate('/admin/dashboard');
       } else {

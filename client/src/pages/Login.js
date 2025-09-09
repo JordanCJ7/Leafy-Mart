@@ -15,7 +15,7 @@ const Login = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { loginCustomer: loginUser } = useAuth();
+  const { loginCustomer: loginUser, loginAdmin } = useAuth();
 
   const from = location.state?.from?.pathname || '/products';
 
@@ -34,8 +34,16 @@ const Login = () => {
       const data = await loginCustomer({ email, password });
 
       if (data.success) {
-        loginUser(data.user, data.token);
-        navigate(from, { replace: true });
+        // If the returned user is an admin, use admin login flow and redirect to admin dashboard
+        const isAdminUser = data.user && (data.user.role === 'admin' || data.user.isAdmin === true || data.isAdmin === true);
+        if (isAdminUser) {
+          // use AuthContext to store admin token/data consistently
+          loginAdmin(data.user, data.token);
+          navigate('/admin/dashboard', { replace: true });
+        } else {
+          loginUser(data.user, data.token);
+          navigate(from, { replace: true });
+        }
       } else {
         setError(data.message || 'Login failed');
       }

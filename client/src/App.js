@@ -6,7 +6,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 import Home from './pages/Home';
 import Products from './pages/Products';
-import AdminLogin from './pages/AdminLogin';
 import CustomerManagement from './pages/CustomerManagement';
 import CartPage from './pages/CartPage';
 import OrderTracking from './pages/OrderTracking';
@@ -71,7 +70,6 @@ function App() {
           } />
           
           {/* Admin Routes (Require Admin Access) */}
-          <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={
             <ProtectedRoute requireAdmin={true}>
               <AdminDashboardPage />
