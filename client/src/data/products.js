@@ -9,7 +9,7 @@ const products = [
     tags: ['medicinal', 'herb', 'balcony'],
     stock: 24,
     desc: 'Sacred and medicinal herb common across South Asia — useful in teas and rituals. Thrives in warm sunny spots and regular watering.',
-  img: '/images/Tulsi.png'
+  img: '/images/tulsi.png'
   },
   {
     id: 'money-plant',
@@ -20,7 +20,7 @@ const products = [
     tags: ['easy-care', 'trailing', 'low-light'],
     stock: 40,
     desc: 'Hardy trailing vine ideal for indoors and balconies. Low light tolerant and very easy to propagate from cuttings.',
-  img: '/images/Money%20Plant.png'
+  img: '/images/moneyplant.png'
   },
   {
     id: 'snake-plant',
@@ -31,7 +31,7 @@ const products = [
     tags: ['air-purifying', 'robust', 'low-water'],
     stock: 18,
     desc: 'Very resilient air-purifying plant; tolerates low light and irregular watering — perfect for busy households.',
-  img: '/images/Snake%20Plant.png'
+  img: '/images/snakeplant.png'
   },
   {
     id: 'areca-palm',
@@ -42,7 +42,7 @@ const products = [
     tags: ['indoor', 'humidity-loving', 'statement'],
     stock: 6,
     desc: 'Popular indoor palm in South Asia — bright indirect light and regular humidity keep it happy; great for living rooms and offices.',
-  img: '/images/Areca%20Palm.png'
+  img: '/images/areca.png'
   },
   {
     id: 'hibiscus',
@@ -53,7 +53,7 @@ const products = [
     tags: ['outdoor', 'flowering', 'sun-loving'],
     stock: 12,
     desc: 'Flowering shrub commonly grown for its bright blooms; thrives in warm climates with full sun and regular watering.',
-    img: '/images/Hibiscus.png'
+    img: '/images/hibiscus.png'
   },
   {
     id: 'peace-lily',
@@ -64,7 +64,7 @@ const products = [
     tags: ['shade-tolerant', 'flowering', 'clean-air'],
     stock: 10,
     desc: 'Compact, shade-tolerant plant with elegant white blooms; prefers consistent moisture and bright, indirect light.',
-  img: '/images/Peace%20Lily.png'
+  img: '/images/peacelily.png'
   }
   ,
   {
@@ -76,7 +76,7 @@ const products = [
     tags: ['statement', 'low-light', 'indoors'],
     stock: 8,
     desc: 'Glossy large leaves make this a statement indoor plant; tolerates moderate light and rewards occasional pruning.',
-    img: '/images/Money%20Plant.png'
+    img: '/images/moneyplant.png'
   },
   {
     id: 'zz-plant',
@@ -87,7 +87,7 @@ const products = [
     tags: ['low-light', 'drought-tolerant', 'office'],
     stock: 22,
     desc: 'Almost indestructible, the ZZ plant is perfect for offices and low-light corners — very low watering needs.',
-    img: '/images/Snake%20Plant.png'
+    img: '/images/snakeplant.png'
   },
   {
     id: 'spider-plant',
@@ -98,7 +98,7 @@ const products = [
     tags: ['easy-care', 'air-purifying', 'kids-friendly'],
     stock: 30,
     desc: 'Classic hanging plant with arching leaves and baby plantlets — forgiving and great for beginners.',
-    img: '/images/Money%20Plant.png'
+    img: '/images/moneyplant.png'
   },
   {
     id: 'fiddle-leaf-fig',
@@ -109,7 +109,7 @@ const products = [
     tags: ['large-leaves', 'bright-indirect', 'living-room'],
     stock: 4,
     desc: 'Small-size fiddle leaf fig for apartments — needs bright, indirect light and consistent care to thrive.',
-    img: '/images/Areca%20Palm.png'
+    img: '/images/areca.png'
   },
   {
     id: 'aloe-vera',
@@ -132,7 +132,7 @@ const products = [
     tags: ['outdoor', 'fragrant', 'flowering'],
     stock: 14,
     desc: 'Fragrant climber widely grown for its aromatic white flowers used in garlands and ceremonies; prefers sunny spots and regular feeding.',
-    img: '/images/Hibiscus.png'
+    img: '/images/hibiscus.png'
   }
 ];
 

@@ -1,0 +1,553 @@
+import React, { useState, useEffect } from 'react';
+import { Plus, Edit, Trash2, Save, X, Search, Filter } from 'lucide-react';
+import './ProductManagement.css';
+
+const ProductManagement = () => {
+  const [productList, setProductList] = useState([]);
+  const [options, setOptions] = useState({ categories: [], tags: [] });
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterCategory, setFilterCategory] = useState('All');
+
+  const [formData, setFormData] = useState({
+    id: '',
+    name: '',
+    desc: '',
+    priceLKR: '',
+    category: '',
+    tags: [],
+    stock: '',
+    img: '',
+    rating: 4.0
+  });
+
+  // Fetch products and options when component mounts
+  useEffect(() => {
+    fetchProducts();
+    fetchOptions();
+  }, []);
+
+  // API call to fetch all products
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:5000/api/products');
+      if (response.ok) {
+        const data = await response.json();
+        setProductList(data);
+      } else {
+        console.error('Failed to fetch products');
+        alert('Failed to fetch products from server');
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      alert('Error connecting to server');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // API call to fetch dropdown options
+  const fetchOptions = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        // Fallback to static options if no admin token
+        setOptions({
+          categories: ['Herbs', 'Indoor Vines', 'Air Purifiers', 'Palms', 'Flowering Shrubs', 'Shade Plants', 'Foliage', 'Low-Maintenance', 'Hanging & Trailing', 'Statement Trees', 'Succulents & Cacti', 'Fragrant Climbers'],
+          tags: ['medicinal', 'herb', 'balcony', 'easy-care', 'trailing', 'low-light', 'statement', 'indoors', 'office', 'air-purifying', 'tropical', 'large-space', 'fragrant', 'colorful', 'flowering', 'shade-tolerant', 'clean-air', 'drought-tolerant', 'kids-friendly', 'outdoor', 'decorative', 'climbing', 'spines', 'blue-flowers', 'winter-hardy']
+        });
+        return;
+      }
+
+      const response = await fetch('http://localhost:5000/api/products/options', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setOptions(data);
+      } else {
+        console.error('Failed to fetch options, using fallback');
+        // Fallback to static options
+        setOptions({
+          categories: ['Herbs', 'Indoor Vines', 'Air Purifiers', 'Palms', 'Flowering Shrubs', 'Shade Plants', 'Foliage', 'Low-Maintenance', 'Hanging & Trailing', 'Statement Trees', 'Succulents & Cacti', 'Fragrant Climbers'],
+          tags: ['medicinal', 'herb', 'balcony', 'easy-care', 'trailing', 'low-light', 'statement', 'indoors', 'office', 'air-purifying', 'tropical', 'large-space', 'fragrant', 'colorful', 'flowering', 'shade-tolerant', 'clean-air', 'drought-tolerant', 'kids-friendly', 'outdoor', 'decorative', 'climbing', 'spines', 'blue-flowers', 'winter-hardy']
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching options:', error);
+      // Fallback to static options
+      setOptions({
+        categories: ['Herbs', 'Indoor Vines', 'Air Purifiers', 'Palms', 'Flowering Shrubs', 'Shade Plants', 'Foliage', 'Low-Maintenance', 'Hanging & Trailing', 'Statement Trees', 'Succulents & Cacti', 'Fragrant Climbers'],
+        tags: ['medicinal', 'herb', 'balcony', 'easy-care', 'trailing', 'low-light', 'statement', 'indoors', 'office', 'air-purifying', 'tropical', 'large-space', 'fragrant', 'colorful', 'flowering', 'shade-tolerant', 'clean-air', 'drought-tolerant', 'kids-friendly', 'outdoor', 'decorative', 'climbing', 'spines', 'blue-flowers', 'winter-hardy']
+      });
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      id: '',
+      name: '',
+      desc: '',
+      priceLKR: '',
+      category: '',
+      tags: [],
+      stock: '',
+      img: '',
+      rating: 4.0
+    });
+    setEditingProduct(null);
+  };
+
+  const openAddModal = () => {
+    resetForm();
+    setShowModal(true);
+  };
+
+  const openEditModal = (product) => {
+    setFormData({
+      id: product.id,
+      name: product.name,
+      desc: product.desc,
+      priceLKR: product.priceLKR,
+      category: product.category,
+      tags: product.tags || [],
+      stock: product.stock,
+      img: product.img,
+      rating: product.rating || 4.0
+    });
+    setEditingProduct(product.id);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    resetForm();
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleTagChange = (tag) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.includes(tag) 
+        ? prev.tags.filter(t => t !== tag)
+        : [...prev.tags, tag]
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    
+    try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        alert('Admin authentication required');
+        setSubmitting(false);
+        return;
+      }
+
+      const productData = {
+        ...formData,
+        priceLKR: parseInt(formData.priceLKR),
+        stock: parseInt(formData.stock),
+        rating: parseFloat(formData.rating)
+      };
+
+      // Don't send id if it's empty (let backend generate it)
+      if (!productData.id) {
+        delete productData.id;
+      }
+
+      const url = editingProduct 
+        ? `http://localhost:5000/api/products/${formData.id}` 
+        : 'http://localhost:5000/api/products';
+      
+      const method = editingProduct ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(productData)
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Product saved:', result);
+        
+        // Refresh the product list
+        await fetchProducts();
+        closeModal();
+        alert(editingProduct ? 'Product updated successfully!' : 'Product added successfully!');
+      } else {
+        const errorData = await response.json();
+        console.error('API Error:', errorData);
+        alert(`Error: ${errorData.error || 'Failed to save product'}`);
+      }
+    } catch (error) {
+      console.error('Error saving product:', error);
+      alert('Error connecting to server');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (productId) => {
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      try {
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+          alert('Admin authentication required');
+          return;
+        }
+
+        const response = await fetch(`http://localhost:5000/api/products/${productId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          // Refresh the product list
+          await fetchProducts();
+          alert('Product deleted successfully!');
+        } else {
+          const errorData = await response.json();
+          console.error('Delete Error:', errorData);
+          alert(`Error: ${errorData.error || 'Failed to delete product'}`);
+        }
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        alert('Error connecting to server');
+      }
+    }
+  };
+
+  // Filter products based on search and category
+  const filteredProducts = productList.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         product.desc.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = filterCategory === 'All' || product.category === filterCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  if (loading) {
+    return (
+      <div className="product-management">
+        <div className="loading">
+          <h2>Loading products...</h2>
+          <p>Fetching data from server...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="product-management">
+      <div className="product-management-header">
+        <h2>Product Management</h2>
+        <button className="btn btn-primary" onClick={openAddModal}>
+          <Plus size={18} />
+          Add New Plant
+        </button>
+      </div>
+
+      {/* Search and Filter Controls */}
+      <div className="product-controls">
+        <div className="search-bar">
+          <Search size={20} />
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <div className="filter-control">
+          <Filter size={18} />
+          <select 
+            value={filterCategory} 
+            onChange={(e) => setFilterCategory(e.target.value)}
+          >
+            <option value="All">All Categories</option>
+            {options.categories.map(category => (
+              <option key={category} value={category}>{category}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Products Table */}
+      <div className="products-table-container">
+        <table className="products-table">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Price (LKR)</th>
+              <th>Stock</th>
+              <th>Tags</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredProducts.map(product => (
+              <tr key={product._id || product.id}>
+                <td>
+                  <img 
+                    src={product.img || '/images/defaultplant.png'} 
+                    alt={product.name}
+                    className="product-image-small"
+                    onError={(e) => {
+                      e.target.src = '/images/defaultplant.png';
+                    }}
+                  />
+                </td>
+                <td>
+                  <div className="product-name-cell">
+                    <strong>{product.name}</strong>
+                    <small>{product.desc.substring(0, 60)}...</small>
+                  </div>
+                </td>
+                <td>
+                  <span className="category-badge">{product.category}</span>
+                </td>
+                <td>{product.priceDisplay}</td>
+                <td>
+                  <span className={`stock-badge ${product.stock < 5 ? 'low-stock' : ''}`}>
+                    {product.stock}
+                  </span>
+                </td>
+                <td>
+                  <div className="tags-cell">
+                    {product.tags?.slice(0, 2).map(tag => (
+                      <span key={tag} className="tag-badge">{tag}</span>
+                    ))}
+                    {product.tags?.length > 2 && (
+                      <span className="tag-badge">+{product.tags.length - 2}</span>
+                    )}
+                  </div>
+                </td>
+                <td>
+                  <div className="actions-cell">
+                    <button 
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => openEditModal(product)}
+                    >
+                      <Edit size={16} />
+                    </button>
+                    <button 
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleDelete(product._id || product.id)}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {filteredProducts.length === 0 && (
+          <div className="no-products">
+            <p>No products found matching your criteria.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Add/Edit Product Modal */}
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>{editingProduct ? 'Edit Plant' : 'Add New Plant'}</h3>
+              <button className="close-btn" onClick={closeModal}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="product-form">
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="name">Plant Name *</label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="id">Product ID</label>
+                  <input
+                    type="text"
+                    id="id"
+                    name="id"
+                    value={formData.id}
+                    onChange={handleInputChange}
+                    placeholder="Auto-generated from name"
+                    disabled={editingProduct}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="desc">Description *</label>
+                <textarea
+                  id="desc"
+                  name="desc"
+                  value={formData.desc}
+                  onChange={handleInputChange}
+                  rows="3"
+                  required
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="priceLKR">Price (LKR) *</label>
+                  <input
+                    type="number"
+                    id="priceLKR"
+                    name="priceLKR"
+                    value={formData.priceLKR}
+                    onChange={handleInputChange}
+                    min="0"
+                    step="100"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="stock">Stock Quantity *</label>
+                  <input
+                    type="number"
+                    id="stock"
+                    name="stock"
+                    value={formData.stock}
+                    onChange={handleInputChange}
+                    min="0"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="rating">Rating</label>
+                  <input
+                    type="number"
+                    id="rating"
+                    name="rating"
+                    value={formData.rating}
+                    onChange={handleInputChange}
+                    min="0"
+                    max="5"
+                    step="0.1"
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="category">Category *</label>
+                  <select
+                    id="category"
+                    name="category"
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    {options.categories.map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="img">Plant Image *</label>
+                  <select
+                    id="img"
+                    name="img"
+                    value={formData.img}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select an image</option>
+                    <option value="/images/areca.png">Areca Palm</option>
+                    <option value="/images/hibiscus.png">Hibiscus</option>
+                    <option value="/images/moneyplant.png">Money Plant</option>
+                    <option value="/images/peacelily.png">Peace Lily</option>
+                    <option value="/images/snakeplant.png">Snake Plant</option>
+                    <option value="/images/tulsi.png">Tulsi</option>
+                  </select>
+                  {formData.img && (
+                    <div className="image-preview">
+                      <img 
+                        src={formData.img} 
+                        alt="Preview" 
+                        style={{ width: '100px', height: '100px', objectFit: 'cover', marginTop: '10px', borderRadius: '8px' }}
+                        onError={(e) => {
+                          e.target.src = '/images/defaultplant.png';
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Tags</label>
+                <div className="tags-selection">
+                  {options.tags.map(tag => (
+                    <label key={tag} className="tag-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={formData.tags.includes(tag)}
+                        onChange={() => handleTagChange(tag)}
+                      />
+                      {tag}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="form-actions">
+                <button type="button" className="btn btn-secondary" onClick={closeModal}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary" disabled={submitting}>
+                  <Save size={18} />
+                  {submitting ? 'Saving...' : (editingProduct ? 'Update Plant' : 'Add Plant')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ProductManagement;

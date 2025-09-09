@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import UserManagement from '../components/UserManagement';
+import ProductManagement from '../components/ProductManagement';
 
 export default function AdminDashboardPage() {
 	const [activeTab, setActiveTab] = useState('dashboard');
@@ -12,7 +13,7 @@ export default function AdminDashboardPage() {
 			case 'users':
 				return <UserManagement />;
 			case 'products':
-				return <div>Products Management - Coming Soon</div>;
+				return <ProductManagement />;
 			case 'orders':
 				return <div>Orders Management - Coming Soon</div>;
 			default:
@@ -48,9 +49,8 @@ export default function AdminDashboardPage() {
 								padding: '1.5rem',
 								borderRadius: '12px',
 								boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-								cursor: 'pointer',
-								opacity: 0.6
-							}}>
+								cursor: 'pointer'
+							}} onClick={() => setActiveTab('products')}>
 								<h3 style={{ color: '#2e7d32', marginBottom: '0.5rem' }}>Product Management</h3>
 								<p style={{ color: '#666' }}>Add, edit, and manage plant inventory</p>
 							</div>
@@ -125,12 +125,13 @@ export default function AdminDashboardPage() {
 								border: 'none',
 								padding: '0.5rem 1rem',
 								cursor: 'pointer',
-								color: '#ccc',
-								fontWeight: 'normal'
+								color: activeTab === 'products' ? '#2e7d32' : '#666',
+								fontWeight: activeTab === 'products' ? 'bold' : 'normal',
+								borderBottom: activeTab === 'products' ? '2px solid #2e7d32' : 'none'
 							}}
-							disabled
+							onClick={() => setActiveTab('products')}
 						>
-							Products (Coming Soon)
+							Product Management
 						</button>
 						<button
 							style={{
