@@ -44,8 +44,11 @@
 
 .search-bar {
   position: relative;
-  flex: 1;
-  min-width: 250px;
+  /* allow the search bar to shrink properly inside a flex container */
+  flex: 1 1 420px; /* grow, shrink, base width */
+  min-width: 0; /* important to allow shrinking on narrow containers */
+  max-width: 100%;
+  margin-right: 5rem; /* create space between the search and the filter controls */
 }
 
 .search-bar svg {
@@ -72,8 +75,9 @@
 
 .filter-controls {
   display: flex;
-  gap: 1rem;
+  gap: 1.25rem; /* slightly larger gap for better spacing */
   align-items: center;
+  flex: 0 0 auto; /* keep filter controls their intrinsic size and avoid being pushed/overlapped */
 }
 
 .filter-toggle {
