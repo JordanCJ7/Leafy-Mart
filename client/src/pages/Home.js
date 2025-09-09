@@ -1,48 +1,51 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-
-const products = [
-	{
-		name: 'Tulsi (Holy Basil)',
-		price: '$8.00',
-		desc: 'Sacred and medicinal herb common across South Asia — useful in teas and rituals. Thrives in warm sunny spots and regular watering.',
-		img: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80',
-	},
-	{
-		name: 'Money Plant (Pothos)',
-		price: '$12.00',
-		desc: 'Hardy trailing vine ideal for indoors and balconies. Low light tolerant and very easy to propagate from cuttings.',
-		img: 'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=800&q=80',
-	},
-	{
-		name: 'Snake Plant (Sansevieria)',
-		price: '$20.00',
-		desc: 'Very resilient air-purifying plant; tolerates low light and irregular watering — perfect for busy households.',
-		img: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80',
-	},
-	{
-		name: 'Areca Palm',
-		price: '$45.00',
-		desc: 'Popular indoor palm in South Asia — bright indirect light and regular humidity keep it happy; great for living rooms and offices.',
-		img: 'https://images.unsplash.com/photo-1501004318641-1d3d7f8a1b6a?auto=format&fit=crop&w=800&q=80',
-	},
-	{
-		name: 'Hibiscus (Gulabo)',
-		price: '$15.00',
-		desc: 'Flowering shrub commonly grown for its bright blooms; thrives in warm climates with full sun and regular watering.',
-		img: 'https://images.unsplash.com/photo-1501004318641-2b8f7a3c3c3e?auto=format&fit=crop&w=800&q=80',
-	},
-	{
-		name: 'Peace Lily',
-		price: '$22.00',
-		desc: 'Compact, shade-tolerant plant with elegant white blooms; prefers consistent moisture and bright, indirect light.',
-		img: 'https://images.unsplash.com/photo-1524594154909-07b6d4b0b6d5?auto=format&fit=crop&w=800&q=80',
-	},
-];
+import products from '../data/products';
+import { Link } from 'react-router-dom';
+import { ShoppingCart, Heart, Tag } from 'lucide-react';
 
 export default function Home() {
+	const [cart, setCart] = useState(() => JSON.parse(localStorage.getItem('cart') || '[]'));
+	const [wishlist, setWishlist] = useState(() => JSON.parse(localStorage.getItem('wishlist') || '[]'));
+
+	// Search and category filter
+	const [search, setSearch] = useState('');
+	const [category, setCategory] = useState('All');
+
+	const categories = useMemo(() => {
+		const setCats = new Set(products.map(p => p.category));
+		return ['All', ...Array.from(setCats)];
+	}, []);
+
+	const filteredProducts = useMemo(() => {
+		const q = search.trim().toLowerCase();
+		return products.filter(p => {
+			if (category !== 'All' && p.category !== category) return false;
+			if (!q) return true;
+			if (p.name.toLowerCase().includes(q)) return true;
+			if (p.tags.join(' ').toLowerCase().includes(q)) return true;
+			if ((p.desc || '').toLowerCase().includes(q)) return true;
+			return false;
+		});
+	}, [search, category]);
+
+	useEffect(() => { localStorage.setItem('cart', JSON.stringify(cart)); }, [cart]);
+	useEffect(() => { localStorage.setItem('wishlist', JSON.stringify(wishlist)); }, [wishlist]);
+
+	const addToCart = (product) => {
+		setCart(prev => {
+			const exists = prev.find(p => p.id === product.id);
+			if (exists) return prev.map(p => p.id === product.id ? { ...p, qty: p.qty + 1 } : p);
+			return [...prev, { ...product, qty: 1 }];
+		});
+	};
+
+	const toggleWishlist = (id) => {
+		setWishlist(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+	};
+
 	return (
 		<div style={{ background: '#f1faee', minHeight: '100vh', fontFamily: 'Segoe UI, Arial, sans-serif', display: 'flex', flexDirection: 'column' }}>
 			<Navbar />
@@ -53,30 +56,54 @@ export default function Home() {
 				<p style={{ textAlign: 'center', color: '#388e3c', fontSize: '1.1rem', marginBottom: '1.5rem' }}>
 					Browse our curated selection of beautiful and healthy houseplants.
 				</p>
-				<div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
-					<input type="text" placeholder="Search for plants..." style={{ width: 320, padding: '0.75rem', borderRadius: 8, border: '1px solid #a5d6a7', fontSize: '1rem' }} />
+				<div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: '2rem', flexWrap: 'wrap' }}>
+					<input value={search} onChange={e => setSearch(e.target.value)} type="text" placeholder="Search for plants..." style={{ width: 320, padding: '0.75rem', borderRadius: 8, border: '1px solid #a5d6a7', fontSize: '1rem' }} />
+					<select value={category} onChange={e => setCategory(e.target.value)} style={{ padding: '0.75rem', borderRadius: 8, border: '1px solid #a5d6a7', fontSize: '1rem', background: '#fff' }}>
+						{categories.map(c => <option key={c} value={c}>{c}</option>)}
+					</select>
 				</div>
 				<div style={{ 
 					display: 'grid', 
-					gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+					/* show 4 items per row on wide screens; wrap naturally on smaller screens */
+					gridTemplateColumns: 'repeat(4, minmax(220px, 1fr))', 
 					gap: '2rem',
-					maxWidth: '1000px',
+					alignItems: 'start',
+					justifyContent: 'center',
+					maxWidth: '1200px',
 					margin: '0 auto'
 				}}>
-					{products.map((p, idx) => (
-						<div key={idx} style={{ background: '#fff', borderRadius: 12, boxShadow: '0 2px 16px rgba(56,142,60,0.08)', overflow: 'hidden', border: '1px solid #e0e0e0', position: 'relative' }}>
-							<img src={p.img} alt={p.name} style={{ width: '100%', height: 200, objectFit: 'cover' }} />
-							<button style={{ position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', fontSize: 22, color: '#388e3c', cursor: 'pointer' }} title="Add to wishlist">♡</button>
-							<div style={{ padding: '1.25rem' }}>
-								<div style={{ fontWeight: 700, fontSize: '1.15rem', color: '#388e3c', marginBottom: 4 }}>{p.name}</div>
-								<div style={{ color: '#43a047', fontWeight: 600, marginBottom: 8 }}>{p.price}</div>
-								<div style={{ color: '#555', fontSize: '0.98rem', marginBottom: 16 }}>{p.desc}</div>
-								<button style={{ width: '100%', padding: '0.75rem', background: '#43a047', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, fontSize: '1rem', cursor: 'pointer' }}>
-									<span role="img" aria-label="cart" style={{ marginRight: 8 }}>🛒</span>Add to Cart
-								</button>
+				{filteredProducts.length === 0 ? (
+						<div style={{ gridColumn: '1/-1', textAlign: 'center', color: '#666' }}>No products found.</div>
+					) : filteredProducts.map((p) => {
+						const inWishlist = wishlist.includes(p.id);
+					return (
+					<div key={p.id} style={{ background: '#fff', borderRadius: 12, boxShadow: '0 2px 16px rgba(56,142,60,0.08)', overflow: 'hidden', border: '1px solid #e0e0e0', position: 'relative', display: 'flex', flexDirection: 'column', height: '100%' }}>
+						<Link to={`/product/${p.id}`} style={{ display: 'block', color: 'inherit', textDecoration: 'none' }}>
+							<div style={{ height: 200, overflow: 'hidden' }}>
+								<img src={p.img} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
 							</div>
+						</Link>
+						<button onClick={() => toggleWishlist(p.id)} style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(255,255,255,0.9)', border: 'none', fontSize: 18, color: inWishlist? '#d32f2f' : '#388e3c', cursor: 'pointer', padding: 6, borderRadius: 6 }} title="Toggle wishlist">
+							<Heart size={18} />
+						</button>
+						<div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: '1 1 auto' }}>
+							<div style={{ fontWeight: 700, fontSize: '1.15rem', color: '#388e3c', marginBottom: 4 }}>{p.name}</div>
+							<div style={{ color: '#43a047', fontWeight: 600, marginBottom: 8 }}>{p.priceDisplay}</div>
+							<div style={{ color: '#555', fontSize: '0.98rem', marginBottom: 16 }}>{p.desc}</div>
+							<div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'space-between' }}>
+								<div style={{ color: '#777', fontSize: '0.95rem' }}>{p.category} · {p.tags.slice(0,2).join(', ')}</div>
+								<div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 8px', borderRadius: 20, background: p.stock>0? '#e8f5e9' : '#fff0f0' }}>
+									<Tag size={14} color={p.stock>0? '#2e7d32' : '#d32f2f'} />
+									<span style={{ color: p.stock>0? '#2e7d32' : '#d32f2f', fontWeight: 700 }}>{p.stock}</span>
+								</div>
+							</div>
+							<button onClick={() => addToCart(p)} disabled={p.stock<=0} style={{ width: '100%', marginTop: 'auto', padding: '0.75rem', background: p.stock>0? '#43a047' : '#bdbdbd', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, fontSize: '1rem', cursor: p.stock>0? 'pointer' : 'not-allowed', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+								<ShoppingCart size={16} /> Add to Cart
+							</button>
 						</div>
-					))}
+					</div>
+					)
+					})}
 				</div>
 			</main>
 			<Footer />

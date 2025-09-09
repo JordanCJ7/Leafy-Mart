@@ -11,12 +11,14 @@ import Wishlist from './pages/Wishlist';
 import CartPage from './pages/CartPage';
 import OrderTracking from './pages/OrderTracking';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import ProductDetail from './pages/ProductDetail';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
+          
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -45,6 +47,7 @@ function App() {
               <AdminDashboardPage />
             </ProtectedRoute>
           } />
+          <Route path="/product/:id" element={<ProductDetail />} />
         </Routes>
       </Router>
     </AuthProvider>
