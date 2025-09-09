@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Leaf, ShoppingCart, Menu, User, LogOut } from 'lucide-react';
+import { Leaf, ShoppingCart, Menu, User, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import './Navbar.css';
 
@@ -8,10 +8,12 @@ function Navbar() {
   const location = useLocation();
   const { isLoggedIn, isAdmin, user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
 
   const handleLogout = () => {
     logout();
     setIsMenuOpen(false);
+    setIsUserMenuOpen(false);
   };
 
   return (
@@ -85,17 +87,37 @@ function Navbar() {
                   Admin
                 </Link>
               )}
-              <div className="navbar-user">
-                <User size={18} />
-                <span>{user?.name || user?.username}</span>
+              <div className="navbar-user-dropdown">
+                <button 
+                  className="navbar-user"
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                >
+                  <User size={18} />
+                  <span>{user?.name || user?.username}</span>
+                </button>
+                {isUserMenuOpen && (
+                  <div className="user-dropdown-menu">
+                    <Link 
+                      to="/profile" 
+                      className="dropdown-item"
+                      onClick={() => {
+                        setIsUserMenuOpen(false);
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      <Settings size={16} />
+                      Profile
+                    </Link>
+                    <button 
+                      className="dropdown-item logout-item"
+                      onClick={handleLogout}
+                    >
+                      <LogOut size={16} />
+                      Logout
+                    </button>
+                  </div>
+                )}
               </div>
-              <button 
-                className="navbar-item navbar-logout"
-                onClick={handleLogout}
-              >
-                <LogOut size={18} />
-                Logout
-              </button>
             </>
           )}
         </div>

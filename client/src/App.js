@@ -20,6 +20,7 @@ import Terms from './pages/Terms';
 import Wishlist from './pages/Wishlist';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -61,6 +62,11 @@ function App() {
           <Route path="/order-tracking" element={
             <ProtectedRoute>
               <OrderTracking />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           } />
           

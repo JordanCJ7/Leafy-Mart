@@ -78,6 +78,15 @@ export const AuthProvider = ({ children }) => {
     setIsAdmin(false);
   };
 
+  const updateUser = (userData) => {
+    setUser(userData);
+    if (!isAdmin) {
+      localStorage.setItem('customerData', JSON.stringify(userData));
+    } else {
+      localStorage.setItem('adminData', JSON.stringify(userData));
+    }
+  };
+
   const value = {
     user,
     isLoggedIn,
@@ -86,6 +95,7 @@ export const AuthProvider = ({ children }) => {
     loginCustomer,
     loginAdmin,
     logout,
+    updateUser,
     checkAuthStatus
   };
 

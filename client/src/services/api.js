@@ -21,7 +21,137 @@ export async function loginCustomer(data) {
 }
 
 export async function getUserProfile(token) {
-	const res = await fetch(`${API_BASE}/auth/profile`, {
+	const res = await fetch(`${API_BASE}/users/profile`, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+	return res.json();
+}
+
+export async function updateUserProfile(data, token) {
+	const res = await fetch(`${API_BASE}/users/profile`, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify(data)
+	});
+	return res.json();
+}
+
+export async function changePassword(data, token) {
+	const res = await fetch(`${API_BASE}/users/profile/change-password`, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify(data)
+	});
+	return res.json();
+}
+
+export async function getUserOrderHistory(token, params = {}) {
+	const queryParams = new URLSearchParams();
+	if (params.page) queryParams.append('page', params.page);
+	if (params.limit) queryParams.append('limit', params.limit);
+	
+	const url = `${API_BASE}/users/profile/orders${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+	const res = await fetch(url, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+	return res.json();
+}
+
+// Admin User Management
+export async function getAllUsers(token, params = {}) {
+	const queryParams = new URLSearchParams();
+	if (params.page) queryParams.append('page', params.page);
+	if (params.limit) queryParams.append('limit', params.limit);
+	if (params.search) queryParams.append('search', params.search);
+	if (params.role) queryParams.append('role', params.role);
+	if (params.membershipLevel) queryParams.append('membershipLevel', params.membershipLevel);
+	if (params.sortBy) queryParams.append('sortBy', params.sortBy);
+	if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+	
+	const url = `${API_BASE}/users/admin/users${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+	const res = await fetch(url, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+	return res.json();
+}
+
+export async function getUserById(id, token) {
+	const res = await fetch(`${API_BASE}/users/admin/users/${id}`, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+	return res.json();
+}
+
+export async function updateUser(id, data, token) {
+	const res = await fetch(`${API_BASE}/users/admin/users/${id}`, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify(data)
+	});
+	return res.json();
+}
+
+export async function deleteUser(id, token) {
+	const res = await fetch(`${API_BASE}/users/admin/users/${id}`, {
+		method: 'DELETE',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+	return res.json();
+}
+
+export async function reactivateUser(id, token) {
+	const res = await fetch(`${API_BASE}/users/admin/users/${id}/reactivate`, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+	return res.json();
+}
+
+export async function resetUserPassword(id, data, token) {
+	const res = await fetch(`${API_BASE}/users/admin/users/${id}/reset-password`, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify(data)
+	});
+	return res.json();
+}
+
+export async function getUserStats(token) {
+	const res = await fetch(`${API_BASE}/users/admin/users/stats`, {
 		method: 'GET',
 		headers: {
 			'Content-Type': 'application/json',
