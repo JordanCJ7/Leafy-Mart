@@ -1,4 +1,4 @@
-const Customer = require('../models/Customer');
+const User = require('../models/User'); // Changed from Customer to User
 const Product = require('../models/Product');
 const Order = require('../models/Order');
 const jwt = require('jsonwebtoken');
@@ -72,7 +72,7 @@ exports.verifyAdmin = async (req, res) => {
 exports.getDashboardStats = async (req, res) => {
 	try {
 		// Get counts
-		const totalCustomers = await Customer.countDocuments();
+		const totalCustomers = await User.countDocuments({ role: 'customer' });
 		const totalProducts = await Product.countDocuments();
 		const totalOrders = await Order.countDocuments();
 		
@@ -82,7 +82,7 @@ exports.getDashboardStats = async (req, res) => {
 		
 		// Get recent orders
 		const recentOrders = await Order.find()
-			.populate('customerId', 'firstName lastName email')
+			.populate('customerId', 'name email')
 			.sort({ createdAt: -1 })
 			.limit(5);
 		

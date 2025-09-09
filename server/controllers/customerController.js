@@ -1,4 +1,4 @@
-const Customer = require('../models/Customer');
+const User = require('../models/User');
 const Order = require('../models/Order');
 
 // Get all customers (Admin only)
@@ -9,26 +9,26 @@ exports.getAllCustomers = async (req, res) => {
     const skip = (page - 1) * limit;
     
     const search = req.query.search;
-    let query = {};
+    let query = { role: 'customer' }; // Only get customers, not admins
     
     if (search) {
       query = {
+        role: 'customer',
         $or: [
-          { firstName: { $regex: search, $options: 'i' } },
-          { lastName: { $regex: search, $options: 'i' } },
+          { name: { $regex: search, $options: 'i' } },
           { email: { $regex: search, $options: 'i' } },
           { phone: { $regex: search, $options: 'i' } }
         ]
       };
     }
     
-    const customers = await Customer.find(query)
+    const customers = await User.find(query)
       .sort({ registrationDate: -1 })
       .skip(skip)
       .limit(limit)
-      .select('-__v');
+      .select('-__v -password');
     
-    const total = await Customer.countDocuments(query);
+    const total = await User.countDocuments(query);
     
     res.json({
       customers,
@@ -46,7 +46,7 @@ exports.getAllCustomers = async (req, res) => {
 // Get customer by ID
 exports.getCustomerById = async (req, res) => {
   try {
-    const customer = await Customer.findById(req.params.id);
+    const customer = await User.findOne({ _id: req.params.id, role: 'customer' });
     if (!customer) {
       return res.status(404).json({ error: 'Customer not found' });
     }
@@ -70,8 +70,7 @@ exports.getCustomerById = async (req, res) => {
 exports.createCustomer = async (req, res) => {
   try {
     const {
-      firstName,
-      lastName,
+      name,
       email,
       phone,
       address,
@@ -83,22 +82,23 @@ exports.createCustomer = async (req, res) => {
     } = req.body;
     
     // Check if customer already exists
-    const existingCustomer = await Customer.findOne({ email });
+    const existingCustomer = await User.findOne({ email });
     if (existingCustomer) {
       return res.status(400).json({ error: 'Customer with this email already exists' });
     }
     
-    const customer = new Customer({
-      firstName,
-      lastName,
+    const customer = new User({
+      name,
       email,
+      password: 'temp123', // Temporary password - should be changed via auth
       phone,
-      address,
+      address: typeof address === 'string' ? { street: address } : address,
       plantPreferences: plantPreferences || [],
       careLevel: careLevel || 'Beginner',
       newsletter: newsletter !== undefined ? newsletter : true,
       careReminders: careReminders !== undefined ? careReminders : true,
-      promotionalEmails: promotionalEmails !== undefined ? promotionalEmails : true
+      promotionalEmails: promotionalEmails !== undefined ? promotionalEmails : true,
+      role: 'customer'
     });
     
     await customer.save();
@@ -119,14 +119,16 @@ exports.updateCustomer = async (req, res) => {
     
     // Prevent updating certain fields
     delete updates._id;
+    delete updates.password;
+    delete updates.role;
     delete updates.totalPurchases;
     delete updates.totalSpent;
     delete updates.loyaltyPoints;
     delete updates.membershipLevel;
     delete updates.registrationDate;
     
-    const customer = await Customer.findByIdAndUpdate(
-      req.params.id,
+    const customer = await User.findOneAndUpdate(
+      { _id: req.params.id, role: 'customer' },
       updates,
       { new: true, runValidators: true }
     );
@@ -147,8 +149,8 @@ exports.updateCustomer = async (req, res) => {
 // Delete customer (Soft delete - mark as inactive)
 exports.deleteCustomer = async (req, res) => {
   try {
-    const customer = await Customer.findByIdAndUpdate(
-      req.params.id,
+    const customer = await User.findOneAndUpdate(
+      { _id: req.params.id, role: 'customer' },
       { isActive: false },
       { new: true }
     );
@@ -169,7 +171,8 @@ exports.deleteCustomer = async (req, res) => {
 // Get customer statistics
 exports.getCustomerStats = async (req, res) => {
   try {
-    const stats = await Customer.aggregate([
+    const stats = await User.aggregate([
+      { $match: { role: 'customer' } },
       {
         $group: {
           _id: null,
@@ -183,8 +186,8 @@ exports.getCustomerStats = async (req, res) => {
       }
     ]);
     
-    const membershipDistribution = await Customer.aggregate([
-      { $match: { isActive: true } },
+    const membershipDistribution = await User.aggregate([
+      { $match: { role: 'customer', isActive: true } },
       {
         $group: {
           _id: '$membershipLevel',
@@ -193,8 +196,8 @@ exports.getCustomerStats = async (req, res) => {
       }
     ]);
     
-    const careLevelDistribution = await Customer.aggregate([
-      { $match: { isActive: true } },
+    const careLevelDistribution = await User.aggregate([
+      { $match: { role: 'customer', isActive: true } },
       {
         $group: {
           _id: '$careLevel',
@@ -223,21 +226,13 @@ exports.processPurchase = async (req, res) => {
   try {
     const { customerId, orderAmount, items } = req.body;
     
-    const customer = await Customer.findById(customerId);
+    const customer = await User.findOne({ _id: customerId, role: 'customer' });
     if (!customer) {
       return res.status(404).json({ error: 'Customer not found' });
     }
     
-    // Update customer purchase data
-    customer.totalPurchases += 1;
-    customer.totalSpent += orderAmount;
-    customer.lastPurchase = new Date();
-    
-    // Add loyalty points
-    const pointsEarned = customer.addLoyaltyPoints(orderAmount);
-    
-    // Update membership level
-    customer.updateMembershipLevel();
+    // Use the new method to record purchase
+    const pointsEarned = customer.recordPurchase(orderAmount);
     
     // Update favorite categories based on purchased items
     if (items && items.length > 0) {
