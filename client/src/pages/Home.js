@@ -230,9 +230,9 @@ export default function Home() {
 					</h2>
 					<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
 						{[
-							{ name: 'Priya Sharma', text: 'Amazing quality plants! My snake plant is thriving after 6 months.', rating: 5 },
-							{ name: 'Rajesh Kumar', text: 'Fast delivery and excellent packaging. Highly recommended!', rating: 5 },
-							{ name: 'Anjali Patel', text: 'The plant care guidance is invaluable. Great customer service!', rating: 5 }
+							{ name: 'Chaminda Perera', text: 'මගේ වෙත ලද plants ගුණාත්මකභාවයෙන් ඉතාමත් සරුයි! Snake plant එක මාස 6කට පසුත් හොඳින් වර්ධනය වෙනවා. Amazing quality!', rating: 5 },
+							{ name: 'Nimesha Fernando', text: 'ඉක්මන් delivery සහ excellent packaging. Highly recommend කරනවා Sri Lankan plant lovers ලට!', rating: 5 },
+							{ name: 'Kasun Jayasinghe', text: 'Plant care guidance එක invaluable! Customer service team එක ඉතාමත් helpful. Thank you Botanica Hub!', rating: 5 }
 						].map((review, i) => (
 							<div key={i} style={{ 
 								background: 'rgba(255,255,255,0.1)', 

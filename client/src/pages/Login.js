@@ -32,7 +32,7 @@ export default function Login() {
 		if (res.user && res.user.isAdmin) {
 			navigate('/admin');
 		} else {
-			navigate('/profile');
+			navigate('/');
 		}
 	};
 

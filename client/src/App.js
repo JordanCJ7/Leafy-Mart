@@ -13,6 +13,11 @@ import CartPage from './pages/CartPage';
 import OrderTracking from './pages/OrderTracking';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import ProductDetail from './pages/ProductDetail';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import FAQ from './pages/FAQ';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
 
 function App() {
   return (
@@ -21,7 +26,36 @@ function App() {
         <Routes>
           
           <Route path="/" element={<Home />} />
-          <Route path="/products" element={<Products />} />
+          <Route path="/products" element={
+            <ProtectedRoute>
+              <Products />
+            </ProtectedRoute>
+          } />
+          <Route path="/about" element={
+            <ProtectedRoute>
+              <About />
+            </ProtectedRoute>
+          } />
+          <Route path="/contact" element={
+            <ProtectedRoute>
+              <Contact />
+            </ProtectedRoute>
+          } />
+          <Route path="/faq" element={
+            <ProtectedRoute>
+              <FAQ />
+            </ProtectedRoute>
+          } />
+          <Route path="/privacy" element={
+            <ProtectedRoute>
+              <Privacy />
+            </ProtectedRoute>
+          } />
+          <Route path="/terms" element={
+            <ProtectedRoute>
+              <Terms />
+            </ProtectedRoute>
+          } />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={
@@ -49,7 +83,11 @@ function App() {
               <AdminDashboardPage />
             </ProtectedRoute>
           } />
-          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/product/:id" element={
+            <ProtectedRoute>
+              <ProductDetail />
+            </ProtectedRoute>
+          } />
         </Routes>
       </Router>
     </AuthProvider>

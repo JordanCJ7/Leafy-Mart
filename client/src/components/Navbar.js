@@ -10,6 +10,8 @@ import {
 	LogOut, 
 	LogIn, 
 	UserPlus,
+	Info,
+	Mail,
 	Leaf
 } from 'lucide-react';
 import './Navbar.css';
@@ -20,7 +22,7 @@ const Navbar = () => {
 
 	const handleLogout = () => {
 		logout();
-		navigate('/');
+		navigate('/login');
 	};
 
 	return (
@@ -37,6 +39,18 @@ const Navbar = () => {
 						<Leaf size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
 						Products
 					</Link>
+				</li>
+				<li>
+						<Link to="/about">
+							<Info size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+							About
+						</Link>
+				</li>
+				<li>
+						<Link to="/contact">
+							<Mail size={18} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+							Contact
+						</Link>
 				</li>
 				{isLoading ? (
 					// Show loading state
