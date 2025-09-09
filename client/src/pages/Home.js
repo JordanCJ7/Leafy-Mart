@@ -5,40 +5,40 @@ import Footer from '../components/Footer';
 
 const products = [
 	{
-		name: 'Monstera Deliciosa',
-		price: '$35.00',
-		desc: 'A classic, easy-to-care-for houseplant with iconic split leaves.',
-		img: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
+		name: 'Tulsi (Holy Basil)',
+		price: '$8.00',
+		desc: 'Sacred and medicinal herb common across South Asia — useful in teas and rituals. Thrives in warm sunny spots and regular watering.',
+		img: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80',
 	},
 	{
-		name: 'Fiddle Leaf Fig',
-		price: '$55.00',
-		desc: 'A stylish and popular plant with large, violin-shaped leaves.',
-		img: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
+		name: 'Money Plant (Pothos)',
+		price: '$12.00',
+		desc: 'Hardy trailing vine ideal for indoors and balconies. Low light tolerant and very easy to propagate from cuttings.',
+		img: 'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=800&q=80',
 	},
 	{
-		name: 'Snake Plant',
-		price: '$25.00',
-		desc: 'Extremely resilient and perfect for beginners. Great for air purification.',
-		img: 'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=400&q=80',
+		name: 'Snake Plant (Sansevieria)',
+		price: '$20.00',
+		desc: 'Very resilient air-purifying plant; tolerates low light and irregular watering — perfect for busy households.',
+		img: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80',
 	},
 	{
-		name: 'Pothos',
-		price: '$18.00',
-		desc: 'A trailing plant that thrives in low light and is easy to propagate.',
-		img: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80',
+		name: 'Areca Palm',
+		price: '$45.00',
+		desc: 'Popular indoor palm in South Asia — bright indirect light and regular humidity keep it happy; great for living rooms and offices.',
+		img: 'https://images.unsplash.com/photo-1501004318641-1d3d7f8a1b6a?auto=format&fit=crop&w=800&q=80',
 	},
 	{
-		name: 'ZZ Plant',
-		price: '$30.00',
-		desc: 'Tolerates neglect and low light. Perfect for busy plant lovers.',
-		img: 'https://images.unsplash.com/photo-1465101178521-c1a4c8a0a8b7?auto=format&fit=crop&w=400&q=80',
+		name: 'Hibiscus (Gulabo)',
+		price: '$15.00',
+		desc: 'Flowering shrub commonly grown for its bright blooms; thrives in warm climates with full sun and regular watering.',
+		img: 'https://images.unsplash.com/photo-1501004318641-2b8f7a3c3c3e?auto=format&fit=crop&w=800&q=80',
 	},
 	{
-		name: 'Calathea Orbifolia',
-		price: '$40.00',
-		desc: 'Striking foliage with silvery stripes. Loves humidity.',
-		img: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
+		name: 'Peace Lily',
+		price: '$22.00',
+		desc: 'Compact, shade-tolerant plant with elegant white blooms; prefers consistent moisture and bright, indirect light.',
+		img: 'https://images.unsplash.com/photo-1524594154909-07b6d4b0b6d5?auto=format&fit=crop&w=800&q=80',
 	},
 ];
 
@@ -56,7 +56,13 @@ export default function Home() {
 				<div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
 					<input type="text" placeholder="Search for plants..." style={{ width: 320, padding: '0.75rem', borderRadius: 8, border: '1px solid #a5d6a7', fontSize: '1rem' }} />
 				</div>
-				<div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '2rem' }}>
+				<div style={{ 
+					display: 'grid', 
+					gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+					gap: '2rem',
+					maxWidth: '1000px',
+					margin: '0 auto'
+				}}>
 					{products.map((p, idx) => (
 						<div key={idx} style={{ background: '#fff', borderRadius: 12, boxShadow: '0 2px 16px rgba(56,142,60,0.08)', overflow: 'hidden', border: '1px solid #e0e0e0', position: 'relative' }}>
 							<img src={p.img} alt={p.name} style={{ width: '100%', height: 200, objectFit: 'cover' }} />

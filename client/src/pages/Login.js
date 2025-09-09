@@ -4,31 +4,32 @@ import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { loginUser } from '../services/api';
 
 export default function Login() {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [error, setError] = useState('');
+	const { login } = useAuth();
 	const navigate = useNavigate();
 
-		const handleSubmit = async e => {
-			e.preventDefault();
-			if (!email || !password) {
-				setError('Please enter both email and password.');
-				return;
-			}
-			const res = await loginUser({ email, password });
-			if (res.error) {
-				setError(res.error);
-				return;
-			}
-			// Save token and user info (for demo, localStorage)
-			localStorage.setItem('token', res.token);
-			localStorage.setItem('user', JSON.stringify(res.user));
-			setError('');
-			navigate('/profile');
-		};
+	const handleSubmit = async e => {
+		e.preventDefault();
+		if (!email || !password) {
+			setError('Please enter both email and password.');
+			return;
+		}
+		const res = await loginUser({ email, password });
+		if (res.error) {
+			setError(res.error);
+			return;
+		}
+		// Use AuthContext login method
+		login(res.token, res.user);
+		setError('');
+		navigate('/profile');
+	};
 
 	return (
 		<div style={{ background: '#f1faee', minHeight: '100vh', fontFamily: 'Segoe UI, Arial, sans-serif', display: 'flex', flexDirection: 'column' }}>
