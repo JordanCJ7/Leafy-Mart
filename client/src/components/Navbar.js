@@ -1,12 +1,16 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Leaf, ShoppingCart, Menu, User, LogOut, Settings, Info, Phone, LogIn, UserPlus } from 'lucide-react';
+import { Leaf, ShoppingCart, Menu, User, LogOut, Settings, Info, Phone, LogIn, UserPlus, Heart } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext';
+import { useWishlist } from '../contexts/WishlistContext';
 import './Navbar.css';
 
 function Navbar() {
   const location = useLocation();
   const { isLoggedIn, isAdmin, user, logout } = useAuth();
+  const { getCartItemsCount } = useCart();
+  const { getWishlistCount } = useWishlist();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = React.useState(false);
@@ -116,9 +120,58 @@ function Navbar() {
 
         <div className="navbar-actions">
           {isLoggedIn && !isAdmin && (
-            <Link to="/cart" className="navbar-action">
-              <ShoppingCart size={20} />
-            </Link>
+            <>
+              <Link to="/wishlist" className="navbar-action" title="Wishlist">
+                <div style={{ position: 'relative' }}>
+                  <Heart size={20} />
+                  {getWishlistCount() > 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-8px',
+                      right: '-8px',
+                      background: '#e53e3e',
+                      color: 'white',
+                      borderRadius: '50%',
+                      fontSize: '12px',
+                      fontWeight: 'bold',
+                      minWidth: '18px',
+                      height: '18px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      lineHeight: 1
+                    }}>
+                      {getWishlistCount()}
+                    </span>
+                  )}
+                </div>
+              </Link>
+              <Link to="/cart" className="navbar-action" title="Shopping Cart">
+                <div style={{ position: 'relative' }}>
+                  <ShoppingCart size={20} />
+                  {getCartItemsCount() > 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-8px',
+                      right: '-8px',
+                      background: '#388e3c',
+                      color: 'white',
+                      borderRadius: '50%',
+                      fontSize: '12px',
+                      fontWeight: 'bold',
+                      minWidth: '18px',
+                      height: '18px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      lineHeight: 1
+                    }}>
+                      {getCartItemsCount()}
+                    </span>
+                  )}
+                </div>
+              </Link>
+            </>
           )}
           <button 
             className="navbar-toggle"

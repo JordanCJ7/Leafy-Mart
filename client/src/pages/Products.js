@@ -2,21 +2,53 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import products from '../data/products';
+import LocalStorageDebug from '../components/LocalStorageDebug';
+import { getAllProducts } from '../services/api';
+import { useCart } from '../contexts/CartContext';
+import { useWishlist } from '../contexts/WishlistContext';
 import { Heart, ShoppingCart, Star, Filter, Search, Grid, List } from 'lucide-react';
 import './Products.css';
 
 const Products = () => {
-  const [filteredProducts, setFilteredProducts] = useState(products);
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [priceRange, setPriceRange] = useState('All');
   const [sortBy, setSortBy] = useState('name');
   const [viewMode, setViewMode] = useState('grid'); // grid or list
+
+  // Context hooks
+  const { addToCart, isInCart, getItemQuantity } = useCart();
+  const { addToWishlist, isInWishlist, toggleWishlistItem } = useWishlist();
   const [showFilters, setShowFilters] = useState(false);
 
   const categories = ['All', 'Herbs', 'Indoor Vines', 'Air Purifiers', 'Palms', 'Flowering Shrubs', 'Shade Plants', 'Foliage', 'Low-Maintenance', 'Hanging & Trailing', 'Statement Trees', 'Succulents & Cacti', 'Fragrant Climbers'];
   const priceRanges = ['All', 'Under LKR 1,500', 'LKR 1,500-3,000', 'LKR 3,000-5,000', 'Above LKR 5,000'];
+
+  // Fetch products from database
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await getAllProducts();
+        if (response.error) {
+          setError(response.error);
+        } else {
+          setProducts(response);
+        }
+      } catch (err) {
+        setError('Failed to fetch products. Please try again later.');
+        console.error('Error fetching products:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   useEffect(() => {
     let filtered = products;
@@ -68,18 +100,17 @@ const Products = () => {
     });
 
     setFilteredProducts(filtered);
-  }, [searchTerm, selectedCategory, priceRange, sortBy]);
+  }, [products, searchTerm, selectedCategory, priceRange, sortBy]);
 
-  const addToCart = (product) => {
-    console.log('Adding to cart:', product);
-    // Implement cart functionality
-    alert('Item added to cart!');
+  const handleAddToCart = (product) => {
+    addToCart(product);
+    alert(`${product.name} added to cart!`);
   };
 
-  const addToWishlist = (product) => {
-    console.log('Adding to wishlist:', product);
-    // Implement wishlist functionality
-    alert('Item added to wishlist!');
+  const handleToggleWishlist = (product) => {
+    toggleWishlistItem(product);
+    const action = isInWishlist(product.id) ? 'removed from' : 'added to';
+    alert(`${product.name} ${action} wishlist!`);
   };
 
   return (
@@ -95,6 +126,9 @@ const Products = () => {
       </div>
 
       <div className="products-container">
+        {/* Debug Component for LocalStorage Testing */}
+        <LocalStorageDebug />
+        
         {/* Filters and Search */}
         <div className="products-controls">
           <div className="search-bar">
@@ -187,17 +221,33 @@ const Products = () => {
               <h2>All Plants ({filteredProducts.length})</h2>
             </div>
 
-            <div className={`products-grid ${viewMode}`}>
-              {filteredProducts.map(product => (
+            {loading ? (
+              <div className="loading-state">
+                <div className="loading-spinner"></div>
+                <p>Loading products...</p>
+              </div>
+            ) : error ? (
+              <div className="error-state">
+                <h3>Error Loading Products</h3>
+                <p>{error}</p>
+                <button onClick={() => window.location.reload()} className="btn btn-primary">
+                  Retry
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className={`products-grid ${viewMode}`}>
+                  {filteredProducts.map(product => (
                 <div key={product.id} className="product-card">
                   <div className="product-image">
                     <img src={product.img} alt={product.name} />
                     <div className="product-overlay">
                       <button 
-                        className="overlay-btn"
-                        onClick={() => addToWishlist(product)}
+                        className={`overlay-btn ${isInWishlist(product.id) ? 'active' : ''}`}
+                        onClick={() => handleToggleWishlist(product)}
+                        title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
                       >
-                        <Heart size={18} />
+                        <Heart size={18} fill={isInWishlist(product.id) ? 'currentColor' : 'none'} />
                       </button>
                     </div>
                   </div>
@@ -228,11 +278,13 @@ const Products = () => {
                           View Details
                         </Link>
                         <button 
-                          className="btn btn-primary"
-                          onClick={() => addToCart(product)}
+                          className={`btn ${isInCart(product.id) ? 'btn-success' : 'btn-primary'}`}
+                          onClick={() => handleAddToCart(product)}
                         >
                           <ShoppingCart size={16} />
-                          Add to Cart
+                          {isInCart(product.id) 
+                            ? `In Cart (${getItemQuantity(product.id)})` 
+                            : 'Add to Cart'}
                         </button>
                       </div>
                     </div>
@@ -247,11 +299,14 @@ const Products = () => {
                 <p>Try adjusting your search or filter criteria</p>
               </div>
             )}
+              </>
+            )}
           </div>
         </div>
       </div>
 
       <Footer />
+      <LocalStorageDebug />
     </div>
   );
 };

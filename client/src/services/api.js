@@ -260,6 +260,140 @@ export async function getProductById(id) {
 	return res.json();
 }
 
+// Order Management
+export async function createOrder(orderData, token) {
+	const res = await fetch(`${API_BASE}/orders`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify(orderData)
+	});
+	return res.json();
+}
+
+export async function getUserOrders(token, params = {}) {
+	const queryParams = new URLSearchParams();
+	if (params.page) queryParams.append('page', params.page);
+	if (params.limit) queryParams.append('limit', params.limit);
+	if (params.status) queryParams.append('status', params.status);
+	
+	const url = `${API_BASE}/orders/user${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+	const res = await fetch(url, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+	return res.json();
+}
+
+export async function getOrderById(orderId, token) {
+	const res = await fetch(`${API_BASE}/orders/${orderId}`, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+	return res.json();
+}
+
+export async function updateOrderStatus(orderId, status, token) {
+	const res = await fetch(`${API_BASE}/orders/${orderId}/status`, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify({ status })
+	});
+	return res.json();
+}
+
+export async function cancelOrder(orderId, token) {
+	const res = await fetch(`${API_BASE}/orders/${orderId}/cancel`, {
+		method: 'PUT',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+	return res.json();
+}
+
+// Cart Management (if you want server-side cart persistence)
+export async function saveCartToServer(cartData, token) {
+	const res = await fetch(`${API_BASE}/cart`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify({ items: cartData })
+	});
+	return res.json();
+}
+
+export async function getCartFromServer(token) {
+	const res = await fetch(`${API_BASE}/cart`, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+	return res.json();
+}
+
+export async function clearCartOnServer(token) {
+	const res = await fetch(`${API_BASE}/cart`, {
+		method: 'DELETE',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+	return res.json();
+}
+
+// Wishlist Management (if you want server-side wishlist persistence)
+export async function saveWishlistToServer(wishlistData, token) {
+	const res = await fetch(`${API_BASE}/wishlist`, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify({ items: wishlistData })
+	});
+	return res.json();
+}
+
+export async function getWishlistFromServer(token) {
+	const res = await fetch(`${API_BASE}/wishlist`, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+	return res.json();
+}
+
+export async function clearWishlistOnServer(token) {
+	const res = await fetch(`${API_BASE}/wishlist`, {
+		method: 'DELETE',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+	return res.json();
+}
+
 // Admin Dashboard
 export async function getDashboardStats(token) {
 	const res = await fetch(`${API_BASE}/admin/dashboard`, {

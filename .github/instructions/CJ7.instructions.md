@@ -41,6 +41,33 @@ cd server
 node createAdmin.js
 ```
 
+### VS Code Configuration
+The project includes pre-configured VS Code settings for optimal development experience:
+
+#### Automatic Terminal Setup
+- **Tasks configured** to automatically start frontend and backend in separate terminals
+- **Keyboard shortcuts** for quick access to development commands
+- **Integrated debugging** support for both React and Node.js
+
+#### Available Tasks (Ctrl+Shift+P → "Tasks: Run Task"):
+- `Start Backend Server`: Runs `cd server; npx nodemon server.js`
+- `Start Frontend Client`: Runs `cd client; npm start`
+- `Start Full Application`: Runs both backend and frontend simultaneously
+
+#### Keyboard Shortcuts:
+- **Ctrl+Shift+F5**: Start full application (both frontend and backend)
+- **Ctrl+Shift+B**: Start backend server only
+- **Ctrl+Shift+R**: Start frontend client only
+
+#### Auto-Start on Folder Open:
+The tasks are configured to automatically start when you open the workspace folder in VS Code, ensuring immediate development readiness.
+
+#### Configuration Files:
+- `.vscode/tasks.json`: Task definitions for terminal automation
+- `.vscode/launch.json`: Debug configurations
+- `.vscode/settings.json`: Workspace-specific settings
+- `.vscode/keybindings.json`: Custom keyboard shortcuts
+
 ### Design System Guidelines
 - **Colors**: Nature-inspired greens (#2e7d32, #388e3c, #43a047, #f1faee)
 - **Typography**: Segoe UI, clean and accessible
