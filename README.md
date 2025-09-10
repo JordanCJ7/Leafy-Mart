@@ -1,127 +1,72 @@
 # Leafy Mart 🌿 (SPSMS)
 
-The **Leafy Mart 🌿** is a web-based application designed to modernize and automate plant store operations. Built with the **MERN stack (MongoDB, Express.js, React, Node.js)**, it provides an efficient way for store owners to manage inventory, customer orders, suppliers, and payments while offering customers a seamless online shopping experience.
+Leafy Mart is a full-stack web application (MERN) for managing plant-store operations: inventory, orders, suppliers and customer-facing shopping.
 
----
+Key technologies: React (client), Node.js + Express (server), MongoDB.
 
-## 🚀 Features
+Goals: provide a simple developer setup, clear run instructions, and notes for contributors.
 
-### Admin
-- Inventory & Product Management (Add, Update, Delete products)
-- Supplier & Sales Tracking
-- Order & Delivery Management
-- Performance Reports & Analytics
+## Quick start (development)
 
-### Customer
-- Secure Registration & Login
-- Profile Management
-- Wish-list Creation
-- Product Browsing & Search
-- Cart & Checkout System
-- Order Tracking (Pending, Shipped, Delivered)
+These instructions match this repository's layout (top-level `server/` and `client/` folders).
 
-### System
-- Automated Low-stock Notifications
-- Centralized Dashboard for Admin
-- Secure Authentication
-- User-friendly Interface
+1) Install dependencies
 
----
+PowerShell (from repo root):
 
-## 🎯 Objectives
+```powershell
+cd server; npm install
+cd ..\client; npm install
+```
 
-- Enhance efficiency of **plant store operations**.
-- Provide **customers with an online shopping platform**.
-- Automate **inventory, orders, and payments**.
-- Deliver better **customer satisfaction & sustainable growth**.
+2) Environment variables (server)
 
----
+Create `server/.env` with at minimum:
 
-## 🛠️ Tech Stack
+```
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
+PORT=5000
+```
 
-- **Frontend**: React.js  
-- **Backend**: Node.js + Express.js  
-- **Database**: MongoDB  
-- **Version Control**: Git & GitHub  
-- **Testing Tools**: Postman, Cypress  
+3) Run for development
 
----
+- Start the server with automatic reload (nodemon):
 
-## ⚙️ Requirements
+```powershell
+cd server; npm run dev
+```
 
-### Team Development Machine
-- Windows 10 or above  
-- Intel Core i7 processor  
-- 8GB RAM  
-- 500GB HDD  
-- Tools: VS Code, Postman, Git, MongoDB  
+- Start the React dev server:
 
-### Client Machine
-- Windows 10 or above  
-- Intel Core i3 processor  
-- 4GB RAM  
-- 256GB HDD  
-- Web browser + Internet connection  
+```powershell
+cd client; npm start
+```
 
----
+Notes:
+- The React app uses a proxy to `http://localhost:5000` (see `client/package.json`).
+- The server package.json provides `start` (node server.js) and `dev` (nodemon) scripts.
 
-## 📦 Setup & Installation
+Alternate: both services are configured as VS Code tasks in this workspace. From the VS Code Run/Tasks panel look for:
+- "Start Backend Server" — runs `cd server; npx nodemon server.js` (background task)
+- "Start Frontend Client" — runs `cd client; npm start` (background task)
 
-1. **Clone the repository**
-	```bash
-	git clone https://github.com/your-repo-link.git
-	cd leafy-mart
-	```
+## Production-style run
 
-2. **Install dependencies**
+1. Build frontend
 
-	**Backend**
-	```bash
-	cd server
-	npm install
-	```
+```powershell
+cd client; npm run build
+```
 
-	**Frontend**
-	```bash
-	cd client
-	npm install
-	```
+2. Serve the static build from your preferred host or configure the `server` to serve `client/build`.
 
-3. **Set up environment variables**
-
-	Create a `.env` file in the backend with:
-	```env
-	MONGO_URI=your_mongodb_connection_string
-	JWT_SECRET=your_secret_key
-	PORT=5000
-	```
-
-4. **Run the application**
-
-	**Start backend server:**
-	```bash
-	cd backend
-	npm start
-	```
-
-	**Start frontend app:**
-	```bash
-	cd frontend
-	npm start
-	```
-
-5. **Access the app**
-
-	Open [http://localhost:3000](http://localhost:3000) in your browser.
-
----
-
-## 📁 Recommended Project Folder Structure
+## Project structure (top-level)
 
 ```
 leafy-mart/
 │
-├── backend/
+├── server/
 │   ├── controllers/
 │   ├── models/
 │   ├── routes/
@@ -132,7 +77,7 @@ leafy-mart/
 │   ├── server.js
 │   └── package.json
 │
-├── frontend/
+├── client/
 │   ├── public/
 │   ├── src/
 │   │   ├── components/
@@ -146,42 +91,81 @@ leafy-mart/
 └── ...
 ```
 
----
+## Scripts of interest
 
-## 📅 Development Timeline
+- server/package.json
+	- `npm run dev` — development server with nodemon
+	- `npm start` — run with node
+- client/package.json
+	- `npm start` — React dev server
+	- `npm run build` — production build
 
-- **Weeks 1–2:** Requirement Gathering & System Design
-- **Weeks 3–6:** Core Feature Development (Inventory, Profile, Orders)
-- **Weeks 7–9:** Testing & Debugging
-- **Weeks 10–12:** User Acceptance & Refinements
-- **Weeks 13–14:** Deployment & Final Evaluation
+## Testing & debugging
 
----
+- Use Postman or similar to exercise API endpoints at `http://localhost:5000`.
+- Client tests (if present) can be run from `client` with `npm test`.
 
-## 💰 Budget
+## Implemented features (current)
 
-| Item             | Cost (Rs.)  |
-|------------------|------------|
-| Infrastructure   | 25,000     |
-| Hardware         | 125,000    |
-| Software Tools   | 20,000     |
-| Web Hosting      | 15,000     |
-| Development      | 300,000    |
-| Testing          | 15,000     |
-| Training         | 25,000     |
-| Maintenance (1y) | 50,000     |
-| **Total**        | **575,000**|
+The sections below reflect features already implemented in this repository (based on server controllers and client pages/contexts).
 
----
+- Backend
+  - Product management: add, update, delete, list, get-by-id, and endpoint for product categories/tags.
+  - Orders: create orders, validate stock, decrement/increment stock on create/cancel, list user/admin orders with pagination and filters, update order status and payment status, basic order statistics aggregation.
+  - Authentication: customer registration, customer login, admin login, get/update profile, JWT token generation and usage in controllers.
+  - Utilities: simple notification utility (currently logs messages to console).
 
-## 👨‍💻 Contributors
+- Frontend
+  - Product browsing UI (product list and product detail pages).
+  - Cart and checkout pages, plus basic payment page stub.
+  - Wishlist and profile pages.
+  - Admin UI pages: dashboard, product management, user/customer management.
+  - App-wide contexts for auth, cart and wishlist; localStorage hook for persistence.
+
+These implemented pieces form a working developer experience for local testing: run the server, start the React app, register/login users, browse products, place orders, and manage products from the admin UI.
+
+## Improvements & roadmap (suggested / work to do)
+
+Practical, prioritized items to make the system production-ready and easier to maintain.
+
+1) Security & stability
+	- Replace the console-based notification with real channels (email/SMS/push) and a queued worker for reliability.
+	- Harden authentication: store JWT secret securely, shorten token lifetimes, add refresh tokens, and ensure role-based access enforcement in middleware.
+	- Add input validation (server + client) and sanitize inputs to prevent injection attacks.
+	- Rate limiting and brute-force protections on auth endpoints.
+
+2) Testing, CI & quality
+	- Add unit and integration tests for critical backend controllers and frontend components (happy path + edge cases).
+	- Configure CI (GitHub Actions) to run lint, tests and build on PRs.
+	- Add ESLint/Prettier and a pre-commit hook to enforce style.
+
+3) Observability & operations
+	- Add structured logging (winston/pino) and error tracking (Sentry).
+	- Add health-check endpoints and basic metrics (request rates, error rates).
+	- Provide a `server/.env.example` and documented run/seed steps.
+
+4) Payments & business flows
+	- Integrate a payment gateway (Stripe/PayPal) and implement secure server-side payment verification.
+	- Extend order lifecycle (refunds, partial cancellations, retries) and improve tracking/notifications.
+
+5) Performance & UX
+	- Move images to cloud storage (S3 or static CDN) and serve optimized images.
+	- Add server-side pagination and indexed search for product listings; consider caching popular queries.
+	- Improve front-end forms, add friendly error handling and loading states.
+
+6) Deployment & infra
+	- Add Dockerfile(s) and docker-compose for local and staging environments.
+	- Add deployment docs (Heroku, DigitalOcean App Platform, or container registry + Kubernetes manifest).
+
+If you'd like, I can implement the highest-priority items incrementally (for example: add `server/.env.example`, create a basic GitHub Actions workflow that runs tests/builds, or wire up ESLint + Prettier). Tell me which one to do first.
+
+## Contributors
 
 - IT23845664 – M V D S Hendahewa
 - IT23576902 – D G D D Jayathissa
 - IT23699144 – E B T B Abeynayaka
 
----
+## License
 
-## 📜 License
+This project is developed for academic purposes under Sri Lanka Institute of Information Technology (SLIIT).
 
-This project is developed for academic purposes under Sri Lanka Institute of Information Technology (SLIIT). Licensing for commercial use must be discussed with the authors.
