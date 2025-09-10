@@ -22,6 +22,7 @@ import Wishlist from './pages/Wishlist';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Profile from './pages/Profile';
+import Payment from './pages/Payment';
 
 function App() {
   return (
@@ -55,6 +56,11 @@ function App() {
           <Route path="/cart" element={
             <ProtectedRoute>
               <CartPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/payment" element={
+            <ProtectedRoute>
+              <Payment />
             </ProtectedRoute>
           } />
           <Route path="/wishlist" element={

@@ -30,7 +30,7 @@ const Terms = () => {
             Please read these terms carefully before using our services
           </p>
           <p style={{ fontSize: '0.9rem', opacity: 0.8, marginTop: '1rem' }}>
-            Last updated: December 2024
+            Last updated: September 2025
           </p>
         </div>
       </section>

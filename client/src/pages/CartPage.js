@@ -31,24 +31,23 @@ export default function CartPage() {
       navigate('/login', { state: { returnTo: '/cart' } });
       return;
     }
+    // Build order summary and navigate to the payment simulator
+    const orderSummary = {
+      items: cartItems,
+      subtotal,
+      shipping,
+      tax,
+      total
+    };
 
-    setIsCheckingOut(true);
-    
-    // Here you would normally integrate with your order API
+    // Store a session fallback so /payment can be opened directly
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // For now, just clear cart and show success
-      clearCart();
-      alert('Order placed successfully! You will receive a confirmation email shortly.');
-      navigate('/order-tracking');
-    } catch (error) {
-      alert('Failed to place order. Please try again.');
-      console.error('Checkout error:', error);
-    } finally {
-      setIsCheckingOut(false);
+      sessionStorage.setItem('leafyMartPendingOrder', JSON.stringify(orderSummary));
+    } catch (err) {
+      console.warn('Could not write sessionStorage pending order:', err);
     }
+
+    navigate('/payment', { state: orderSummary });
   };
 
   const subtotal = getCartTotal();
