@@ -24,9 +24,6 @@ Thumbs.db
 .env
 .env.*
 
-# VS Code settings
-.vscode/
-
 # Misc
 *.swp
 *.swo

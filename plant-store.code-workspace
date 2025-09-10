@@ -1,0 +1,45 @@
+{
+	"folders": [
+		{
+			"name": "Leafy Mart",
+			"path": "."
+		}
+	],
+	"settings": {
+		"terminal.integrated.defaultProfile.windows": "PowerShell",
+		"files.exclude": {
+			"**/node_modules": true
+		}
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "Start Development Environment",
+				"dependsOrder": "parallel",
+				"dependsOn": [
+					"Start Backend Server",
+					"Start Frontend Client"
+				],
+				"group": {
+					"kind": "build",
+					"isDefault": true
+				},
+				"runOptions": {
+					"runOn": "folderOpen"
+				}
+			}
+		]
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-vscode.vscode-node-azure-pack",
+			"bradlc.vscode-tailwindcss",
+			"esbenp.prettier-vscode",
+			"ms-vscode.vscode-json",
+			"formulahendry.auto-rename-tag",
+			"christian-kohler.path-intellisense",
+			"ms-vscode.vscode-typescript-next"
+		]
+	}
+}

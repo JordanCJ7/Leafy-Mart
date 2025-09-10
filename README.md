@@ -1,6 +1,6 @@
-# 🌱 Smart Plant Store Management System (SPSMS)
+# Leafy Mart 🌿 (SPSMS)
 
-The **Smart Plant Store Management System (SPSMS)** is a web-based application designed to modernize and automate plant store operations. Built with the **MERN stack (MongoDB, Express.js, React, Node.js)**, it provides an efficient way for store owners to manage inventory, customer orders, suppliers, and payments while offering customers a seamless online shopping experience.
+The **Leafy Mart 🌿** is a web-based application designed to modernize and automate plant store operations. Built with the **MERN stack (MongoDB, Express.js, React, Node.js)**, it provides an efficient way for store owners to manage inventory, customer orders, suppliers, and payments while offering customers a seamless online shopping experience.
 
 ---
 
@@ -70,20 +70,20 @@ The **Smart Plant Store Management System (SPSMS)** is a web-based application d
 1. **Clone the repository**
 	```bash
 	git clone https://github.com/your-repo-link.git
-	cd smart-plant-store
+	cd leafy-mart
 	```
 
 2. **Install dependencies**
 
 	**Backend**
 	```bash
-	cd backend
+	cd server
 	npm install
 	```
 
 	**Frontend**
 	```bash
-	cd frontend
+	cd client
 	npm install
 	```
 
@@ -119,7 +119,7 @@ The **Smart Plant Store Management System (SPSMS)** is a web-based application d
 ## 📁 Recommended Project Folder Structure
 
 ```
-smart-plant-store/
+leafy-mart/
 │
 ├── backend/
 │   ├── controllers/
