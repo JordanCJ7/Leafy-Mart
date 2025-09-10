@@ -6,8 +6,10 @@ exports.createOrder = async (req, res) => {
 	try {
 		const orderData = {
 			...req.body,
-			customerId: req.user?._id || req.body.customerId
+			customerId: req.user?.id || req.body.customerId
 		};
+
+		console.log('createOrder - incoming orderData:', JSON.stringify(orderData, null, 2));
 		
 		// Validate and calculate totals
 		if (orderData.items && orderData.items.length > 0) {
@@ -55,7 +57,7 @@ exports.getUserOrders = async (req, res) => {
 		const limit = parseInt(req.query.limit) || 10;
 		const skip = (page - 1) * limit;
 		
-		const query = { customerId: req.user?._id || req.params.userId };
+		const query = { customerId: req.user?.id || req.params.userId };
 		
 		// Add status filter if provided
 		if (req.query.status) {
@@ -96,7 +98,7 @@ exports.getOrderById = async (req, res) => {
 		}
 		
 		// Check if user owns this order (unless admin)
-		if (!req.user.isAdmin && order.customerId._id.toString() !== req.user._id.toString()) {
+		if (!req.user.isAdmin && order.customerId._id.toString() !== req.user.id.toString()) {
 			return res.status(403).json({ error: 'Access denied' });
 		}
 		
@@ -231,7 +233,7 @@ exports.cancelOrder = async (req, res) => {
 		}
 		
 		// Check if user owns this order (unless admin)
-		if (!req.user.isAdmin && order.customerId.toString() !== req.user._id.toString()) {
+		if (!req.user.isAdmin && order.customerId.toString() !== req.user.id.toString()) {
 			return res.status(403).json({ error: 'Access denied' });
 		}
 		
@@ -276,12 +278,110 @@ exports.getOrderStats = async (req, res) => {
 			{ $group: { _id: null, total: { $sum: '$total' } } }
 		]);
 		
+		// Get recent orders
+		const recentOrders = await Order.find()
+			.populate('customerId', 'name email')
+			.populate('items.productId', 'name img')
+			.sort({ createdAt: -1 })
+			.limit(10);
+		
+		// Get monthly revenue
+		const monthlyRevenue = await Order.aggregate([
+			{
+				$match: {
+					status: { $in: ['Delivered', 'Shipped'] },
+					createdAt: { $gte: new Date(Date.now() - 12 * 30 * 24 * 60 * 60 * 1000) }
+				}
+			},
+			{
+				$group: {
+					_id: {
+						year: { $year: '$createdAt' },
+						month: { $month: '$createdAt' }
+					},
+					revenue: { $sum: '$total' },
+					orders: { $sum: 1 }
+				}
+			},
+			{ $sort: { '_id.year': 1, '_id.month': 1 } }
+		]);
+		
 		res.json({
 			statusStats: stats,
 			totalOrders,
-			totalRevenue: totalRevenue[0]?.total || 0
+			totalRevenue: totalRevenue[0]?.total || 0,
+			recentOrders,
+			monthlyRevenue
 		});
 	} catch (err) {
 		res.status(500).json({ error: err.message });
+	}
+};
+
+// Request feedback for delivered orders
+exports.requestFeedback = async (req, res) => {
+	try {
+		const { id } = req.params;
+		
+		const order = await Order.findById(id);
+		if (!order) {
+			return res.status(404).json({ error: 'Order not found' });
+		}
+		
+		if (order.status !== 'Delivered') {
+			return res.status(400).json({ 
+				error: 'Feedback can only be requested for delivered orders' 
+			});
+		}
+		
+		if (order.feedbackRequested) {
+			return res.status(400).json({ 
+				error: 'Feedback already requested for this order' 
+			});
+		}
+		
+		order.feedbackRequested = true;
+		await order.save();
+		
+		// Here you could send notification to customer about feedback request
+		
+		res.json({ message: 'Feedback request sent to customer', order });
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+};
+
+// Bulk update order status
+exports.bulkUpdateOrderStatus = async (req, res) => {
+	try {
+		const { orderIds, status, notes } = req.body;
+		
+		if (!Array.isArray(orderIds) || orderIds.length === 0) {
+			return res.status(400).json({ error: 'Order IDs array is required' });
+		}
+		
+		const updateData = { 
+			status,
+			processedBy: req.user.name || req.user.email,
+			processedAt: new Date()
+		};
+		
+		if (notes) updateData.notes = notes;
+		if (status === 'Delivered') updateData.actualDelivery = new Date();
+		
+		const result = await Order.updateMany(
+			{ _id: { $in: orderIds } },
+			updateData
+		);
+		
+		const updatedOrders = await Order.find({ _id: { $in: orderIds } })
+			.populate('customerId', 'name email');
+		
+		res.json({
+			message: `${result.modifiedCount} orders updated successfully`,
+			updatedOrders
+		});
+	} catch (err) {
+		res.status(400).json({ error: err.message });
 	}
 };

@@ -8,7 +8,7 @@ const userWishlists = new Map();
 // Get user's wishlist
 router.get('/', auth, (req, res) => {
   try {
-    const userId = req.user._id.toString();
+    const userId = req.user.id.toString();
     const wishlist = userWishlists.get(userId) || { items: [], updatedAt: new Date() };
     res.json(wishlist);
   } catch (err) {
@@ -19,7 +19,7 @@ router.get('/', auth, (req, res) => {
 // Save user's wishlist
 router.post('/', auth, (req, res) => {
   try {
-    const userId = req.user._id.toString();
+    const userId = req.user.id.toString();
     const { items } = req.body;
     
     const wishlist = {
@@ -37,7 +37,7 @@ router.post('/', auth, (req, res) => {
 // Clear user's wishlist
 router.delete('/', auth, (req, res) => {
   try {
-    const userId = req.user._id.toString();
+    const userId = req.user.id.toString();
     userWishlists.delete(userId);
     res.json({ message: 'Wishlist cleared successfully' });
   } catch (err) {

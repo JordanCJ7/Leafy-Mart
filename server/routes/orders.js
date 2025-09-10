@@ -20,5 +20,7 @@ router.get('/', authenticateAdmin, orderController.getAllOrders);
 router.get('/stats', authenticateAdmin, orderController.getOrderStats);
 router.put('/:id/status', authenticateAdmin, orderController.updateOrderStatus);
 router.put('/:id/payment', authenticateAdmin, orderController.updatePaymentStatus);
+router.put('/:id/feedback-request', authenticateAdmin, orderController.requestFeedback);
+router.put('/bulk/status', authenticateAdmin, orderController.bulkUpdateOrderStatus);
 
 module.exports = router;

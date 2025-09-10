@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
     checkAuthStatus();
@@ -32,12 +33,14 @@ export const AuthProvider = ({ children }) => {
       
       if (customerToken && customerData) {
         setUser(JSON.parse(customerData));
+        setToken(customerToken);
         setIsLoggedIn(true);
         setIsAdmin(false);
       } else if (adminToken) {
         const response = await verifyAdminToken(adminToken);
         if (response.valid) {
           setUser(response.admin);
+          setToken(adminToken);
           setIsLoggedIn(true);
           setIsAdmin(true);
         } else {
@@ -52,18 +55,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginCustomer = (customerData, token) => {
-    localStorage.setItem('customerToken', token);
+  const loginCustomer = (customerData, tokenValue) => {
+    localStorage.setItem('customerToken', tokenValue);
     localStorage.setItem('customerData', JSON.stringify(customerData));
     setUser(customerData);
+    setToken(tokenValue);
     setIsLoggedIn(true);
     setIsAdmin(false);
   };
 
-  const loginAdmin = (adminData, token) => {
-    localStorage.setItem('adminToken', token);
+  const loginAdmin = (adminData, tokenValue) => {
+    localStorage.setItem('adminToken', tokenValue);
     localStorage.setItem('adminData', JSON.stringify(adminData));
     setUser(adminData);
+    setToken(tokenValue);
     setIsLoggedIn(true);
     setIsAdmin(true);
   };
@@ -74,6 +79,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminData');
     setUser(null);
+    setToken(null);
     setIsLoggedIn(false);
     setIsAdmin(false);
   };
@@ -89,6 +95,7 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
+    token,
     isLoggedIn,
     isAdmin,
     loading,
