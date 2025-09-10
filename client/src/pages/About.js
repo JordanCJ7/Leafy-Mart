@@ -23,7 +23,7 @@ const About = () => {
       }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1rem' }}>
-            About Botanica Hub
+            About Leafy Mart
           </h1>
           <p style={{ fontSize: '1.2rem', opacity: 0.9, maxWidth: '600px', margin: '0 auto' }}>
             Bringing nature closer to Sri Lankan homes with premium plants and expert care guidance
@@ -43,7 +43,7 @@ const About = () => {
                   Our Story
                 </h2>
                 <p style={{ fontSize: '1.1rem', lineHeight: '1.8', color: '#333', marginBottom: '1.5rem' }}>
-                  Founded in 2020 in the heart of Colombo, Botanica Hub began as a small passion project to make 
+                  Founded in 2020 in the heart of Colombo, Leafy Mart began as a small passion project to make 
                   premium plants accessible to every Sri Lankan home. What started as a local plant nursery has 
                   grown into Sri Lanka's leading online plant store.
                 </p>

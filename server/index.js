@@ -15,7 +15,7 @@ app.use(express.json());
 app.use('/api/products', require('./routes/products'));
 
 app.get('/', (req, res) => {
-  res.send('Botanica Hub 🌿 API');
+  res.send('Leafy Mart 🌿 API');
 });
 
 // Connect to MongoDB and start server

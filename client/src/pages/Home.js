@@ -1,34 +1,34 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import products from '../data/products';
+import { useCart } from '../contexts/CartContext';
+import { useWishlist } from '../contexts/WishlistContext';
 import { ShoppingCart, Heart, Tag, Star, Shield, Truck, Leaf, Users, Award, ArrowRight, CheckCircle, Sparkles } from 'lucide-react';
 import './Home.css';
 
 export default function Home() {
 	const navigate = useNavigate();
-	const [cart, setCart] = useState(() => JSON.parse(localStorage.getItem('cart') || '[]'));
-	const [wishlist, setWishlist] = useState(() => JSON.parse(localStorage.getItem('wishlist') || '[]'));
+	const { addToCart, isInCart, getItemQuantity } = useCart();
+	const { toggleWishlistItem, isInWishlist } = useWishlist();
 
 	const categories = useMemo(() => {
 		const setCats = new Set(products.map(p => p.category));
 		return ['All', ...Array.from(setCats)];
 	}, []);
 
-	useEffect(() => { localStorage.setItem('cart', JSON.stringify(cart)); }, [cart]);
-	useEffect(() => { localStorage.setItem('wishlist', JSON.stringify(wishlist)); }, [wishlist]);
-
-	const addToCart = (product) => {
-		setCart(prev => {
-			const exists = prev.find(p => p.id === product.id);
-			if (exists) return prev.map(p => p.id === product.id ? { ...p, qty: p.qty + 1 } : p);
-			return [...prev, { ...product, qty: 1 }];
-		});
+	// Use central context functions for cart/wishlist so state is shared
+	const addToCartLocal = (product) => {
+		addToCart(product);
+		alert(`${product.name} added to cart!`);
 	};
 
-	const toggleWishlist = (id) => {
-		setWishlist(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+	const toggleWishlistLocal = (product) => {
+		// toggleWishlistItem will add or remove and update persistent wishlist
+		toggleWishlistItem(product);
+		const action = isInWishlist(product.id) ? 'removed from' : 'added to';
+		alert(`${product.name} ${action} wishlist!`);
 	};
 
 	return (
@@ -58,7 +58,7 @@ export default function Home() {
 					<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }} className="hero-title">
 						<Sparkles size={32} style={{ marginRight: '12px', color: '#a5d6a7' }} />
 						<h1 style={{ fontSize: '3.5rem', fontWeight: 900, margin: 0, textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
-							Botanica Hub
+							Leafy Mart
 						</h1>
 						<Sparkles size={32} style={{ marginLeft: '12px', color: '#a5d6a7' }} />
 					</div>
@@ -99,14 +99,14 @@ export default function Home() {
 							Learn More
 						</button>
 					</div>
-				</div>
+					</div>
 			</section>
 
 			{/* Features Section */}
 			<section style={{ padding: '4rem 1rem', background: '#fff' }}>
 				<div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
 					<h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#2e7d32', marginBottom: '1rem' }}>
-						Why Choose Botanica Hub?
+						Why Choose Leafy Mart?
 					</h2>
 					<p style={{ color: '#666', fontSize: '1.2rem', marginBottom: '3rem', maxWidth: '600px', margin: '0 auto 3rem' }}>
 						We're committed to bringing you the finest plants with exceptional service
@@ -189,9 +189,9 @@ export default function Home() {
 								onClick={() => navigate('/products')}
 								className="category-card"
 								>
-									{sampleProduct && (
+					{sampleProduct && (
 										<div style={{ height: '200px', overflow: 'hidden' }}>
-											<img src={sampleProduct.img} alt={cat} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s ease' }} />
+						<img src={sampleProduct.img} alt={cat} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s ease' }} />
 										</div>
 									)}
 									<div style={{ padding: '1.5rem' }}>
@@ -232,7 +232,7 @@ export default function Home() {
 						{[
 							{ name: 'Chaminda Perera', text: 'මගේ වෙත ලද plants ගුණාත්මකභාවයෙන් ඉතාමත් සරුයි! Snake plant එක මාස 6කට පසුත් හොඳින් වර්ධනය වෙනවා. Amazing quality!', rating: 5 },
 							{ name: 'Nimesha Fernando', text: 'ඉක්මන් delivery සහ excellent packaging. Highly recommend කරනවා Sri Lankan plant lovers ලට!', rating: 5 },
-							{ name: 'Kasun Jayasinghe', text: 'Plant care guidance එක invaluable! Customer service team එක ඉතාමත් helpful. Thank you Botanica Hub!', rating: 5 }
+							{ name: 'Kasun Jayasinghe', text: 'Plant care guidance එක invaluable! Customer service team එක ඉතාමත් helpful. Thank you Leafy Mart!', rating: 5 }
 						].map((review, i) => (
 							<div key={i} style={{ 
 								background: 'rgba(255,255,255,0.1)', 

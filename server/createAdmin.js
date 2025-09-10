@@ -21,7 +21,7 @@ const createAdminUser = async () => {
         }
         
         // Create admin user
-        const adminEmail = process.env.ADMIN_EMAIL || 'admin@plantstore.com';
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@leafymart.com';
         const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
         
         // Hash password

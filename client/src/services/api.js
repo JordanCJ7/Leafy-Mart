@@ -1,4 +1,4 @@
-// API service for Plant Store Management System
+// API service for Leafy Mart Management System
 const API_BASE = 'http://localhost:5000/api';
 
 // Customer Authentication

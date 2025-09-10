@@ -103,14 +103,14 @@ const Products = () => {
   }, [products, searchTerm, selectedCategory, priceRange, sortBy]);
 
   const handleAddToCart = (product) => {
-    addToCart(product);
-    alert(`${product.name} added to cart!`);
+  addToCart(product);
+  alert(`${product.name} added to cart!`);
   };
 
   const handleToggleWishlist = (product) => {
-    toggleWishlistItem(product);
-    const action = isInWishlist(product.id) ? 'removed from' : 'added to';
-    alert(`${product.name} ${action} wishlist!`);
+  toggleWishlistItem(product);
+  const action = isInWishlist(product.id) ? 'removed from' : 'added to';
+  alert(`${product.name} ${action} wishlist!`);
   };
 
   return (

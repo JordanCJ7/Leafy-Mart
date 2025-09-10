@@ -12,7 +12,7 @@ export const useWishlist = () => {
 };
 
 export const WishlistProvider = ({ children }) => {
-  const [wishlistItems, setWishlistItems] = useLocalStorage('plantStoreWishlist', []);
+  const [wishlistItems, setWishlistItems] = useLocalStorage('leafyMartWishlist', []);
 
   const addToWishlist = (product) => {
     setWishlistItems(prevItems => {

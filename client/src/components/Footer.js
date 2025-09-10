@@ -20,9 +20,9 @@ const Footer = () => {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
               <Leaf size={24} color="#43a047" style={{ marginRight: '0.5rem' }} />
-              <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#2e7d32', margin: 0 }}>
-                Botanica Hub
-              </h3>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#2e7d32', margin: 0 }}>
+                    Leafy Mart
+                  </h3>
             </div>
             <p style={{ 
               fontSize: '0.95rem', 
@@ -42,7 +42,7 @@ const Footer = () => {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
                 <Mail size={16} color="#43a047" style={{ marginRight: '0.5rem' }} />
-                <span style={{ fontSize: '0.9rem', color: '#555' }}>info@botanicahub.lk</span>
+                    <span style={{ fontSize: '0.9rem', color: '#555' }}>info@leafymart.lk</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <MapPin size={16} color="#43a047" style={{ marginRight: '0.5rem' }} />
@@ -280,7 +280,7 @@ const Footer = () => {
             color: '#666', 
             fontSize: '0.9rem' 
           }}>
-            &copy; {new Date().getFullYear()} Botanica Hub 🌿. All rights reserved.
+                &copy; {new Date().getFullYear()} Leafy Mart 🌿. All rights reserved.
           </p>
           
           <div style={{ 

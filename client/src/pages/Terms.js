@@ -51,7 +51,7 @@ const Terms = () => {
               1. Agreement to Terms
             </h2>
             <p style={{ fontSize: '1.1rem', lineHeight: '1.8', color: '#333', marginBottom: '1.5rem' }}>
-              By accessing and using the Botanica Hub website and services, you accept and agree to be bound by 
+              By accessing and using the Leafy Mart website and services, you accept and agree to be bound by 
               the terms and provision of this agreement. If you do not agree to abide by the above, please do 
               not use this service.
             </p>
@@ -76,7 +76,7 @@ const Terms = () => {
             </div>
             
             <p style={{ fontSize: '1rem', lineHeight: '1.8', color: '#333', marginBottom: '1.5rem' }}>
-              Permission is granted to temporarily download one copy of the materials on Botanica Hub's website 
+              Permission is granted to temporarily download one copy of the materials on Leafy Mart's website 
               for personal, non-commercial transitory viewing only.
             </p>
             
@@ -255,7 +255,7 @@ const Terms = () => {
                 Plant Care Responsibility
               </h3>
               <p style={{ fontSize: '1rem', lineHeight: '1.8', color: '#333', marginBottom: '1rem' }}>
-                By purchasing plants from Botanica Hub, you acknowledge that:
+                By purchasing plants from Leafy Mart, you acknowledge that:
               </p>
               <ul style={{ fontSize: '1rem', lineHeight: '1.8', color: '#333', paddingLeft: '1.5rem' }}>
                 <li>Plants are living organisms that require proper care</li>
@@ -324,7 +324,7 @@ const Terms = () => {
             </h2>
             
             <p style={{ fontSize: '1rem', lineHeight: '1.8', color: '#333', marginBottom: '1.5rem' }}>
-              In no event shall Botanica Hub, nor its directors, employees, partners, agents, suppliers, or affiliates, 
+              In no event shall Leafy Mart, nor its directors, employees, partners, agents, suppliers, or affiliates, 
               be liable for any indirect, incidental, special, consequential, or punitive damages, including without 
               limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your use 
               of the service.
@@ -394,7 +394,7 @@ const Terms = () => {
             
             <div style={{ fontSize: '1rem', marginBottom: '2rem' }}>
               <p style={{ marginBottom: '0.5rem' }}>
-                <strong>Email:</strong> legal@botanicahub.lk
+                <strong>Email:</strong> legal@leafymart.lk
               </p>
               <p style={{ marginBottom: '0.5rem' }}>
                 <strong>Phone:</strong> +94 77 123 4567

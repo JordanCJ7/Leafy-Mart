@@ -1,19 +1,84 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import products from '../data/products';
+import { getProductById } from '../services/api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { ShoppingCart, Heart, Tag } from 'lucide-react';
+import { useCart } from '../contexts/CartContext';
+import { useWishlist } from '../contexts/WishlistContext';
+import { ShoppingCart, Heart, Tag, ArrowLeft } from 'lucide-react';
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const product = products.find(p => p.id === id);
-  // Hooks must be called unconditionally. Initialize cart and wishlist
-  const [cart, setCart] = useState(() => JSON.parse(localStorage.getItem('cart') || '[]'));
-  const [wishlist, setWishlist] = useState(() => JSON.parse(localStorage.getItem('wishlist') || '[]'));
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => { localStorage.setItem('cart', JSON.stringify(cart)); }, [cart]);
-  useEffect(() => { localStorage.setItem('wishlist', JSON.stringify(wishlist)); }, [wishlist]);
+  // Use contexts for cart and wishlist functionality
+  const { addToCart, isInCart, getItemQuantity } = useCart();
+  const { toggleWishlistItem, isInWishlist } = useWishlist();
+  
+  // Local state for feedback messages
+  const [addedToCart, setAddedToCart] = useState(false);
+  const [toggledWishlist, setToggledWishlist] = useState(false);
+
+  // Effect for feedback messages
+  useEffect(() => {
+    if (addedToCart) {
+      const timer = setTimeout(() => setAddedToCart(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [addedToCart]);
+
+  useEffect(() => {
+    if (toggledWishlist) {
+      const timer = setTimeout(() => setToggledWishlist(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [toggledWishlist]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const local = products.find(p => p.id === id);
+    if (local) {
+      setProduct(local);
+      setLoading(false);
+      return () => { mounted = false; };
+    }
+
+    // If not in local catalogue, try fetching from API
+    (async () => {
+      try {
+        setLoading(true);
+        const res = await getProductById(id);
+        if (!mounted) return;
+        if (res && !res.error) {
+          setProduct(res);
+        } else {
+          setProduct(null);
+        }
+      } catch (err) {
+        console.error('Error fetching product:', err);
+        if (mounted) setProduct(null);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+
+    return () => { mounted = false; };
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh' }}>
+        <Navbar />
+        <main style={{ padding: '4rem 1rem', textAlign: 'center' }}>
+          <h2>Loading product…</h2>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -22,54 +87,249 @@ export default function ProductDetail() {
         <main style={{ padding: '4rem 1rem', textAlign: 'center' }}>
           <h2>Product not found</h2>
           <p>The product you are looking for does not exist.</p>
-          <Link to="/">Go back home</Link>
+          <Link to="/products" style={{ color: '#43a047', textDecoration: 'none' }}>
+            ← Back to Products
+          </Link>
         </main>
         <Footer />
       </div>
     );
   }
 
-  const addToCart = (product) => {
-    setCart(prev => {
-      const exists = prev.find(p => p.id === product.id);
-      if (exists) return prev.map(p => p.id === product.id ? { ...p, qty: p.qty + 1 } : p);
-      return [...prev, { ...product, qty: 1 }];
-    });
+  const handleAddToCart = () => {
+    addToCart(product);
+    setAddedToCart(true);
   };
 
-  const toggleWishlist = (id) => {
-    setWishlist(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  const handleToggleWishlist = () => {
+    toggleWishlistItem(product);
+    setToggledWishlist(true);
   };
 
-  const inWishlist = product ? wishlist.includes(product.id) : false;
+  const inWishlist = isInWishlist(product.id);
+  const itemQuantity = getItemQuantity(product.id);
 
   return (
     <div style={{ background: '#f1faee', minHeight: '100vh', fontFamily: 'Segoe UI, Arial, sans-serif', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
-      <main style={{ maxWidth: 900, margin: '2rem auto', padding: '1rem' }}>
-        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
-          <div style={{ flex: '1 1 50%' }}>
-            <img src={product.img} alt={product.name} style={{ width: '100%', borderRadius: 12, border: '1px solid #e0e0e0' }} />
+      {/* Feedback Messages */}
+      {addedToCart && (
+        <div style={{
+          position: 'fixed', 
+          top: '80px', 
+          right: '20px', 
+          background: '#4caf50', 
+          color: 'white', 
+          padding: '12px 20px', 
+          borderRadius: '8px', 
+          zIndex: 1000,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}>
+          ✓ Added to cart!
+        </div>
+      )}
+      {toggledWishlist && (
+        <div style={{
+          position: 'fixed', 
+          top: '80px', 
+          right: '20px', 
+          background: inWishlist ? '#e91e63' : '#ff9800', 
+          color: 'white', 
+          padding: '12px 20px', 
+          borderRadius: '8px', 
+          zIndex: 1000,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+        }}>
+          {inWishlist ? '♥ Added to wishlist!' : '♡ Removed from wishlist!'}
+        </div>
+      )}
+      <main style={{ maxWidth: 1000, margin: '2rem auto', padding: '1rem' }}>
+        {/* Back navigation */}
+        <Link 
+          to="/products" 
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            color: '#2e7d32',
+            textDecoration: 'none',
+            marginBottom: '2rem',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            background: 'white',
+            border: '1px solid #e0e0e0',
+            transition: 'all 0.2s'
+          }}
+        >
+          <ArrowLeft size={18} />
+          Back to Products
+        </Link>
+        
+        <div style={{ display: 'flex', gap: 32, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 400px', minWidth: '300px' }}>
+            <img 
+              src={product.img || product.image || product.imageUrl || '/images/defaultplant.png'} 
+              alt={product.name} 
+              style={{ 
+                width: '100%', 
+                maxWidth: '500px',
+                borderRadius: 16, 
+                border: '1px solid #e0e0e0',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.1)'
+              }} 
+            />
           </div>
-          <div style={{ flex: '1 1 50%' }}>
-            <h1 style={{ color: '#2e7d32' }}>{product.name}</h1>
-            <div style={{ color: '#43a047', fontWeight: 700, fontSize: '1.25rem', marginBottom: 12 }}>{product.priceDisplay}</div>
-            <div style={{ marginBottom: 12 }}>{product.category} · {product.tags.join(', ')}</div>
-            <div style={{ marginBottom: 12 }}>{product.desc}</div>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 12 }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 20, background: product.stock>0? '#e8f5e9' : '#fff0f0' }}>
-                <Tag size={16} color={product.stock>0? '#2e7d32' : '#d32f2f'} />
-                <span style={{ color: product.stock>0? '#2e7d32' : '#d32f2f', fontWeight: 700 }}>{product.stock}</span>
-              </div>
-              <button onClick={() => toggleWishlist(product.id)} style={{ background: inWishlist? '#ffdcd2' : '#fff', border: '1px solid #e0e0e0', padding: 8, borderRadius: 8, cursor: 'pointer' }} title="Toggle wishlist">
-                <Heart size={18} color={inWishlist? '#d32f2f' : '#388e3c'} />
-              </button>
+          <div style={{ flex: '1 1 400px', minWidth: '300px' }}>
+            <h1 style={{ color: '#2e7d32', marginBottom: '1rem', fontSize: '2rem' }}>{product.name}</h1>
+            
+            <div style={{ 
+              color: '#43a047', 
+              fontWeight: 'bold', 
+              fontSize: '1.5rem', 
+              marginBottom: '1rem',
+              padding: '8px 12px',
+              background: '#e8f5e9',
+              borderRadius: '8px',
+              display: 'inline-block'
+            }}>
+              {product.priceDisplay}
             </div>
-            <div style={{ display: 'flex', gap: 12 }}>
-              <button onClick={() => addToCart(product)} disabled={product.stock<=0} style={{ padding: '0.75rem 1rem', background: product.stock>0? '#43a047' : '#bdbdbd', color: '#fff', border: 'none', borderRadius: 8, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                <ShoppingCart size={16} /> Add to Cart
+            
+            <div style={{ 
+              marginBottom: '1rem', 
+              color: '#666',
+              fontSize: '1rem'
+            }}>
+              <strong>Category:</strong> {product.category}
+            </div>
+            
+            <div style={{ 
+              marginBottom: '1rem',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '6px'
+            }}>
+              {(product.tags || product.tags === undefined) && (product.tags || []).map(tag => (
+                <span key={tag} style={{
+                  background: '#f0f0f0',
+                  color: '#555',
+                  padding: '4px 8px',
+                  borderRadius: '12px',
+                  fontSize: '0.85rem'
+                }}>
+                  #{tag}
+                </span>
+              ))}
+            </div>
+            
+            <div style={{ 
+              marginBottom: '1.5rem',
+              padding: '16px',
+              background: 'white',
+              borderRadius: '8px',
+              border: '1px solid #e0e0e0'
+            }}>
+              <p style={{ margin: 0, lineHeight: '1.6', color: '#444' }}>{product.desc}</p>
+            </div>
+            
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: '1.5rem' }}>
+              <div style={{ 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                gap: 8, 
+                padding: '8px 12px', 
+                borderRadius: 20, 
+                background: product.stock > 0 ? '#e8f5e9' : '#fff0f0',
+                border: `1px solid ${product.stock > 0 ? '#c8e6c9' : '#ffcdd2'}`
+              }}>
+                <Tag size={16} color={product.stock > 0 ? '#2e7d32' : '#d32f2f'} />
+                <span style={{ 
+                  color: product.stock > 0 ? '#2e7d32' : '#d32f2f', 
+                  fontWeight: 'bold' 
+                }}>
+                  {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+                </span>
+              </div>
+              
+              {itemQuantity > 0 && (
+                <div style={{
+                  background: '#e3f2fd',
+                  color: '#1976d2',
+                  padding: '6px 12px',
+                  borderRadius: '20px',
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold'
+                }}>
+                  {itemQuantity} in cart
+                </div>
+              )}
+            </div>
+            
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <button 
+                onClick={handleAddToCart}
+                disabled={product.stock <= 0}
+                style={{ 
+                  padding: '12px 24px',
+                  background: product.stock > 0 ? '#43a047' : '#bdbdbd',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontWeight: 'bold',
+                  fontSize: '1rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  cursor: product.stock > 0 ? 'pointer' : 'not-allowed',
+                  transition: 'all 0.2s',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}
+                onMouseOver={(e) => {
+                  if (product.stock > 0) {
+                    e.target.style.background = '#388e3c';
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (product.stock > 0) {
+                    e.target.style.background = '#43a047';
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                  }
+                }}
+              >
+                <ShoppingCart size={18} />
+                {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
               </button>
-              <Link to="/" style={{ padding: '0.75rem 1rem', background: '#e0e0e0', color: '#2e7d32', borderRadius: 8, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Back</Link>
+              
+              <button 
+                onClick={handleToggleWishlist}
+                style={{ 
+                  padding: '12px',
+                  background: inWishlist ? '#ffebee' : 'white',
+                  border: `2px solid ${inWishlist ? '#e91e63' : '#e0e0e0'}`,
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s'
+                }} 
+                title={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'scale(1.1)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'scale(1)';
+                }}
+              >
+                <Heart 
+                  size={20} 
+                  color={inWishlist ? '#e91e63' : '#888'}
+                  fill={inWishlist ? '#e91e63' : 'none'}
+                />
+              </button>
             </div>
           </div>
         </div>

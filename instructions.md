@@ -1,4 +1,4 @@
-# Botanica Hub 🌿 - Comprehensive Development Guidelines
+# Leafy Mart 🌿 - Comprehensive Development Guidelines
 
 ## Table of Contents
 1. [Project Overview & Progress Assessment](#project-overview--progress-assessment)
@@ -17,7 +17,7 @@
 ## Project Overview & Progress Assessment
 
 ### System Identity
-**Name:** Botanica Hub 🌿 (Smart Plant Store Management System)
+**Name:** Leafy Mart 🌿 (Smart Plant Store Management System)
 **Tagline:** "Growing Your Green Dreams"
 **Vision:** Modernize plant store operations through digital transformation
 
@@ -53,7 +53,7 @@ Based on codebase analysis, the following components are **IMPLEMENTED**:
 ## Design System & Theme Guide
 
 ### Color Palette 🎨
-The Botanica Hub follows a nature-inspired color scheme that reflects growth, freshness, and sustainability:
+The Leafy Mart follows a nature-inspired color scheme that reflects growth, freshness, and sustainability:
 
 #### Primary Colors
 ```css
@@ -721,10 +721,10 @@ CORS_ORIGIN=http://localhost:3000
 # Server Production Environment
 NODE_ENV=production
 PORT=5000
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/botanica_hub_prod
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/leafymart_prod
 JWT_SECRET=super_secure_production_secret_key
 JWT_EXPIRES_IN=7d
-CORS_ORIGIN=https://botanicahub.com
+CORS_ORIGIN=https://leafymart.com
 ```
 
 ### Deployment Pipeline
@@ -856,7 +856,7 @@ const errorHandler = (err, req, res, next) => {
 
 ## Conclusion
 
-This comprehensive guideline provides the roadmap for completing the Botanica Hub project. The system is well-architected with a solid foundation in place. The next critical steps are implementing the three priority features:
+This comprehensive guideline provides the roadmap for completing the Leafy Mart project. The system is well-architected with a solid foundation in place. The next critical steps are implementing the three priority features:
 
 1. **Inventory & Product Management**: Complete admin CRUD operations
 2. **User Profile + Wishlist Management**: Enhanced customer experience

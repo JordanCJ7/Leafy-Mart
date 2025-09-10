@@ -3,11 +3,11 @@
 applyTo: '**'
 ---
 
-# Botanica Hub 🌿 - Smart Plant Store Management System
+# Leafy Mart 🌿 - Smart Plant Store Management System
 ## AI Development Guidelines & Context
 
 ### Project Overview
-**System Name:** Botanica Hub (SPSMS - Smart Plant Store Management System)
+**System Name:** Leafy Mart (SPSMS - Smart Plant Store Management System)
 **Vision:** Modernize plant store operations through digital transformation
 **Tech Stack:** MERN (MongoDB, Express.js, React 19.1.1, Node.js)
 **Target Market:** Sri Lankan plant stores and customers

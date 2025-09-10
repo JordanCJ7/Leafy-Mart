@@ -51,7 +51,7 @@ const Privacy = () => {
               Introduction
             </h2>
             <p style={{ fontSize: '1.1rem', lineHeight: '1.8', color: '#333', marginBottom: '1.5rem' }}>
-              At Botanica Hub, we respect your privacy and are committed to protecting your personal data. 
+              At Leafy Mart, we respect your privacy and are committed to protecting your personal data. 
               This privacy policy explains how we collect, use, disclose, and safeguard your information 
               when you visit our website or use our services.
             </p>
@@ -151,7 +151,7 @@ const Privacy = () => {
               <li><strong>Service Providers:</strong> Trusted third-party companies that help us operate our business (payment processors, shipping companies, email service providers)</li>
               <li><strong>Legal Requirements:</strong> When required by law, court order, or government request</li>
               <li><strong>Business Transfers:</strong> In connection with a merger, acquisition, or sale of business assets</li>
-              <li><strong>Safety and Security:</strong> To protect the rights, property, or safety of Botanica Hub, our users, or others</li>
+              <li><strong>Safety and Security:</strong> To protect the rights, property, or safety of Leafy Mart, our users, or others</li>
             </ul>
           </section>
 
@@ -216,7 +216,7 @@ const Privacy = () => {
               border: '2px solid #e9ecef'
             }}>
               <p style={{ fontSize: '1rem', color: '#333', margin: 0 }}>
-                <strong>To exercise these rights, contact us at:</strong> privacy@botanicahub.lk or +94 77 123 4567
+                <strong>To exercise these rights, contact us at:</strong> privacy@leafymart.lk or +94 77 123 4567
               </p>
             </div>
           </section>
@@ -359,7 +359,7 @@ const Privacy = () => {
             
             <div style={{ fontSize: '1rem', marginBottom: '2rem' }}>
               <p style={{ marginBottom: '0.5rem' }}>
-                <strong>Email:</strong> privacy@botanicahub.lk
+                <strong>Email:</strong> privacy@leafymart.lk
               </p>
               <p style={{ marginBottom: '0.5rem' }}>
                 <strong>Phone:</strong> +94 77 123 4567

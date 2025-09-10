@@ -108,7 +108,7 @@ const Contact = () => {
                   Email Us
                 </h3>
                 <p style={{ fontSize: '1.1rem', color: '#333', marginBottom: '0.5rem' }}>
-                  info@botanicahub.lk
+                  info@leafymart.lk
                 </p>
                 <p style={{ fontSize: '1rem', color: '#666' }}>
                   We respond within 24 hours

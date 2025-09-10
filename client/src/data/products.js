@@ -76,7 +76,7 @@ const products = [
     tags: ['statement', 'low-light', 'indoors'],
     stock: 8,
     desc: 'Glossy large leaves make this a statement indoor plant; tolerates moderate light and rewards occasional pruning.',
-    img: '/images/moneyplant.png'
+    img: '/images/defaultplant.png'
   },
   {
     id: 'zz-plant',
@@ -98,7 +98,7 @@ const products = [
     tags: ['easy-care', 'air-purifying', 'kids-friendly'],
     stock: 30,
     desc: 'Classic hanging plant with arching leaves and baby plantlets — forgiving and great for beginners.',
-    img: '/images/moneyplant.png'
+    img: '/images/defaultplant.png'
   },
   {
     id: 'fiddle-leaf-fig',
@@ -120,7 +120,7 @@ const products = [
     tags: ['medicinal', 'drought-tolerant', 'sun-loving'],
     stock: 26,
     desc: 'Low-maintenance succulent valued for its soothing gel — prefers bright light and sparse watering.',
-    img: '/images/Tulsi.png'
+    img: '/images/tulsi.png'
   }
   ,
   {

@@ -12,7 +12,7 @@ export const useCart = () => {
 };
 
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useLocalStorage('plantStoreCart', []);
+  const [cartItems, setCartItems] = useLocalStorage('leafyMartCart', []);
 
   const addToCart = (product, quantity = 1) => {
     setCartItems(prevItems => {

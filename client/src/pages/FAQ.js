@@ -106,7 +106,7 @@ const FAQ = () => {
         },
         {
           question: 'How can I contact customer support?',
-          answer: 'You can reach us via WhatsApp (+94 77 123 4567), email (info@botanicahub.lk), or phone during business hours (8 AM - 6 PM, Mon-Sat).'
+          answer: 'You can reach us via WhatsApp (+94 77 123 4567), email (info@leafymart.lk), or phone during business hours (8 AM - 6 PM, Mon-Sat).'
         },
         {
           question: 'Can I cancel or modify my order?',

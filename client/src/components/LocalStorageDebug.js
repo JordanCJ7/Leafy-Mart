@@ -25,8 +25,8 @@ const LocalStorageDebug = () => {
   };
 
   const checkLocalStorage = () => {
-    const cart = localStorage.getItem('plantStoreCart');
-    const wishlist = localStorage.getItem('plantStoreWishlist');
+  const cart = localStorage.getItem('leafyMartCart');
+  const wishlist = localStorage.getItem('leafyMartWishlist');
     
     console.log('LocalStorage Cart:', cart ? JSON.parse(cart) : 'empty');
     console.log('LocalStorage Wishlist:', wishlist ? JSON.parse(wishlist) : 'empty');

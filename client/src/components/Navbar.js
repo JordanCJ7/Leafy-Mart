@@ -27,7 +27,7 @@ function Navbar() {
       <div className="navbar-container">
   <Link to={isAdmin ? "/admin/dashboard" : "/"} className="navbar-logo">
           <Leaf className="navbar-icon" />
-          <span>Green Paradise</span>
+          <span>Leafy Mart </span>
         </Link>
 
   <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
