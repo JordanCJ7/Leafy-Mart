@@ -107,7 +107,7 @@ export default function OrderManagement() {
 
   const handleSelectAll = (checked) => {
     if (checked) {
-      setSelectedOrders(orders.map(order => order._id));
+      setSelectedOrders((orders || []).map(order => order._id));
     } else {
       setSelectedOrders([]);
     }
@@ -177,7 +177,12 @@ export default function OrderManagement() {
     }
   };
 
-  const formatCurrency = (amount) => `LKR ${amount.toLocaleString()}`;
+  const formatCurrency = (amount) => {
+    // Guard against undefined/null/non-number values
+    const n = Number(amount);
+    if (!Number.isFinite(n)) return 'LKR 0';
+    return `LKR ${n.toLocaleString()}`;
+  };
 
   if (loading && !orders.length) {
     return (
@@ -225,7 +230,7 @@ export default function OrderManagement() {
               </p>
             </div>
             
-            {stats.statusStats.map(stat => (
+            {(stats?.statusStats || []).map(stat => (
               <div key={stat._id} style={{
                 background: 'white',
                 padding: '1rem',
@@ -380,7 +385,7 @@ export default function OrderManagement() {
               </tr>
             </thead>
             <tbody>
-              {orders.map(order => (
+              {(orders || []).map(order => (
                 <tr key={order._id} style={{ borderBottom: '1px solid #dee2e6' }}>
                   <td style={{ padding: '1rem' }}>
                     <input

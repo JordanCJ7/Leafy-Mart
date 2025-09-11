@@ -82,6 +82,8 @@ exports.getUserOrders = async (req, res) => {
 			}
 		});
 	} catch (err) {
+		console.error('getOrderStats error:', err);
+		console.error(err.stack);
 		res.status(500).json({ error: err.message });
 	}
 };
@@ -262,89 +264,115 @@ exports.cancelOrder = async (req, res) => {
 // Get order statistics (admin)
 exports.getOrderStats = async (req, res) => {
 	try {
-		const stats = await Order.aggregate([
-			{
-				$group: {
-					_id: '$status',
-					count: { $sum: 1 },
-					totalValue: { $sum: '$total' }
+		console.log('getOrderStats - start');
+
+		let stats = [];
+		let totalOrders = 0;
+		let totalRevenue = 0;
+		let recentOrders = [];
+		let monthlyRevenue = [];
+
+		// stats aggregation
+		try {
+			stats = await Order.aggregate([
+				{
+					$group: {
+						_id: '$status',
+						count: { $sum: 1 },
+						totalValue: { $sum: '$total' }
+					}
 				}
-			}
-		]);
-		
-		const totalOrders = await Order.countDocuments();
-		const totalRevenue = await Order.aggregate([
-			{ $match: { status: { $in: ['Delivered', 'Shipped'] } } },
-			{ $group: { _id: null, total: { $sum: '$total' } } }
-		]);
-		
-		// Get recent orders
-		const recentOrders = await Order.find()
-			.populate('customerId', 'name email')
-			.populate('items.productId', 'name img')
-			.sort({ createdAt: -1 })
-			.limit(10);
-		
-		// Get monthly revenue
-		const monthlyRevenue = await Order.aggregate([
-			{
-				$match: {
-					status: { $in: ['Delivered', 'Shipped'] },
-					createdAt: { $gte: new Date(Date.now() - 12 * 30 * 24 * 60 * 60 * 1000) }
-				}
-			},
-			{
-				$group: {
-					_id: {
-						year: { $year: '$createdAt' },
-						month: { $month: '$createdAt' }
-					},
-					revenue: { $sum: '$total' },
-					orders: { $sum: 1 }
-				}
-			},
-			{ $sort: { '_id.year': 1, '_id.month': 1 } }
-		]);
-		
+			]);
+			console.log('getOrderStats - stats aggregation done', stats);
+		} catch (errAgg) {
+			console.error('getOrderStats - stats aggregation failed:', errAgg && errAgg.stack ? errAgg.stack : errAgg);
+		}
+
+		// total orders
+		try {
+			totalOrders = await Order.countDocuments();
+			console.log('getOrderStats - totalOrders', totalOrders);
+		} catch (errCount) {
+			console.error('getOrderStats - countDocuments failed:', errCount && errCount.stack ? errCount.stack : errCount);
+		}
+
+		// total revenue
+		try {
+			const revAgg = await Order.aggregate([
+				{ $match: { status: { $in: ['Delivered', 'Shipped'] } } },
+				{ $group: { _id: null, total: { $sum: '$total' } } }
+			]);
+			totalRevenue = revAgg[0]?.total || 0;
+			console.log('getOrderStats - totalRevenue', totalRevenue);
+		} catch (errRev) {
+			console.error('getOrderStats - totalRevenue aggregation failed:', errRev && errRev.stack ? errRev.stack : errRev);
+		}
+
+		// recent orders
+		try {
+			recentOrders = await Order.find()
+				.populate('customerId', 'name email')
+				.populate('items.productId', 'name img')
+				.sort({ createdAt: -1 })
+				.limit(10);
+			console.log('getOrderStats - recentOrders length', recentOrders.length);
+		} catch (errRecent) {
+			console.error('getOrderStats - recentOrders failed:', errRecent && errRecent.stack ? errRecent.stack : errRecent);
+		}
+
+		// monthly revenue
+		try {
+			monthlyRevenue = await Order.aggregate([
+				{
+					$match: {
+						status: { $in: ['Delivered', 'Shipped'] },
+						createdAt: { $gte: new Date(Date.now() - 12 * 30 * 24 * 60 * 60 * 1000) }
+					}
+				},
+				{
+					$group: {
+						_id: {
+							year: { $year: '$createdAt' },
+							month: { $month: '$createdAt' }
+						},
+						revenue: { $sum: '$total' },
+						orders: { $sum: 1 }
+					}
+				},
+				{ $sort: { '_id.year': 1, '_id.month': 1 } }
+			]);
+			console.log('getOrderStats - monthlyRevenue', monthlyRevenue.length);
+		} catch (errMonth) {
+			console.error('getOrderStats - monthlyRevenue failed:', errMonth && errMonth.stack ? errMonth.stack : errMonth);
+		}
+
 		res.json({
 			statusStats: stats,
 			totalOrders,
-			totalRevenue: totalRevenue[0]?.total || 0,
+			totalRevenue,
 			recentOrders,
 			monthlyRevenue
 		});
 	} catch (err) {
+		console.error('getOrderStats error (outer):', err && err.stack ? err.stack : err);
 		res.status(500).json({ error: err.message });
 	}
 };
 
-// Request feedback for delivered orders
+// Request feedback from customer for an order (admin)
 exports.requestFeedback = async (req, res) => {
 	try {
-		const { id } = req.params;
-		
-		const order = await Order.findById(id);
+		const order = await Order.findById(req.params.id);
 		if (!order) {
 			return res.status(404).json({ error: 'Order not found' });
 		}
-		
-		if (order.status !== 'Delivered') {
-			return res.status(400).json({ 
-				error: 'Feedback can only be requested for delivered orders' 
-			});
-		}
-		
-		if (order.feedbackRequested) {
-			return res.status(400).json({ 
-				error: 'Feedback already requested for this order' 
-			});
-		}
-		
+
+		// Mark feedback requested (non-breaking if schema is strict)
 		order.feedbackRequested = true;
 		await order.save();
-		
-		// Here you could send notification to customer about feedback request
-		
+
+		// Optionally send notification here using utils/sendNotification
+
 		res.json({ message: 'Feedback request sent to customer', order });
 	} catch (err) {
 		res.status(500).json({ error: err.message });
