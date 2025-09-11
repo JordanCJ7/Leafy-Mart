@@ -98,3 +98,23 @@ exports.getProductOptions = async (req, res) => {
 		res.status(500).json({ error: err.message });
 	}
 };
+
+// Upload product image
+exports.uploadImage = async (req, res) => {
+	try {
+		if (!req.file) {
+			return res.status(400).json({ error: 'No image file uploaded' });
+		}
+
+		// Generate the URL for accessing the uploaded file
+		const imageUrl = `/uploads/${req.file.filename}`;
+		
+		res.json({ 
+			message: 'Image uploaded successfully',
+			imageUrl,
+			filename: req.file.filename
+		});
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+};

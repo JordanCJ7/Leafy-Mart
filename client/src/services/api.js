@@ -260,6 +260,49 @@ export async function getProductById(id) {
 	return res.json();
 }
 
+// Upload product image
+export async function uploadProductImage(imageFile, token) {
+	const formData = new FormData();
+	// If imageFile is a Blob (no name), provide a filename derived from its MIME type so multer's fileFilter
+	// can validate the extension. If the file has a name (File object), preserve it.
+	let filename = undefined;
+	if (imageFile && typeof imageFile === 'object' && 'name' in imageFile && imageFile.name) {
+		filename = imageFile.name;
+	} else if (imageFile && imageFile.type) {
+		// map common mime types to extensions
+		switch (imageFile.type) {
+			case 'image/jpeg':
+				filename = `upload.jpg`;
+				break;
+			case 'image/png':
+				filename = `upload.png`;
+				break;
+			case 'image/gif':
+				filename = `upload.gif`;
+				break;
+			case 'image/webp':
+				filename = `upload.webp`;
+				break;
+			default:
+				filename = `upload`;
+		}
+	}
+	if (filename) {
+		formData.append('image', imageFile, filename);
+	} else {
+		formData.append('image', imageFile);
+	}
+	
+	const res = await fetch(`${API_BASE}/products/upload`, {
+		method: 'POST',
+		headers: {
+			'Authorization': `Bearer ${token}`
+		},
+		body: formData
+	});
+	return res.json();
+}
+
 // Order Management
 export async function createOrder(orderData, token) {
 	const res = await fetch(`${API_BASE}/orders`, {
