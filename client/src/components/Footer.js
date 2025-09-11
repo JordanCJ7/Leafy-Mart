@@ -156,16 +156,6 @@ const Footer = () => {
               onMouseOut={(e) => e.target.style.color = '#555'}>
                 Order Tracking
               </Link>
-              <Link to="/admin/login" style={{ 
-                color: '#555', 
-                textDecoration: 'none', 
-                fontSize: '0.95rem',
-                transition: 'color 0.2s ease'
-              }}
-              onMouseOver={(e) => e.target.style.color = '#43a047'}
-              onMouseOut={(e) => e.target.style.color = '#555'}>
-                Admin Login
-              </Link>
             </div>
           </div>
 
