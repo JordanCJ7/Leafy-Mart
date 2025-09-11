@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import LocalStorageDebug from '../components/LocalStorageDebug';
 import { getAllProducts } from '../services/api';
 import { useCart } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
@@ -126,8 +125,6 @@ const Products = () => {
       </div>
 
       <div className="products-container">
-        {/* Debug Component for LocalStorage Testing */}
-        <LocalStorageDebug />
         
         {/* Filters and Search */}
         <div className="products-controls">
@@ -305,8 +302,7 @@ const Products = () => {
         </div>
       </div>
 
-      <Footer />
-      <LocalStorageDebug />
+  <Footer />
     </div>
   );
 };

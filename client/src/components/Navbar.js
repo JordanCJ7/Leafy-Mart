@@ -25,13 +25,61 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-  <Link to={isAdmin ? "/admin/dashboard" : "/"} className="navbar-logo">
-          <Leaf className="navbar-icon" />
-          <span>Leafy Mart </span>
-        </Link>
+  {/* Logo: for admins force a full reload to /admin/dashboard; for others go to home */}
+  <a
+    href={isAdmin ? '/admin/dashboard' : '/'}
+    className="navbar-logo"
+    onClick={(e) => {
+      if (isAdmin) {
+        // Force full navigation+reload to admin dashboard even if already on an admin tab
+        e.preventDefault();
+        window.location.href = '/admin/dashboard';
+      } else {
+        // For normal customers always navigate to landing page (force reload)
+        e.preventDefault();
+        window.location.href = '/';
+      }
+    }}
+  >
+    <Leaf className="navbar-icon" />
+    <span>Leafy Mart </span>
+  </a>
 
   <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
           
+          {isAdmin && (
+            <>
+              <Link
+                to="/admin/dashboard?tab=users"
+                className={`navbar-item ${location.pathname.startsWith('/admin') && new URLSearchParams(location.search).get('tab') === 'users' ? 'active' : ''}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                User Management
+              </Link>
+              <Link
+                to="/admin/dashboard?tab=products"
+                className={`navbar-item ${location.pathname.startsWith('/admin') && new URLSearchParams(location.search).get('tab') === 'products' ? 'active' : ''}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Product Management
+              </Link>
+              <Link
+                to="/admin/dashboard?tab=orders"
+                className={`navbar-item ${location.pathname.startsWith('/admin') && new URLSearchParams(location.search).get('tab') === 'orders' ? 'active' : ''}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Order Management
+              </Link>
+              <Link
+                to="/admin/dashboard?tab=feedback"
+                className={`navbar-item ${location.pathname.startsWith('/admin') && new URLSearchParams(location.search).get('tab') === 'feedback' ? 'active' : ''}`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Feedback Management
+              </Link>
+            </>
+          )}
+
           {isLoggedIn && !isAdmin && (
             <>
               <Link 

@@ -5,7 +5,7 @@ const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
   desc: { type: String, required: true },
   priceLKR: { type: Number, required: true },
-  priceDisplay: { type: String, required: true },
+  priceDisplay: { type: String },
   category: { 
     type: String, 
     required: true,
@@ -21,8 +21,8 @@ const productSchema = new mongoose.Schema({
   supplier: { type: String }
 }, { timestamps: true });
 
-// Auto-generate priceDisplay before saving
-productSchema.pre('save', function(next) {
+// Auto-generate priceDisplay before validation so required validation passes
+productSchema.pre('validate', function(next) {
   if (this.priceLKR) {
     this.priceDisplay = `LKR ${this.priceLKR.toLocaleString()}`;
   }

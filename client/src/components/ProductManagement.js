@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Save, X, Search, Filter } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Search, Filter, Upload } from 'lucide-react';
+import { uploadProductImage } from '../services/api';
 import './ProductManagement.css';
 
 const ProductManagement = () => {
@@ -11,6 +12,11 @@ const ProductManagement = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('All');
+  
+  // File upload state
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadMode, setUploadMode] = useState('url'); // 'url' or 'file'
 
   const [formData, setFormData] = useState({
     id: '',
@@ -102,6 +108,8 @@ const ProductManagement = () => {
       rating: 4.0
     });
     setEditingProduct(null);
+    setSelectedFile(null);
+    setUploadMode('url');
   };
 
   const openAddModal = () => {
@@ -147,6 +155,74 @@ const ProductManagement = () => {
     }));
   };
 
+  // Handle file selection
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+        return;
+      }
+      
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+      
+      setSelectedFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFormData(prev => ({
+          ...prev,
+          img: e.target.result // This will be replaced with server URL after upload
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Upload image to server
+  const handleImageUpload = async () => {
+    if (!selectedFile) {
+      alert('Please select an image first');
+      return;
+    }
+
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      alert('Admin authentication required');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const response = await uploadProductImage(selectedFile, token);
+      
+      if (response.error) {
+        alert(`Upload failed: ${response.error}`);
+        return;
+      }
+
+      // Update form data with server image URL
+      setFormData(prev => ({
+        ...prev,
+        img: `http://localhost:5000${response.imageUrl}`
+      }));
+      
+      alert('Image uploaded successfully!');
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -159,8 +235,30 @@ const ProductManagement = () => {
         return;
       }
 
-      const productData = {
+      // If the current form image is a data URL (preview) we should upload it first
+      let finalImg = formData.img;
+      if (typeof finalImg === 'string' && finalImg.startsWith('data:')) {
+        // convert dataURL to Blob then upload via API
+        try {
+          const blob = await (await fetch(finalImg)).blob();
+          const uploadRes = await uploadProductImage(blob, token);
+          if (uploadRes.error) {
+            alert(`Upload failed: ${uploadRes.error}`);
+            setSubmitting(false);
+            return;
+          }
+          finalImg = `http://localhost:5000${uploadRes.imageUrl}`;
+        } catch (uploadErr) {
+          console.error('Automatic upload failed:', uploadErr);
+          alert('Failed to upload the selected image. Please try uploading manually first.');
+          setSubmitting(false);
+          return;
+        }
+  }
+
+  const productData = {
         ...formData,
+        img: finalImg,
         priceLKR: parseInt(formData.priceLKR),
         stock: parseInt(formData.stock),
         rating: parseFloat(formData.rating)
@@ -487,21 +585,72 @@ const ProductManagement = () => {
 
                 <div className="form-group">
                   <label htmlFor="img">Plant Image *</label>
-                  <select
-                    id="img"
-                    name="img"
-                    value={formData.img}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Select an image</option>
-                    <option value="/images/areca.png">Areca Palm</option>
-                    <option value="/images/hibiscus.png">Hibiscus</option>
-                    <option value="/images/moneyplant.png">Money Plant</option>
-                    <option value="/images/peacelily.png">Peace Lily</option>
-                    <option value="/images/snakeplant.png">Snake Plant</option>
-                    <option value="/images/tulsi.png">Tulsi</option>
-                  </select>
+                  
+                  {/* Upload mode toggle */}
+                  <div className="upload-mode-toggle" style={{ marginBottom: '10px' }}>
+                    <button
+                      type="button"
+                      className={`btn ${uploadMode === 'url' ? 'btn-primary' : 'btn-secondary'}`}
+                      onClick={() => setUploadMode('url')}
+                      style={{ marginRight: '10px' }}
+                    >
+                      Use URL
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn ${uploadMode === 'file' ? 'btn-primary' : 'btn-secondary'}`}
+                      onClick={() => setUploadMode('file')}
+                    >
+                      Upload File
+                    </button>
+                  </div>
+
+                  {uploadMode === 'url' ? (
+                    /* URL Mode - Original dropdown */
+                    <select
+                      id="img"
+                      name="img"
+                      value={formData.img}
+                      onChange={handleInputChange}
+                      required
+                    >
+                      <option value="">Select an image</option>
+                      <option value="/images/areca.png">Areca Palm</option>
+                      <option value="/images/hibiscus.png">Hibiscus</option>
+                      <option value="/images/moneyplant.png">Money Plant</option>
+                      <option value="/images/peacelily.png">Peace Lily</option>
+                      <option value="/images/snakeplant.png">Snake Plant</option>
+                      <option value="/images/tulsi.png">Tulsi</option>
+                    </select>
+                  ) : (
+                    /* File Upload Mode */
+                    <div className="file-upload-section">
+                      <div className="file-input-container" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        <input
+                          type="file"
+                          id="imageFile"
+                          accept="image/*"
+                          onChange={handleFileSelect}
+                          style={{ flex: 1 }}
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-secondary"
+                          onClick={handleImageUpload}
+                          disabled={!selectedFile || uploading}
+                        >
+                          <Upload size={16} />
+                          {uploading ? 'Uploading...' : 'Upload'}
+                        </button>
+                      </div>
+                      {selectedFile && (
+                        <p style={{ marginTop: '5px', color: '#666', fontSize: '0.9rem' }}>
+                          Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)}KB)
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   {formData.img && (
                     <div className="image-preview">
                       <img 
