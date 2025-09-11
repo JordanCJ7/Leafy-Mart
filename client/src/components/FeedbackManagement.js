@@ -13,6 +13,7 @@ import {
   Filter,
   TrendingUp
 } from 'lucide-react';
+import { alert, toast } from '../utils/swal';
 
 export default function FeedbackManagement() {
   const { token } = useAuth();
@@ -79,7 +80,7 @@ export default function FeedbackManagement() {
         adminResponse: response
       }, token);
       
-      if (updateResponse._id) {
+  if (updateResponse._id) {
         // Update feedback in the list
         setFeedback(feedback.map(fb => 
           fb._id === feedbackId ? updateResponse : fb
@@ -90,7 +91,7 @@ export default function FeedbackManagement() {
       }
     } catch (error) {
       console.error('Failed to update feedback:', error);
-      alert('Failed to update feedback: ' + error.message);
+  alert('Failed to update feedback', error.message);
     }
   };
 

@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Minus, Plus, X, ShoppingBag, Heart, ArrowLeft } from 'lucide-react';
+import { confirm } from '../utils/swal';
 
 export default function CartPage() {
   const { cartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
@@ -21,9 +22,10 @@ export default function CartPage() {
   };
 
   const handleRemoveItem = (productId) => {
-    if (window.confirm('Are you sure you want to remove this item from your cart?')) {
-      removeFromCart(productId);
-    }
+    (async () => {
+      const ok = await confirm('Remove item', 'Are you sure you want to remove this item from your cart?');
+      if (ok) removeFromCart(productId);
+    })();
   };
 
   const handleCheckout = async () => {
@@ -247,10 +249,9 @@ export default function CartPage() {
               </Link>
               
               <button
-                onClick={() => {
-                  if (window.confirm('Are you sure you want to clear your cart?')) {
-                    clearCart();
-                  }
+                onClick={async () => {
+                  const ok = await confirm('Clear cart', 'Are you sure you want to clear your cart?');
+                  if (ok) clearCart();
                 }}
                 style={{
                   border: '1px solid #dc3545',

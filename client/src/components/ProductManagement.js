@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Save, X, Search, Filter, Upload } from 'lucide-react';
 import { uploadProductImage } from '../services/api';
+import { toast, alert, confirm } from '../utils/swal';
 import './ProductManagement.css';
 
 const ProductManagement = () => {
@@ -46,11 +47,11 @@ const ProductManagement = () => {
         setProductList(data);
       } else {
         console.error('Failed to fetch products');
-        alert('Failed to fetch products from server');
+        alert('Failed to fetch products', 'Failed to fetch products from server');
       }
     } catch (error) {
       console.error('Error fetching products:', error);
-      alert('Error connecting to server');
+      alert('Error', 'Error connecting to server');
     } finally {
       setLoading(false);
     }
@@ -162,13 +163,13 @@ const ProductManagement = () => {
       // Validate file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
-        alert('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+        alert('Invalid file', 'Please select a valid image file (JPEG, PNG, GIF, or WebP)');
         return;
       }
       
       // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB');
+        alert('File too large', 'File size must be less than 5MB');
         return;
       }
       
@@ -189,13 +190,13 @@ const ProductManagement = () => {
   // Upload image to server
   const handleImageUpload = async () => {
     if (!selectedFile) {
-      alert('Please select an image first');
+      alert('No image', 'Please select an image first');
       return;
     }
 
     const token = localStorage.getItem('adminToken');
     if (!token) {
-      alert('Admin authentication required');
+      alert('Authentication', 'Admin authentication required');
       return;
     }
 
@@ -204,7 +205,7 @@ const ProductManagement = () => {
       const response = await uploadProductImage(selectedFile, token);
       
       if (response.error) {
-        alert(`Upload failed: ${response.error}`);
+        alert('Upload failed', `${response.error}`);
         return;
       }
 
@@ -214,10 +215,10 @@ const ProductManagement = () => {
         img: `http://localhost:5000${response.imageUrl}`
       }));
       
-      alert('Image uploaded successfully!');
+  toast({ title: 'Image uploaded successfully!', icon: 'success' });
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Failed to upload image. Please try again.');
+  alert('Upload failed', 'Failed to upload image. Please try again.');
     } finally {
       setUploading(false);
     }
@@ -226,55 +227,48 @@ const ProductManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    
+
     try {
       const token = localStorage.getItem('adminToken');
       if (!token) {
-        alert('Admin authentication required');
+        alert('Authentication', 'Admin authentication required');
         setSubmitting(false);
         return;
       }
 
-      // If the current form image is a data URL (preview) we should upload it first
+      // Prepare image: if it's a data URL, upload it first
       let finalImg = formData.img;
       if (typeof finalImg === 'string' && finalImg.startsWith('data:')) {
-        // convert dataURL to Blob then upload via API
         try {
           const blob = await (await fetch(finalImg)).blob();
           const uploadRes = await uploadProductImage(blob, token);
           if (uploadRes.error) {
-            alert(`Upload failed: ${uploadRes.error}`);
+            alert('Upload failed', `${uploadRes.error}`);
             setSubmitting(false);
             return;
           }
           finalImg = `http://localhost:5000${uploadRes.imageUrl}`;
         } catch (uploadErr) {
           console.error('Automatic upload failed:', uploadErr);
-          alert('Failed to upload the selected image. Please try uploading manually first.');
+          alert('Upload failed', 'Failed to upload the selected image. Please try uploading manually first.');
           setSubmitting(false);
           return;
         }
-  }
-
-  const productData = {
-        ...formData,
-        img: finalImg,
-        priceLKR: parseInt(formData.priceLKR),
-        stock: parseInt(formData.stock),
-        rating: parseFloat(formData.rating)
-      };
-
-      // Don't send id if it's empty (let backend generate it)
-      if (!productData.id) {
-        delete productData.id;
       }
 
-      const url = editingProduct 
-        ? `http://localhost:5000/api/products/${formData.id}` 
-        : 'http://localhost:5000/api/products';
-      
+      const productData = {
+        ...formData,
+        img: finalImg,
+        priceLKR: parseInt(formData.priceLKR) || 0,
+        stock: parseInt(formData.stock) || 0,
+        rating: parseFloat(formData.rating) || 0
+      };
+
+      if (!productData.id) delete productData.id;
+
+      const url = editingProduct ? `http://localhost:5000/api/products/${formData.id}` : 'http://localhost:5000/api/products';
       const method = editingProduct ? 'PUT' : 'POST';
-      
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -287,30 +281,29 @@ const ProductManagement = () => {
       if (response.ok) {
         const result = await response.json();
         console.log('Product saved:', result);
-        
-        // Refresh the product list
         await fetchProducts();
         closeModal();
-        alert(editingProduct ? 'Product updated successfully!' : 'Product added successfully!');
+        toast({ title: editingProduct ? 'Product updated successfully!' : 'Product added successfully!', icon: 'success' });
       } else {
         const errorData = await response.json();
         console.error('API Error:', errorData);
-        alert(`Error: ${errorData.error || 'Failed to save product'}`);
+        alert('Error', `${errorData.error || 'Failed to save product'}`);
       }
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('Error connecting to server');
+      alert('Error', 'Error connecting to server');
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDelete = async (productId) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      try {
+    const ok = await confirm('Delete product', 'Are you sure you want to delete this product?');
+    if (!ok) return;
+    try {
         const token = localStorage.getItem('adminToken');
         if (!token) {
-          alert('Admin authentication required');
+          alert('Authentication', 'Admin authentication required');
           return;
         }
 
@@ -324,17 +317,16 @@ const ProductManagement = () => {
         if (response.ok) {
           // Refresh the product list
           await fetchProducts();
-          alert('Product deleted successfully!');
+          toast({ title: 'Product deleted successfully!', icon: 'success' });
         } else {
           const errorData = await response.json();
           console.error('Delete Error:', errorData);
-          alert(`Error: ${errorData.error || 'Failed to delete product'}`);
+          alert('Error', `${errorData.error || 'Failed to delete product'}`);
         }
       } catch (error) {
         console.error('Error deleting product:', error);
-        alert('Error connecting to server');
+        alert('Error', 'Error connecting to server');
       }
-    }
   };
 
   // Filter products based on search and category

@@ -6,6 +6,7 @@ import { getAllProducts } from '../services/api';
 import { useCart } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import { Heart, ShoppingCart, Star, Filter, Search, Grid, List } from 'lucide-react';
+import { toast } from '../utils/swal';
 import './Products.css';
 
 const Products = () => {
@@ -103,13 +104,13 @@ const Products = () => {
 
   const handleAddToCart = (product) => {
   addToCart(product);
-  alert(`${product.name} added to cart!`);
+  toast({ title: `${product.name} added to cart!`, icon: 'success' });
   };
 
   const handleToggleWishlist = (product) => {
   toggleWishlistItem(product);
   const action = isInWishlist(product.id) ? 'removed from' : 'added to';
-  alert(`${product.name} ${action} wishlist!`);
+  toast({ title: `${product.name} ${action} wishlist!`, icon: 'success' });
   };
 
   return (

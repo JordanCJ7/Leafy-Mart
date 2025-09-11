@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserOrders, createFeedback } from '../services/api';
 import { Package, Truck, CheckCircle, Clock, X, MapPin, Calendar, CreditCard, Star, MessageSquare } from 'lucide-react';
+import { toast, alert, confirm } from '../utils/swal';
 
 const mockOrders = [];
 
@@ -113,12 +114,12 @@ export default function OrderTracking() {
         throw new Error(response.error);
       }
 
-      alert('Feedback submitted successfully! Thank you for your review.');
+      toast({ title: 'Feedback submitted successfully! Thank you for your review.', icon: 'success' });
       setShowFeedbackModal(false);
       fetchOrders(); // Refresh orders
     } catch (error) {
       console.error('Failed to submit feedback:', error);
-      alert('Failed to submit feedback: ' + error.message);
+      alert('Failed to submit feedback', error.message);
     } finally {
       setFeedbackSubmitting(false);
     }
@@ -420,7 +421,7 @@ export default function OrderTracking() {
 
                   {order.trackingNumber && (
                     <button
-                      onClick={() => alert(`Tracking: ${order.trackingNumber}\n\nThis would open external tracking page.`)}
+                      onClick={() => alert('Tracking', `Tracking: ${order.trackingNumber}\n\nThis would open external tracking page.`)}
                       style={{
                         padding: '0.5rem 1rem',
                         border: '1px solid #42a5f5',

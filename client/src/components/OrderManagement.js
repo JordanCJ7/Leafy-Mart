@@ -20,6 +20,7 @@ import {
   Eye,
   MessageSquare
 } from 'lucide-react';
+import { toast, alert } from '../utils/swal';
 
 const statusColors = {
   'Pending': '#ffa726',
@@ -116,7 +117,7 @@ export default function OrderManagement() {
   const handleUpdateOrder = async (orderId, updateData) => {
     try {
       const response = await updateOrderStatusAdmin(orderId, updateData, token);
-      if (response._id) {
+  if (response._id) {
         // Update the order in the list
         setOrders(orders.map(order => 
           order._id === orderId ? response : order
@@ -126,13 +127,13 @@ export default function OrderManagement() {
       }
     } catch (error) {
       console.error('Failed to update order:', error);
-      alert('Failed to update order: ' + error.message);
+  alert('Failed to update order', error.message);
     }
   };
 
   const handleBulkUpdate = async (status, notes = '') => {
     if (selectedOrders.length === 0) {
-      alert('Please select orders to update');
+      alert('Warning', 'Please select orders to update');
       return;
     }
 
@@ -142,11 +143,11 @@ export default function OrderManagement() {
         fetchOrders();
         fetchStats();
         setSelectedOrders([]);
-        alert(response.message);
+        toast({ title: response.message, icon: 'success' });
       }
     } catch (error) {
       console.error('Failed to bulk update orders:', error);
-      alert('Failed to update orders: ' + error.message);
+      alert('Failed to update orders', error.message);
     }
   };
 
@@ -157,11 +158,11 @@ export default function OrderManagement() {
         setOrders(orders.map(order => 
           order._id === orderId ? response.order : order
         ));
-        alert('Feedback request sent to customer');
+        toast({ title: 'Feedback request sent to customer', icon: 'success' });
       }
     } catch (error) {
       console.error('Failed to request feedback:', error);
-      alert('Failed to send feedback request: ' + error.message);
+      alert('Failed to send feedback request', error.message);
     }
   };
 
