@@ -13,6 +13,7 @@ import {
   Twitter,
   Leaf
 } from 'lucide-react';
+import { toast } from '../utils/swal';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -33,7 +34,7 @@ const Contact = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle form submission logic here
-    alert('Thank you for your message! We will get back to you within 24 hours.');
+  toast({ title: 'Thank you for your message! We will get back to you within 24 hours.', icon: 'success' });
     setFormData({
       name: '',
       email: '',

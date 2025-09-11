@@ -6,6 +6,7 @@ import products from '../data/products';
 import { useCart } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import { ShoppingCart, Heart, Tag, Star, Shield, Truck, Leaf, Users, Award, ArrowRight, CheckCircle, Sparkles } from 'lucide-react';
+import { toast } from '../utils/swal';
 import './Home.css';
 
 export default function Home() {
@@ -21,14 +22,14 @@ export default function Home() {
 	// Use central context functions for cart/wishlist so state is shared
 	const addToCartLocal = (product) => {
 		addToCart(product);
-		alert(`${product.name} added to cart!`);
+		toast({ title: `${product.name} added to cart!`, icon: 'success' });
 	};
 
 	const toggleWishlistLocal = (product) => {
 		// toggleWishlistItem will add or remove and update persistent wishlist
 		toggleWishlistItem(product);
 		const action = isInWishlist(product.id) ? 'removed from' : 'added to';
-		alert(`${product.name} ${action} wishlist!`);
+		toast({ title: `${product.name} ${action} wishlist!`, icon: 'success' });
 	};
 
 	return (

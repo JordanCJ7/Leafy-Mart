@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useCart } from '../contexts/CartContext';
 import { Heart, ShoppingCart, X, ArrowLeft, Star } from 'lucide-react';
+import { toast, confirm } from '../utils/swal';
 
 export default function Wishlist() {
   const { wishlistItems, removeFromWishlist, clearWishlist } = useWishlist();
@@ -14,13 +15,14 @@ export default function Wishlist() {
   const handleMoveToCart = (item) => {
     addToCart(item);
     removeFromWishlist(item.id);
-    alert(`${item.name} moved to cart!`);
+  toast({ title: `${item.name} moved to cart!`, icon: 'success' });
   };
 
   const handleRemoveItem = (itemId, itemName) => {
-    if (window.confirm(`Remove ${itemName} from your wishlist?`)) {
-      removeFromWishlist(itemId);
-    }
+    (async () => {
+      const ok = await confirm('Remove from wishlist', `Remove ${itemName} from your wishlist?`);
+      if (ok) removeFromWishlist(itemId);
+    })();
   };
 
   if (wishlistItems.length === 0) {
@@ -98,10 +100,9 @@ export default function Wishlist() {
           
           {wishlistItems.length > 0 && (
             <button
-              onClick={() => {
-                if (window.confirm('Are you sure you want to clear your entire wishlist?')) {
-                  clearWishlist();
-                }
+              onClick={async () => {
+                const ok = await confirm('Clear wishlist', 'Are you sure you want to clear your entire wishlist?');
+                if (ok) clearWishlist();
               }}
               style={{
                 border: '1px solid #dc3545',
