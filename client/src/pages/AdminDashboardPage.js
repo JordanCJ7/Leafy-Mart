@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import UserManagement from '../components/UserManagement';
@@ -9,6 +10,15 @@ import FeedbackManagement from '../components/FeedbackManagement';
 
 export default function AdminDashboardPage() {
 	const [activeTab, setActiveTab] = useState('dashboard');
+
+	const location = useLocation();
+
+	// Sync activeTab with ?tab= query param on mount and whenever it changes
+	useEffect(() => {
+		const params = new URLSearchParams(location.search);
+		const tab = params.get('tab');
+		if (tab) setActiveTab(tab);
+	}, [location.search]);
 
 	const renderContent = () => {
 		switch (activeTab) {
@@ -96,88 +106,7 @@ export default function AdminDashboardPage() {
 		}}>
 			<Navbar />
 			
-			{/* Admin Navigation */}
-			<div style={{
-				background: 'white',
-				padding: '1rem 2rem',
-				boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-				borderBottom: '1px solid #e0e0e0'
-			}}>
-				<div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-					<nav style={{ display: 'flex', gap: '2rem' }}>
-						<button
-							style={{
-								background: 'none',
-								border: 'none',
-								padding: '0.5rem 1rem',
-								cursor: 'pointer',
-								color: activeTab === 'dashboard' ? '#2e7d32' : '#666',
-								fontWeight: activeTab === 'dashboard' ? 'bold' : 'normal',
-								borderBottom: activeTab === 'dashboard' ? '2px solid #2e7d32' : 'none'
-							}}
-							onClick={() => setActiveTab('dashboard')}
-						>
-							Dashboard
-						</button>
-						<button
-							style={{
-								background: 'none',
-								border: 'none',
-								padding: '0.5rem 1rem',
-								cursor: 'pointer',
-								color: activeTab === 'users' ? '#2e7d32' : '#666',
-								fontWeight: activeTab === 'users' ? 'bold' : 'normal',
-								borderBottom: activeTab === 'users' ? '2px solid #2e7d32' : 'none'
-							}}
-							onClick={() => setActiveTab('users')}
-						>
-							User Management
-						</button>
-						<button
-							style={{
-								background: 'none',
-								border: 'none',
-								padding: '0.5rem 1rem',
-								cursor: 'pointer',
-								color: activeTab === 'products' ? '#2e7d32' : '#666',
-								fontWeight: activeTab === 'products' ? 'bold' : 'normal',
-								borderBottom: activeTab === 'products' ? '2px solid #2e7d32' : 'none'
-							}}
-							onClick={() => setActiveTab('products')}
-						>
-							Product Management
-						</button>
-						<button
-							style={{
-								background: 'none',
-								border: 'none',
-								padding: '0.5rem 1rem',
-								cursor: 'pointer',
-								color: activeTab === 'orders' ? '#2e7d32' : '#666',
-								fontWeight: activeTab === 'orders' ? 'bold' : 'normal',
-								borderBottom: activeTab === 'orders' ? '2px solid #2e7d32' : 'none'
-							}}
-							onClick={() => setActiveTab('orders')}
-						>
-							Order Management
-						</button>
-						<button
-							style={{
-								background: 'none',
-								border: 'none',
-								padding: '0.5rem 1rem',
-								cursor: 'pointer',
-								color: activeTab === 'feedback' ? '#2e7d32' : '#666',
-								fontWeight: activeTab === 'feedback' ? 'bold' : 'normal',
-								borderBottom: activeTab === 'feedback' ? '2px solid #2e7d32' : 'none'
-							}}
-							onClick={() => setActiveTab('feedback')}
-						>
-							Feedback Management
-						</button>
-					</nav>
-				</div>
-			</div>
+			{/* Admin Navigation removed from header — Navbar contains admin links now */}
 			
 			<main style={{ flex: 1, paddingTop: '2rem', paddingBottom: '2rem' }}>
 				{renderContent()}
