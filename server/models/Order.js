@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
-  customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true },
+  customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   
   // Order Items
   items: [{
@@ -62,12 +62,17 @@ const orderSchema = new mongoose.Schema({
   
   // Plant Care Information
   careInstructions: [String], // Care instructions for ordered plants
-  seasonalNotes: String // Seasonal care notes
+  seasonalNotes: String, // Seasonal care notes
+  
+  // Feedback Information
+  feedbackRequested: { type: Boolean, default: false },
+  feedbackSubmitted: { type: Boolean, default: false },
+  feedbackId: { type: mongoose.Schema.Types.ObjectId, ref: 'Feedback' }
   
 }, { timestamps: true });
 
-// Generate order number before saving
-orderSchema.pre('save', async function(next) {
+// Generate order number before validation so required validation passes
+orderSchema.pre('validate', async function(next) {
   if (!this.orderNumber) {
     const date = new Date();
     const year = date.getFullYear();

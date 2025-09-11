@@ -18,6 +18,7 @@ app.use('/api/wishlist', require('./routes/wishlist'));
 app.use('/api/suppliers', require('./routes/suppliers'));
 app.use('/api/customers', require('./routes/customers'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/feedback', require('./routes/feedback'));
 
 app.get('/', (req, res) => res.send('Leafy Mart 🌿 API Running'));
 

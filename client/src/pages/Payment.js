@@ -3,11 +3,14 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
+import { createOrder, getProductById } from '../services/api';
 
 export default function Payment() {
   const location = useLocation();
   const navigate = useNavigate();
   const { clearCart } = useCart();
+  const { user, token } = useAuth();
   // Read order summary from location.state or sessionStorage fallback
   let summary = location.state || null;
   if (!summary) {
@@ -30,41 +33,46 @@ export default function Payment() {
   const [cvv, setCvv] = useState('');
   const [method, setMethod] = useState('card');
 
-  // Luhn check for card number
-  const luhnValid = (num) => {
-    const s = num.replace(/\D/g, '');
-    let sum = 0;
-    let shouldDouble = false;
-    for (let i = s.length - 1; i >= 0; i--) {
-      let d = parseInt(s[i], 10);
-      if (shouldDouble) {
-        d *= 2;
-        if (d > 9) d -= 9;
-      }
-      sum += d;
-      shouldDouble = !shouldDouble;
-    }
-    return (sum % 10) === 0;
+  // ✨ SIMPLIFIED CARD VALIDATION ✨
+  
+  // Simple card brand detection - just for display
+  const getCardBrand = (cardNum) => {
+    const cleanNum = cardNum.replace(/\s/g, ''); // Remove spaces
+    
+    if (cleanNum.startsWith('4')) return 'Visa';
+    if (cleanNum.startsWith('5')) return 'Mastercard'; 
+    if (cleanNum.startsWith('3')) return 'Amex';
+    if (cleanNum.startsWith('6')) return 'Discover';
+    return 'Card'; // Default
   };
 
-  // Detect card issuer
-  const detectIssuer = (num) => {
-    const s = num.replace(/\D/g, '');
-    if (/^4/.test(s)) return 'Visa';
-    if (/^5[1-5]/.test(s)) return 'Mastercard';
-    if (/^3[47]/.test(s)) return 'AMEX';
-    if (/^6(?:011|5)/.test(s) || /^64[4-9]/.test(s)) return 'Discover';
-    return 'Card';
-  };
-
+  // Simple validation - easy to understand!
   const validate = () => {
-    if (!cardName.trim()) return 'Please enter the name on card.';
-    const raw = cardNumber.replace(/\s+/g, '');
-    if (!/^[0-9]{13,19}$/.test(raw)) return 'Enter a valid card number.';
-    if (!luhnValid(raw)) return 'Card number failed checksum (Luhn).' ;
-    if (!/^(0[1-9]|1[0-2])\/(?:[0-9]{2})$/.test(expiry)) return 'Expiry must be in MM/YY format.';
-    if (!/^[0-9]{3,4}$/.test(cvv)) return 'Enter a valid CVV.';
-    return null;
+    // Check if name is entered
+    if (!cardName.trim()) {
+      return 'Please enter your name';
+    }
+    
+    // Check card number (remove spaces, check if 13-19 digits)
+    const cleanCardNum = cardNumber.replace(/\s/g, '');
+    if (cleanCardNum.length < 13 || cleanCardNum.length > 19) {
+      return 'Card number must be 13-19 digits long';
+    }
+    if (!/^\d+$/.test(cleanCardNum)) {
+      return 'Card number can only contain numbers';
+    }
+    
+    // Check expiry (MM/YY format)
+    if (!/^\d{2}\/\d{2}$/.test(expiry)) {
+      return 'Expiry must be MM/YY format (example: 12/25)';
+    }
+    
+    // Check CVV (3 or 4 digits)
+    if (!/^\d{3,4}$/.test(cvv)) {
+      return 'CVV must be 3 or 4 digits';
+    }
+    
+    return null; // All good!
   };
 
   const handlePayNow = async (e) => {
@@ -81,29 +89,85 @@ export default function Payment() {
       // show processing state
       await new Promise(resolve => setTimeout(resolve, 1400));
 
+      // Convert local product IDs to database product ObjectIds
+      const orderItems = [];
+      for (const item of summary.items) {
+        try {
+          // Get the database product by its string ID
+          const product = await getProductById(item.id);
+          if (product && product._id) {
+            orderItems.push({
+              productId: product._id, // Use MongoDB ObjectId
+              quantity: item.quantity,
+              price: item.price,
+              discount: 0
+            });
+          } else {
+            throw new Error(`Product not found in database: ${item.id}`);
+          }
+        } catch (error) {
+          throw new Error(`Failed to find product ${item.id}: ${error.message}`);
+        }
+      }
+
+      // Create order data
+      const orderData = {
+        items: orderItems,
+        subtotal: summary.subtotal,
+        tax: summary.tax,
+        shippingCost: summary.shipping,
+        total: summary.total,
+        paymentMethod: method === 'card' ? 'Card' : 'Digital Wallet',
+        paymentStatus: 'Paid',
+        shippingAddress: {
+          street: user?.address?.street || '123 Main Street',
+          city: user?.address?.city || 'Colombo',
+          state: user?.address?.state || 'Western',
+          zipCode: user?.address?.zipCode || '00100',
+          country: 'Sri Lanka'
+        },
+        notes: 'Order placed via online payment'
+      };
+
+      // Create order in backend
+      const orderResponse = await createOrder(orderData, token);
+      
+      if (orderResponse.error) {
+        throw new Error(orderResponse.error);
+      }
+
       // success flow: clear cart, show confirmation then navigate
       clearCart();
-      setStatus({ type: 'success', message: 'Payment successful. Redirecting to order tracking...' });
-      setTimeout(() => navigate('/order-tracking', { state: { message: 'Payment successful' } }), 900);
+      setStatus({ type: 'success', message: 'Payment successful. Order created. Redirecting to order tracking...' });
+      
+      // Store order ID for tracking
+      sessionStorage.setItem('leafyMartLastOrder', JSON.stringify({
+        orderId: orderResponse._id,
+        orderNumber: orderResponse.orderNumber
+      }));
+      
+      setTimeout(() => navigate('/order-tracking', { 
+        state: { 
+          message: 'Payment successful', 
+          orderId: orderResponse._id,
+          orderNumber: orderResponse.orderNumber 
+        } 
+      }), 1500);
     } catch (err) {
-      console.error(err);
-      setStatus({ type: 'error', message: 'Payment failed. Please try again.' });
+      console.error('Payment/Order creation error:', err);
+      setStatus({ type: 'error', message: `Payment failed: ${err.message || 'Please try again.'}` });
     } finally {
       setProcessing(false);
     }
   };
 
-  // Helper: format card number display
-  const formatCard = (v) => {
-    const s = v.replace(/\D/g, '');
-    // Grouping: Amex 4-6-5, others by 4
-    if (/^3[47]/.test(s)) {
-      return s.replace(/(\d{1,4})(\d{1,6})?(\d{1,5})?/,'$1 $2 $3').trim();
-    }
-    return s.replace(/(.{4})/g, '$1 ').trim();
+  // Simple card number formatting - adds spaces every 4 digits
+  const formatCard = (cardNum) => {
+    const cleanNum = cardNum.replace(/\D/g, ''); // Remove non-digits
+    return cleanNum.replace(/(.{4})/g, '$1 ').trim(); // Add space every 4 characters
   };
 
-  const issuer = detectIssuer(cardNumber);
+  const cardBrand = getCardBrand(cardNumber);
 
   return (
     <div style={{ background: '#f1faee', minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'Segoe UI, Arial, sans-serif' }}>
@@ -175,21 +239,50 @@ export default function Payment() {
                   </div>
 
                   <div style={{ marginBottom: 12 }}>
-                    <label style={{ display: 'block', fontSize: 13, color: '#444', marginBottom: 6 }}>Card number</label>
+                    <label style={{ display: 'block', fontSize: 13, color: '#444', marginBottom: 6 }}>
+                      Card number (13-19 digits)
+                    </label>
                     <div style={{ position: 'relative' }}>
-                      <input value={formatCard(cardNumber)} onChange={e => setCardNumber(e.target.value)} placeholder="1234 5678 9012 3456" maxLength={23} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e6e6e6' }} />
-                      <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: '#666' }}>{issuer}</div>
+                      <input 
+                        value={formatCard(cardNumber)} 
+                        onChange={e => setCardNumber(e.target.value)} 
+                        placeholder="1234 5678 9012 3456" 
+                        maxLength={23} 
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e6e6e6' }} 
+                      />
+                      <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: '#666' }}>{cardBrand}</div>
                     </div>
+                    <small style={{ color: '#666', fontSize: 11 }}>
+                      💡 We automatically detect Visa, Mastercard, Amex, and Discover
+                    </small>
                   </div>
 
                   <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
                     <div style={{ flex: 1 }}>
-                      <label style={{ display: 'block', fontSize: 13, color: '#444', marginBottom: 6 }}>Expiry (MM/YY)</label>
-                      <input value={expiry} onChange={e => setExpiry(e.target.value)} placeholder="MM/YY" maxLength={5} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e6e6e6' }} />
+                      <label style={{ display: 'block', fontSize: 13, color: '#444', marginBottom: 6 }}>
+                        Expiry Date
+                      </label>
+                      <input 
+                        value={expiry} 
+                        onChange={e => setExpiry(e.target.value)} 
+                        placeholder="MM/YY (e.g., 12/25)" 
+                        maxLength={5} 
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e6e6e6' }} 
+                      />
+                      <small style={{ color: '#666', fontSize: 11 }}>Format: MM/YY</small>
                     </div>
                     <div style={{ width: 120 }}>
-                      <label style={{ display: 'block', fontSize: 13, color: '#444', marginBottom: 6 }}>CVV</label>
-                      <input value={cvv} onChange={e => setCvv(e.target.value)} placeholder="123" maxLength={4} style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e6e6e6' }} />
+                      <label style={{ display: 'block', fontSize: 13, color: '#444', marginBottom: 6 }}>
+                        CVV Code
+                      </label>
+                      <input 
+                        value={cvv} 
+                        onChange={e => setCvv(e.target.value)} 
+                        placeholder="123" 
+                        maxLength={4} 
+                        style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #e6e6e6' }} 
+                      />
+                      <small style={{ color: '#666', fontSize: 11 }}>3-4 digits</small>
                     </div>
                   </div>
                 </>

@@ -82,7 +82,7 @@ export default function Home() {
 						}} className="cta-button-primary">
 							Shop Now <ArrowRight size={20} />
 						</Link>
-						<button style={{ 
+						<Link to="/about" style={{ 
 							background: 'transparent', 
 							color: '#fff', 
 							border: '2px solid #fff',
@@ -97,7 +97,23 @@ export default function Home() {
 							transition: 'all 0.3s ease'
 						}} className="cta-button-secondary">
 							Learn More
-						</button>
+						</Link>
+						{/* <button style={{ 
+							background: 'transparent', 
+							color: '#fff', 
+							border: '2px solid #fff',
+							padding: '1rem 2rem', 
+							borderRadius: '50px',
+							fontWeight: 700,
+							fontSize: '1.1rem',
+							cursor: 'pointer',
+							display: 'inline-flex',
+							alignItems: 'center',
+							gap: '8px',
+							transition: 'all 0.3s ease'
+						}} className="cta-button-secondary">
+							Learn More
+						</button> */}
 					</div>
 					</div>
 			</section>

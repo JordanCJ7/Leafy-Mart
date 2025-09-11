@@ -8,7 +8,7 @@ const userCarts = new Map();
 // Get user's cart
 router.get('/', auth, (req, res) => {
   try {
-    const userId = req.user._id.toString();
+    const userId = req.user.id.toString();
     const cart = userCarts.get(userId) || { items: [], updatedAt: new Date() };
     res.json(cart);
   } catch (err) {
@@ -19,7 +19,7 @@ router.get('/', auth, (req, res) => {
 // Save user's cart
 router.post('/', auth, (req, res) => {
   try {
-    const userId = req.user._id.toString();
+    const userId = req.user.id.toString();
     const { items } = req.body;
     
     const cart = {
@@ -37,7 +37,7 @@ router.post('/', auth, (req, res) => {
 // Clear user's cart
 router.delete('/', auth, (req, res) => {
   try {
-    const userId = req.user._id.toString();
+    const userId = req.user.id.toString();
     userCarts.delete(userId);
     res.json({ message: 'Cart cleared successfully' });
   } catch (err) {

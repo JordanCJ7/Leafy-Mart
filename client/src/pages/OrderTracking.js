@@ -1,50 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '../contexts/AuthContext';
-import { Package, Truck, CheckCircle, Clock, X, MapPin, Calendar, CreditCard } from 'lucide-react';
+import { getUserOrders, createFeedback } from '../services/api';
+import { Package, Truck, CheckCircle, Clock, X, MapPin, Calendar, CreditCard, Star, MessageSquare } from 'lucide-react';
 
-const mockOrders = [
-  {
-    id: 'ORD20240901001',
-    status: 'Delivered',
-    items: [
-      { name: 'Snake Plant', quantity: 2, price: 3000 },
-      { name: 'Money Plant', quantity: 1, price: 1800 }
-    ],
-    total: 7800,
-    orderDate: '2024-09-01',
-    deliveryDate: '2024-09-05',
-    trackingNumber: 'TRK12345678',
-    shippingAddress: '123 Main St, Colombo 03'
-  },
-  {
-    id: 'ORD20240905002',
-    status: 'Shipped',
-    items: [
-      { name: 'Areca Palm', quantity: 1, price: 7000 }
-    ],
-    total: 7500,
-    orderDate: '2024-09-05',
-    estimatedDelivery: '2024-09-09',
-    trackingNumber: 'TRK87654321',
-    shippingAddress: '456 Garden Ave, Kandy'
-  },
-  {
-    id: 'ORD20240907003',
-    status: 'Processing',
-    items: [
-      { name: 'Tulsi Plant', quantity: 3, price: 1200 },
-      { name: 'Hibiscus', quantity: 1, price: 2500 }
-    ],
-    total: 6100,
-    orderDate: '2024-09-07',
-    estimatedDelivery: '2024-09-12',
-    shippingAddress: '789 Plant St, Galle'
-  }
-];
+const mockOrders = [];
 
 const getStatusIcon = (status) => {
   switch (status) {
@@ -71,30 +34,133 @@ const getStatusColor = (status) => {
 };
 
 export default function OrderTracking() {
-  const { isLoggedIn, user } = useAuth();
+  const { isLoggedIn, user, token } = useAuth();
+  const location = useLocation();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackData, setFeedbackData] = useState({
+    rating: 5,
+    review: '',
+    deliveryRating: 5,
+    serviceRating: 5,
+    wouldRecommend: true,
+    improvements: '',
+    productFeedback: []
+  });
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
 
   useEffect(() => {
-    // Simulate API call to fetch orders
-    const fetchOrders = async () => {
-      setLoading(true);
-      try {
-        // In a real app, you'd fetch from your API
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setOrders(mockOrders);
-      } catch (error) {
-        console.error('Failed to fetch orders:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (isLoggedIn) {
+    if (isLoggedIn && token) {
       fetchOrders();
     }
-  }, [isLoggedIn]);
+    
+    // Check if redirected from successful payment
+    if (location.state?.message) {
+      setTimeout(() => {
+        window.history.replaceState({}, document.title);
+      }, 3000);
+    }
+  }, [isLoggedIn, token, location.state]);
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      
+      console.log('OrderTracking - Token available:', !!token);
+      console.log('OrderTracking - Token preview:', token?.substring(0, 20) + '...');
+      
+      const response = await getUserOrders(token);
+      console.log('OrderTracking - API response:', response);
+      
+      if (response.orders) {
+        setOrders(response.orders);
+      } else if (Array.isArray(response)) {
+        setOrders(response);
+      }
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFeedbackSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedOrder) return;
+
+    try {
+      setFeedbackSubmitting(true);
+      
+      // Initialize product feedback for each product in the order
+      const productFeedback = selectedOrder.items.map(item => ({
+        productId: item.productId._id,
+        productRating: feedbackData.productFeedback.find(pf => pf.productId === item.productId._id)?.productRating || 5,
+        productReview: feedbackData.productFeedback.find(pf => pf.productId === item.productId._id)?.productReview || '',
+        plantCondition: feedbackData.productFeedback.find(pf => pf.productId === item.productId._id)?.plantCondition || 'Good',
+        packagingQuality: feedbackData.productFeedback.find(pf => pf.productId === item.productId._id)?.packagingQuality || 'Good'
+      }));
+
+      const feedbackPayload = {
+        ...feedbackData,
+        productFeedback
+      };
+
+      const response = await createFeedback(selectedOrder._id, feedbackPayload, token);
+      
+      if (response.error) {
+        throw new Error(response.error);
+      }
+
+      alert('Feedback submitted successfully! Thank you for your review.');
+      setShowFeedbackModal(false);
+      fetchOrders(); // Refresh orders
+    } catch (error) {
+      console.error('Failed to submit feedback:', error);
+      alert('Failed to submit feedback: ' + error.message);
+    } finally {
+      setFeedbackSubmitting(false);
+    }
+  };
+
+  const updateProductFeedback = (productId, field, value) => {
+    const existingIndex = feedbackData.productFeedback.findIndex(pf => pf.productId === productId);
+    const newProductFeedback = [...feedbackData.productFeedback];
+    
+    if (existingIndex >= 0) {
+      newProductFeedback[existingIndex] = {
+        ...newProductFeedback[existingIndex],
+        [field]: value
+      };
+    } else {
+      newProductFeedback.push({
+        productId,
+        [field]: value
+      });
+    }
+    
+    setFeedbackData({ ...feedbackData, productFeedback: newProductFeedback });
+  };
+
+  const renderStars = (rating, onRatingChange) => {
+    return (
+      <div style={{ display: 'flex', gap: '0.25rem' }}>
+        {[1, 2, 3, 4, 5].map(star => (
+          <Star 
+            key={star}
+            size={20}
+            style={{ 
+              cursor: onRatingChange ? 'pointer' : 'default',
+              color: star <= rating ? '#ffc107' : '#e9ecef'
+            }}
+            fill={star <= rating ? '#ffc107' : 'none'}
+            onClick={() => onRatingChange && onRatingChange(star)}
+          />
+        ))}
+      </div>
+    );
+  };
 
   if (!isLoggedIn) {
     return (
@@ -226,13 +292,13 @@ export default function OrderTracking() {
           <div style={{ display: 'grid', gap: '1.5rem' }}>
             {orders.map((order) => (
               <div 
-                key={order.id} 
+                key={order._id} 
                 style={{
                   background: '#fff',
                   borderRadius: '1rem',
                   padding: '1.5rem',
                   boxShadow: '0 2px 16px rgba(56, 142, 60, 0.15)',
-                  border: selectedOrder?.id === order.id ? '2px solid #388e3c' : '1px solid transparent'
+                  border: selectedOrder?._id === order._id ? '2px solid #388e3c' : '1px solid transparent'
                 }}
               >
                 <div style={{ 
@@ -245,7 +311,7 @@ export default function OrderTracking() {
                 }}>
                   <div>
                     <h3 style={{ color: '#333', marginBottom: '0.5rem' }}>
-                      Order #{order.id}
+                      Order #{order.orderNumber || order._id}
                     </h3>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                       {getStatusIcon(order.status)}
@@ -258,7 +324,7 @@ export default function OrderTracking() {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#666', fontSize: '0.9rem' }}>
                       <Calendar size={16} />
-                      <span>Ordered: {new Date(order.orderDate).toLocaleDateString()}</span>
+                      <span>Ordered: {new Date(order.createdAt || order.orderDate).toLocaleDateString()}</span>
                     </div>
                   </div>
 
@@ -277,14 +343,14 @@ export default function OrderTracking() {
                 <div style={{ marginBottom: '1rem' }}>
                   <h4 style={{ color: '#333', marginBottom: '0.5rem', fontSize: '0.9rem' }}>Items:</h4>
                   {order.items.map((item, index) => (
-                    <div key={index} style={{ 
+                    <div key={item.productId?._id || index} style={{ 
                       display: 'flex', 
                       justifyContent: 'space-between',
                       padding: '0.25rem 0',
                       fontSize: '0.9rem',
                       color: '#666'
                     }}>
-                      <span>{item.name} × {item.quantity}</span>
+                      <span>{item.productId?.name || item.name || 'Product'} × {item.quantity}</span>
                       <span>LKR {(item.price * item.quantity).toLocaleString()}</span>
                     </div>
                   ))}
@@ -303,7 +369,15 @@ export default function OrderTracking() {
                     <MapPin size={16} color="#666" />
                     <div>
                       <div style={{ fontSize: '0.8rem', color: '#666' }}>Shipping Address:</div>
-                      <div style={{ fontSize: '0.9rem', color: '#333' }}>{order.shippingAddress}</div>
+                      <div style={{ fontSize: '0.9rem', color: '#333' }}>
+                        {order.shippingAddress ? (
+                          <div>
+                            <div>{order.shippingAddress.street}</div>
+                            <div>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}</div>
+                            <div>{order.shippingAddress.country}</div>
+                          </div>
+                        ) : '—'}
+                      </div>
                     </div>
                   </div>
                   
@@ -314,9 +388,9 @@ export default function OrderTracking() {
                         {order.status === 'Delivered' ? 'Delivered:' : 'Expected Delivery:'}
                       </div>
                       <div style={{ fontSize: '0.9rem', color: '#333' }}>
-                        {order.deliveryDate 
-                          ? new Date(order.deliveryDate).toLocaleDateString()
-                          : new Date(order.estimatedDelivery).toLocaleDateString()
+                        {(order.actualDelivery || order.deliveryDate)
+                          ? new Date(order.actualDelivery || order.deliveryDate).toLocaleDateString()
+                          : order.estimatedDelivery ? new Date(order.estimatedDelivery).toLocaleDateString() : '—'
                         }
                       </div>
                     </div>
@@ -329,7 +403,7 @@ export default function OrderTracking() {
                   flexWrap: 'wrap' 
                 }}>
                   <button
-                    onClick={() => setSelectedOrder(selectedOrder?.id === order.id ? null : order)}
+                    onClick={() => setSelectedOrder(selectedOrder?._id === order._id ? null : order)}
                     style={{
                       padding: '0.5rem 1rem',
                       border: '1px solid #388e3c',
@@ -341,7 +415,7 @@ export default function OrderTracking() {
                       fontSize: '0.9rem'
                     }}
                   >
-                    {selectedOrder?.id === order.id ? 'Hide Details' : 'View Details'}
+                    {selectedOrder?._id === order._id ? 'Hide Details' : 'View Details'}
                   </button>
 
                   {order.trackingNumber && (
@@ -381,7 +455,7 @@ export default function OrderTracking() {
                   )}
                 </div>
 
-                {selectedOrder?.id === order.id && (
+                {selectedOrder?._id === order._id && (
                   <div style={{ 
                     marginTop: '1rem', 
                     padding: '1rem',
