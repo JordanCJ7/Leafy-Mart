@@ -641,6 +641,7 @@ const Profile = () => {
                             >
                               {order.status}
                             </span>
+                            <br /><br />
                             <p className="order-total">{formatCurrency(order.total)}</p>
                           </div>
                         </div>

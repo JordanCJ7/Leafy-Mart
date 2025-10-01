@@ -37,17 +37,28 @@ const Login = () => {
       const data = await loginCustomer({ email, password });
 
       if (data.success) {
-        // If the returned user is an admin, use admin login flow and redirect to admin dashboard
+        // Determine whether the returned user should be treated as admin
         const isAdminUser = data.user && (data.user.role === 'admin' || data.user.isAdmin === true || data.isAdmin === true);
+
         if (isAdminUser) {
-          // use AuthContext to store admin token/data consistently
+          // store admin token/data and send to admin dashboard
           loginAdmin(data.user, data.token);
           navigate('/admin/dashboard', { replace: true });
         } else {
+          // Regular customer
           loginUser(data.user, data.token);
-          // Prevent navigating back to login/signup after successful auth
-          const forbidden = ['/login', '/signup', '/register'];
-          const target = forbidden.includes(from) ? defaultLanding : from;
+
+          // Prevent navigating back to login/signup/profile after successful auth
+          const forbidden = ['/login', '/signup', '/register', '/profile'];
+
+          // If the saved `from` path points to an admin-only area (starts with '/admin')
+          // or to the user's profile page (starts with '/profile'), do not send a non-admin user there —
+          // instead send them to the default landing.
+          const fromPath = rawFrom || defaultLanding;
+          const isFromAdminPath = typeof fromPath === 'string' && fromPath.startsWith('/admin');
+          const isFromProfilePath = typeof fromPath === 'string' && fromPath.startsWith('/profile');
+
+          const target = forbidden.includes(fromPath) || isFromAdminPath || isFromProfilePath ? defaultLanding : fromPath;
           navigate(target, { replace: true });
         }
       } else {
