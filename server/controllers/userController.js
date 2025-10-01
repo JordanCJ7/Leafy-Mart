@@ -77,8 +77,7 @@ exports.getUserById = async (req, res) => {
     const { id } = req.params;
     
     const user = await User.findById(id)
-      .select('-password')
-      .populate('wishlist', 'name price image');
+      .select('-password');
 
     if (!user) {
       return res.status(404).json({

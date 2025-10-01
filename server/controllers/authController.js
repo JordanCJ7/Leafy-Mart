@@ -169,15 +169,14 @@ const getUserProfile = async (req, res) => {
         res.json({
             success: true,
             user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                phone: user.phone,
-                address: user.address,
-                plantPreferences: user.plantPreferences,
-                wishlist: user.wishlist
-            }
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
+                    phone: user.phone,
+                    address: user.address,
+                    plantPreferences: user.plantPreferences
+                }
         });
     } catch (error) {
         console.error('Get profile error:', error);
