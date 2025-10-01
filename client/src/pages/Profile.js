@@ -277,27 +277,32 @@ const Profile = () => {
             
             {user && (
               <div className="user-stats">
-                <div className="stat-item">
-                  <span className="stat-label">Membership</span>
-                  <span 
-                    className="stat-value membership"
-                    style={{ backgroundColor: getMembershipColor(user.membershipLevel) }}
-                  >
-                    {user.membershipLevel}
-                  </span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">Loyalty Points</span>
-                  <span className="stat-value">{user.loyaltyPoints || 0}</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">Total Spent</span>
-                  <span className="stat-value">{formatCurrency(user.totalSpent || 0)}</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">Orders</span>
-                  <span className="stat-value">{user.totalPurchases || 0}</span>
-                </div>
+                {/* Do not show these stats for admin users */}
+                {!isAdmin && (
+                  <div className="stat-item">
+                    <span className="stat-label">Membership</span>
+                    <span 
+                      className="stat-value membership"
+                      style={{ backgroundColor: getMembershipColor(user.membershipLevel) }}
+                    >
+                      {user.membershipLevel}
+                    </span>
+                  </div>
+                )}
+
+                {!isAdmin && (
+                  <div className="stat-item">
+                    <span className="stat-label">Total Spent</span>
+                    <span className="stat-value">{formatCurrency(user.totalSpent || 0)}</span>
+                  </div>
+                )}
+
+                {!isAdmin && (
+                  <div className="stat-item">
+                    <span className="stat-label">Orders</span>
+                    <span className="stat-value">{user.totalPurchases || 0}</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -329,12 +334,15 @@ const Profile = () => {
             >
               Security
             </button>
-            <button 
-              className={`tab-button ${activeTab === 'orders' ? 'active' : ''}`}
-              onClick={() => setActiveTab('orders')}
-            >
-              Order History
-            </button>
+            {/* Orders tab is not shown for admin users */}
+            {!isAdmin && (
+              <button 
+                className={`tab-button ${activeTab === 'orders' ? 'active' : ''}`}
+                onClick={() => setActiveTab('orders')}
+              >
+                Order History
+              </button>
+            )}
           </div>
 
           <div className="tab-content">
@@ -603,8 +611,8 @@ const Profile = () => {
               </div>
             )}
 
-            {/* Orders Tab */}
-            {activeTab === 'orders' && (
+            {/* Orders Tab removed for admins; non-admins still have orders when activeTab === 'orders' */}
+            {!isAdmin && activeTab === 'orders' && (
               <div className="orders-section">
                 <h3>Order History</h3>
                 
