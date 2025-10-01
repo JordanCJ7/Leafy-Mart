@@ -42,6 +42,12 @@ const Profile = () => {
   // Orders state
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersStats, setOrdersStats] = useState({
+    totalSpent: 0,
+    totalOrders: 0,
+    totalItems: 0,
+    membershipLevel: ''
+  });
   
   const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -53,7 +59,11 @@ const Profile = () => {
   };
 
   useEffect(() => {
+    // Fetch profile and orders on mount so header stats are available immediately
     fetchUserProfile();
+    if (!isAdmin) {
+      fetchOrders();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -105,7 +115,9 @@ const Profile = () => {
     try {
       setOrdersLoading(true);
       const token = getAuthToken();
-      const response = await fetch(`${API_BASE}/users/profile/orders`, {
+      // Request a large limit so we can calculate true lifetime stats client-side.
+      // If your dataset grows large consider adding a server-side summary endpoint.
+      const response = await fetch(`${API_BASE}/users/profile/orders?limit=1000`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -113,13 +125,58 @@ const Profile = () => {
       });
 
       const data = await response.json();
-      if (data.success) {
-        setOrders(data.data.orders || []);
-      }
+
+      // Support two response shapes:
+      // 1) { success: true, data: { orders: [...] } }
+      // 2) { orders: [...], pagination: {...} }
+      const fetchedOrders = data?.success ? (data.data?.orders || []) : (data.orders || data.data?.orders || []);
+      setOrders(fetchedOrders);
+      computeOrdersStats(fetchedOrders);
     } catch (error) {
       console.error('Failed to fetch orders:', error);
     } finally {
       setOrdersLoading(false);
+    }
+  };
+
+  const computeOrdersStats = (ordersList) => {
+    try {
+      const totalOrders = ordersList.length;
+      let totalSpent = 0;
+      let totalItems = 0;
+
+      for (const o of ordersList) {
+        // prefer the order.total if present, otherwise sum item prices
+        if (typeof o.total === 'number') {
+          totalSpent += o.total;
+        } else if (Array.isArray(o.items)) {
+          for (const it of o.items) {
+            totalSpent += (it.price || 0) * (it.quantity || 1);
+          }
+        }
+
+        if (Array.isArray(o.items)) {
+          for (const it of o.items) {
+            totalItems += it.quantity || 0;
+          }
+        }
+      }
+
+      // Determine membership level based on totalSpent (assumption thresholds)
+      let membershipLevel = '';
+      if (totalSpent >= 100000) membershipLevel = 'Platinum';
+      else if (totalSpent >= 50000) membershipLevel = 'Gold';
+      else if (totalSpent >= 20000) membershipLevel = 'Silver';
+      else if (totalSpent > 0) membershipLevel = 'Bronze';
+
+      setOrdersStats({
+        totalSpent,
+        totalOrders,
+        totalItems,
+        membershipLevel
+      });
+    } catch (err) {
+      console.error('computeOrdersStats error', err);
     }
   };
 
@@ -283,9 +340,9 @@ const Profile = () => {
                     <span className="stat-label">Membership</span>
                     <span 
                       className="stat-value membership"
-                      style={{ backgroundColor: getMembershipColor(user.membershipLevel) }}
+                      style={{ backgroundColor: getMembershipColor(ordersStats.membershipLevel || user.membershipLevel) }}
                     >
-                      {user.membershipLevel}
+                      {ordersStats.membershipLevel || user.membershipLevel}
                     </span>
                   </div>
                 )}
@@ -293,14 +350,14 @@ const Profile = () => {
                 {!isAdmin && (
                   <div className="stat-item">
                     <span className="stat-label">Total Spent</span>
-                    <span className="stat-value">{formatCurrency(user.totalSpent || 0)}</span>
+                    <span className="stat-value">{formatCurrency(ordersStats.totalSpent || user.totalSpent || 0)}</span>
                   </div>
                 )}
 
                 {!isAdmin && (
                   <div className="stat-item">
                     <span className="stat-label">Orders</span>
-                    <span className="stat-value">{user.totalPurchases || 0}</span>
+                    <span className="stat-value">{ordersStats.totalOrders || user.totalPurchases || 0}</span>
                   </div>
                 )}
               </div>
@@ -650,8 +707,12 @@ const Profile = () => {
                           {order.items.map((item, index) => (
                             <div key={index} className="order-item">
                               <img 
-                                src={item.productId?.image || '/images/placeholder.png'} 
-                                alt={item.productId?.name || 'Product'} 
+                                src={
+                                  item.productId?.img ||
+                                  item.productId?.image ||
+                                  '/images/defaultplant.png'
+                                }
+                                alt={item.productId?.name || 'Plant'} 
                               />
                               <div className="item-details">
                                 <h5>{item.productId?.name || 'Product'}</h5>
