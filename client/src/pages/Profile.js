@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { deleteUserProfile } from '../services/api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import './Profile.css';
 
 const Profile = () => {
-  const { user, updateUser, isAdmin } = useAuth();
+  const { user, updateUser, isAdmin, logout } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -48,6 +51,9 @@ const Profile = () => {
     totalItems: 0,
     membershipLevel: ''
   });
+  
+  // Delete modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   
   const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -209,6 +215,41 @@ const Profile = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const deleteProfile = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const token = getAuthToken();
+      // call API helper without password
+      const res = await deleteUserProfile(token);
+      if (res.success) {
+        // If available, call logout from context to clear local storage and redirect
+        if (typeof logout === 'function') {
+          logout();
+        }
+        // Navigate to home
+        navigate('/');
+      } else {
+        setError(res.message || 'Failed to delete account');
+      }
+    } catch (err) {
+      setError('Network error occurred');
+    } finally {
+      setLoading(false);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+    setError('');
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setError('');
   };
 
   const changePassword = async () => {
@@ -608,13 +649,22 @@ const Profile = () => {
                 )}
 
                 <div className="form-actions">
-                  <button 
-                    className="btn-primary"
-                    onClick={updateProfile}
-                    disabled={loading}
-                  >
-                    {loading ? 'Updating...' : 'Update Profile'}
-                  </button>
+                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <button 
+                      className="btn-primary"
+                      onClick={updateProfile}
+                      disabled={loading}
+                    >
+                      {loading ? 'Updating...' : 'Update Profile'}
+                    </button>
+                    <button
+                      className="btn-danger"
+                      onClick={handleDeleteClick}
+                      disabled={loading}
+                    >
+                      Delete Profile
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -731,6 +781,40 @@ const Profile = () => {
           </div>
         </div>
       </main>
+      
+      {/* Delete Account Modal */}
+      {showDeleteModal && (
+        <div className="modal-overlay" onClick={handleDeleteCancel}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">
+                ⚠️ Delete Account
+              </h3>
+              <p className="modal-description">
+                Are you sure you want to permanently delete your account? 
+                This will remove all your data and cannot be undone.
+              </p>
+            </div>
+            
+            <div className="modal-actions">
+              <button 
+                className="btn-secondary"
+                onClick={handleDeleteCancel}
+                disabled={loading}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn-danger"
+                onClick={deleteProfile}
+                disabled={loading}
+              >
+                {loading ? 'Deleting...' : 'Delete Account'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       <Footer />
     </div>

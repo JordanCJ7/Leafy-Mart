@@ -55,6 +55,17 @@ export async function changePassword(data, token) {
 	return res.json();
 }
 
+export async function deleteUserProfile(token) {
+	const res = await fetch(`${API_BASE}/users/profile`, {
+		method: 'DELETE',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		}
+	});
+	return res.json();
+}
+
 export async function getUserOrderHistory(token, params = {}) {
 	const queryParams = new URLSearchParams();
 	if (params.page) queryParams.append('page', params.page);
