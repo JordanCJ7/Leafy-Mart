@@ -1,123 +1,16 @@
-const Feedback = require('../models/Feedback');
-const Order = require('../models/Order');
-const Product = require('../models/Product');
+// Feedback controller disabled - feature removed.
+// If any runtime code still calls these endpoints, respond with 501 Not Implemented.
 
-// Create feedback for a completed order
-exports.createFeedback = async (req, res) => {
-	try {
-		const { orderId } = req.params;
-		const customerId = req.user.id;
-		
-		// Verify order exists and belongs to customer
-		const order = await Order.findOne({ 
-			_id: orderId, 
-			customerId: customerId,
-			status: 'Delivered'
-		});
-		
-		if (!order) {
-			return res.status(404).json({ 
-				error: 'Order not found or not delivered yet' 
-			});
-		}
-		
-		// Check if feedback already exists
-		const existingFeedback = await Feedback.findOne({ orderId });
-		if (existingFeedback) {
-			return res.status(400).json({ 
-				error: 'Feedback already submitted for this order' 
-			});
-		}
-		
-		// Create feedback
-		const feedbackData = {
-			...req.body,
-			orderId,
-			customerId
-		};
-		
-		const feedback = new Feedback(feedbackData);
-		await feedback.save();
-		
-		// Update order to mark feedback as submitted
-		order.feedbackSubmitted = true;
-		order.feedbackId = feedback._id;
-		await order.save();
-		
-		// Update product ratings if product feedback provided
-		if (feedback.productFeedback && feedback.productFeedback.length > 0) {
-			for (const productFeedback of feedback.productFeedback) {
-				const product = await Product.findById(productFeedback.productId);
-				if (product) {
-					// Recalculate product rating
-					const allProductFeedback = await Feedback.find({
-						'productFeedback.productId': productFeedback.productId,
-						status: 'Approved'
-					});
-					
-					let totalRating = 0;
-					let count = 0;
-					
-					allProductFeedback.forEach(fb => {
-						const pf = fb.productFeedback.find(pf => 
-							pf.productId.toString() === productFeedback.productId.toString()
-						);
-						if (pf) {
-							totalRating += pf.productRating;
-							count++;
-						}
-					});
-					
-					if (count > 0) {
-						product.rating = totalRating / count;
-						product.reviewCount = count;
-						await product.save();
-					}
-				}
-			}
-		}
-		
-		res.status(201).json({
-			message: 'Feedback submitted successfully',
-			feedback
-		});
-	} catch (err) {
-		res.status(400).json({ error: err.message });
-	}
-};
+const notImplemented = (req, res) => res.status(501).json({ error: 'Feedback feature disabled' });
 
-// Get feedback for a specific order (customer)
-exports.getFeedbackByOrder = async (req, res) => {
-	try {
-		const { orderId } = req.params;
-		const customerId = req.user.id;
-		
-		// Verify order belongs to customer
-		const order = await Order.findOne({ 
-			_id: orderId, 
-			customerId: customerId 
-		});
-		
-		if (!order) {
-			return res.status(404).json({ error: 'Order not found' });
-		}
-		
-		const feedback = await Feedback.findOne({ orderId })
-			.populate('productFeedback.productId', 'name img');
-		
-		if (!feedback) {
-			return res.status(404).json({ error: 'Feedback not found' });
-		}
-		
-		res.json(feedback);
-	} catch (err) {
-		res.status(500).json({ error: err.message });
-	}
-};
-
-// Get all feedback for a customer
-exports.getCustomerFeedback = async (req, res) => {
-	try {
+exports.createFeedback = notImplemented;
+exports.getFeedbackByOrder = notImplemented;
+exports.getCustomerFeedback = notImplemented;
+exports.getProductFeedback = notImplemented;
+exports.getAllFeedback = notImplemented;
+exports.updateFeedbackStatus = notImplemented;
+exports.getFeedbackStats = notImplemented;
+exports.voteFeedbackHelpful = notImplemented;
 		const customerId = req.user.id;
 		const page = parseInt(req.query.page) || 1;
 		const limit = parseInt(req.query.limit) || 10;

@@ -4,7 +4,6 @@ import {
   getAllOrders, 
   getOrderStats, 
   updateOrderStatusAdmin, 
-  requestOrderFeedback,
   bulkUpdateOrderStatus 
 } from '../services/api';
 import { 
@@ -151,20 +150,7 @@ export default function OrderManagement() {
     }
   };
 
-  const handleRequestFeedback = async (orderId) => {
-    try {
-      const response = await requestOrderFeedback(orderId, token);
-      if (response.order) {
-        setOrders(orders.map(order => 
-          order._id === orderId ? response.order : order
-        ));
-        toast({ title: 'Feedback request sent to customer', icon: 'success' });
-      }
-    } catch (error) {
-      console.error('Failed to request feedback:', error);
-      alert('Failed to send feedback request', error.message);
-    }
-  };
+  // feedback request function removed
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -455,22 +441,7 @@ export default function OrderManagement() {
                         <Edit3 size={14} />
                       </button>
                       
-                      {order.status === 'Delivered' && !order.feedbackRequested && (
-                        <button
-                          onClick={() => handleRequestFeedback(order._id)}
-                          style={{
-                            background: '#28a745',
-                            color: 'white',
-                            border: 'none',
-                            padding: '0.25rem 0.5rem',
-                            borderRadius: '4px',
-                            cursor: 'pointer'
-                          }}
-                          title="Request Feedback"
-                        >
-                          <MessageSquare size={14} />
-                        </button>
-                      )}
+                      {/* feedback request button removed */}
                     </div>
                   </td>
                 </tr>

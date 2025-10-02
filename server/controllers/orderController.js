@@ -359,25 +359,7 @@ exports.getOrderStats = async (req, res) => {
 	}
 };
 
-// Request feedback from customer for an order (admin)
-exports.requestFeedback = async (req, res) => {
-	try {
-		const order = await Order.findById(req.params.id);
-		if (!order) {
-			return res.status(404).json({ error: 'Order not found' });
-		}
-
-		// Mark feedback requested (non-breaking if schema is strict)
-		order.feedbackRequested = true;
-		await order.save();
-
-		// Optionally send notification here using utils/sendNotification
-
-		res.json({ message: 'Feedback request sent to customer', order });
-	} catch (err) {
-		res.status(500).json({ error: err.message });
-	}
-};
+// feedback functionality removed
 
 // Bulk update order status
 exports.bulkUpdateOrderStatus = async (req, res) => {

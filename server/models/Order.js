@@ -62,10 +62,7 @@ const orderSchema = new mongoose.Schema({
   careInstructions: [String], // Care instructions for ordered plants
   seasonalNotes: String, // Seasonal care notes
   
-  // Feedback Information
-  feedbackRequested: { type: Boolean, default: false },
-  feedbackSubmitted: { type: Boolean, default: false },
-  feedbackId: { type: mongoose.Schema.Types.ObjectId, ref: 'Feedback' }
+  // (feedback removed)
   
 }, { timestamps: true });
 

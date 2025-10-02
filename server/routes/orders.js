@@ -16,7 +16,7 @@ router.get('/stats', authenticateAdmin, orderController.getOrderStats);
 router.put('/bulk/status', authenticateAdmin, orderController.bulkUpdateOrderStatus);
 router.put('/:id/status', authenticateAdmin, orderController.updateOrderStatus);
 router.put('/:id/payment', authenticateAdmin, orderController.updatePaymentStatus);
-router.put('/:id/feedback-request', authenticateAdmin, orderController.requestFeedback);
+// feedback request route removed
 
 // Parameterized routes (after admin routes)
 // Get specific order by ID (authenticated users)

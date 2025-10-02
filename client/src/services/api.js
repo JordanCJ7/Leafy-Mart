@@ -327,6 +327,14 @@ export async function createOrder(orderData, token) {
 	return res.json();
 }
 
+// Feedback API - disabled: provide a stub so frontend imports don't break.
+// Returns an error-shaped object that calling code (e.g., OrderTracking) expects.
+export async function createFeedback(orderId, feedbackData, token) {
+	// Feedback feature has been removed/disabled server-side. Return a consistent
+	// response object so callers can handle it gracefully.
+	return { error: 'Feedback feature disabled' };
+}
+
 export async function getUserOrders(token, params = {}) {
 	const queryParams = new URLSearchParams();
 	if (params.page) queryParams.append('page', params.page);
@@ -434,17 +442,6 @@ export async function updatePaymentStatus(orderId, paymentData, token) {
 	return res.json();
 }
 
-export async function requestOrderFeedback(orderId, token) {
-	const res = await fetch(`${API_BASE}/orders/${orderId}/feedback-request`, {
-		method: 'PUT',
-		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': `Bearer ${token}`
-		}
-	});
-	return res.json();
-}
-
 export async function bulkUpdateOrderStatus(orderIds, statusData, token) {
 	const res = await fetch(`${API_BASE}/orders/bulk/status`, {
 		method: 'PUT',
@@ -453,135 +450,6 @@ export async function bulkUpdateOrderStatus(orderIds, statusData, token) {
 			'Authorization': `Bearer ${token}`
 		},
 		body: JSON.stringify({ orderIds, ...statusData })
-	});
-	return res.json();
-}
-
-// Feedback Management
-export async function createFeedback(orderId, feedbackData, token) {
-	const res = await fetch(`${API_BASE}/feedback/order/${orderId}`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': `Bearer ${token}`
-		},
-		body: JSON.stringify(feedbackData)
-	});
-	return res.json();
-}
-
-export async function getFeedbackByOrder(orderId, token) {
-	const res = await fetch(`${API_BASE}/feedback/order/${orderId}`, {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': `Bearer ${token}`
-		}
-	});
-	return res.json();
-}
-
-export async function getCustomerFeedback(token, params = {}) {
-	const queryParams = new URLSearchParams();
-	if (params.page) queryParams.append('page', params.page);
-	if (params.limit) queryParams.append('limit', params.limit);
-	
-	const url = `${API_BASE}/feedback/customer${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-	const res = await fetch(url, {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': `Bearer ${token}`
-		}
-	});
-	return res.json();
-}
-
-export async function getProductFeedback(productId, params = {}) {
-	const queryParams = new URLSearchParams();
-	if (params.page) queryParams.append('page', params.page);
-	if (params.limit) queryParams.append('limit', params.limit);
-	
-	const url = `${API_BASE}/feedback/product/${productId}${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-	const res = await fetch(url, {
-		method: 'GET'
-	});
-	return res.json();
-}
-
-export async function getAllFeedback(token, params = {}) {
-	const queryParams = new URLSearchParams();
-	if (params.page) queryParams.append('page', params.page);
-	if (params.limit) queryParams.append('limit', params.limit);
-	if (params.status) queryParams.append('status', params.status);
-	if (params.rating) queryParams.append('rating', params.rating);
-	if (params.dateFrom) queryParams.append('dateFrom', params.dateFrom);
-	if (params.dateTo) queryParams.append('dateTo', params.dateTo);
-	
-	const url = `${API_BASE}/feedback${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-	const res = await fetch(url, {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': `Bearer ${token}`
-		}
-	});
-	return res.json();
-}
-
-export async function getFeedbackStats(token) {
-	const res = await fetch(`${API_BASE}/feedback/stats`, {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': `Bearer ${token}`
-		}
-	});
-	return res.json();
-}
-
-export async function updateFeedbackStatus(feedbackId, statusData, token) {
-	const res = await fetch(`${API_BASE}/feedback/${feedbackId}/status`, {
-		method: 'PUT',
-		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': `Bearer ${token}`
-		},
-		body: JSON.stringify(statusData)
-	});
-	return res.json();
-}
-
-export async function voteFeedbackHelpful(feedbackId) {
-	const res = await fetch(`${API_BASE}/feedback/${feedbackId}/helpful`, {
-		method: 'PUT',
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	});
-	return res.json();
-}
-
-// Admin feedback functions
-export async function getAllFeedbackAdmin(token, params = {}) {
-	const queryString = new URLSearchParams(params).toString();
-	const res = await fetch(`${API_BASE}/feedback/admin${queryString ? `?${queryString}` : ''}`, {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': `Bearer ${token}`
-		}
-	});
-	return res.json();
-}
-
-export async function getFeedbackStatsAdmin(token) {
-	const res = await fetch(`${API_BASE}/feedback/admin/stats`, {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': `Bearer ${token}`
-		}
 	});
 	return res.json();
 }
