@@ -13,7 +13,7 @@ const Signup = () => {
     password: '',
     confirmPassword: '',
     phone: '',
-    address: ''
+
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -57,8 +57,7 @@ const Signup = () => {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        phone: formData.phone,
-        address: formData.address
+        phone: formData.phone
       });
 
       if (data.success) {
@@ -131,24 +130,9 @@ const Signup = () => {
             }}>Join our plant community today!</p>
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div style={{
-              background: '#ffebee',
-              color: '#c62828',
-              padding: '12px 16px',
-              borderRadius: '8px',
-              marginBottom: '20px',
-              border: '1px solid #ef9a9a',
-              fontSize: '14px'
-            }}>
-              {error}
-            </div>
-          )}
-
           {/* Registration Form */}
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            
+
             {/* Name Input */}
             <div>
               <label style={{
@@ -355,7 +339,7 @@ const Signup = () => {
               </div>
             </div>
 
-            {/* Phone and Address - Optional Fields */}
+            {/* Phone Number - Optional */}
             <div>
               <label style={{
                 display: 'block',
@@ -392,47 +376,6 @@ const Signup = () => {
                     transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
                     boxSizing: 'border-box',
                     outline: 'none'
-                  }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label style={{
-                display: 'block',
-                marginBottom: '8px',
-                color: '#2e7d32',
-                fontWeight: '500',
-                fontSize: '14px'
-              }}>
-                Address (Optional)
-              </label>
-              <div style={{ position: 'relative' }}>
-                <MapPin 
-                  size={20} 
-                  style={{
-                    position: 'absolute',
-                    left: '15px',
-                    top: '20px',
-                    color: '#4caf50'
-                  }} 
-                />
-                <textarea
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  placeholder="Enter your address"
-                  rows="3"
-                  style={{
-                    width: '100%',
-                    padding: '15px 15px 15px 50px',
-                    border: '2px solid #e8f5e8',
-                    borderRadius: '12px',
-                    fontSize: '16px',
-                    transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                    resize: 'vertical'
                   }}
                 />
               </div>

@@ -128,7 +128,8 @@ const ProductManagement = () => {
       tags: product.tags || [],
       stock: product.stock,
       img: product.img,
-      rating: product.rating || 4.0
+      // keep rating fixed to 4 for all products (not shown in the form)
+      rating: 4.0
     });
     setEditingProduct(product.id);
     setShowModal(true);
@@ -261,7 +262,8 @@ const ProductManagement = () => {
         img: finalImg,
         priceLKR: parseInt(formData.priceLKR) || 0,
         stock: parseInt(formData.stock) || 0,
-        rating: parseFloat(formData.rating) || 0
+        // enforce a fixed rating of 4 for all products (not editable in UI)
+        rating: 4.0
       };
 
       if (!productData.id) delete productData.id;
@@ -543,19 +545,7 @@ const ProductManagement = () => {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="rating">Rating</label>
-                  <input
-                    type="number"
-                    id="rating"
-                    name="rating"
-                    value={formData.rating}
-                    onChange={handleInputChange}
-                    min="0"
-                    max="5"
-                    step="0.1"
-                  />
-                </div>
+                {/* Rating is hidden from the form UI; all products will have rating = 4 */}
               </div>
 
               <div className="form-row">

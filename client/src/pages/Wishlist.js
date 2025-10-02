@@ -4,19 +4,11 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useWishlist } from '../contexts/WishlistContext';
-import { useCart } from '../contexts/CartContext';
-import { Heart, ShoppingCart, X, ArrowLeft, Star } from 'lucide-react';
+import { Heart, X, ArrowLeft, Star } from 'lucide-react';
 import { toast, confirm } from '../utils/swal';
 
 export default function Wishlist() {
   const { wishlistItems, removeFromWishlist, clearWishlist } = useWishlist();
-  const { addToCart } = useCart();
-
-  const handleMoveToCart = (item) => {
-    addToCart(item);
-    removeFromWishlist(item.id);
-  toast({ title: `${item.name} moved to cart!`, icon: 'success' });
-  };
 
   const handleRemoveItem = (itemId, itemName) => {
     (async () => {
@@ -266,29 +258,7 @@ export default function Wishlist() {
                     View Details
                   </Link>
                   
-                  <button
-                    onClick={() => handleMoveToCart(item)}
-                    disabled={item.stock === 0}
-                    style={{
-                      flex: 1,
-                      padding: '0.75rem',
-                      background: item.stock === 0 ? '#ccc' : '#388e3c',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontWeight: '600',
-                      fontSize: '0.9rem',
-                      cursor: item.stock === 0 ? 'not-allowed' : 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.5rem',
-                      transition: 'background-color 0.2s'
-                    }}
-                  >
-                    <ShoppingCart size={16} />
-                    {item.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-                  </button>
+                  {/* Add to Cart removed from wishlist page by design */}
                 </div>
               </div>
             </div>

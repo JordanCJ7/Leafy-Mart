@@ -8,7 +8,6 @@ const orderSchema = new mongoose.Schema({
     productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
     quantity: { type: Number, required: true, min: 1 },
     price: { type: Number, required: true }, // Price at time of order
-    discount: { type: Number, default: 0 }
   }],
   
   // Order Details
@@ -23,7 +22,6 @@ const orderSchema = new mongoose.Schema({
   subtotal: { type: Number, required: true },
   tax: { type: Number, default: 0 },
   shippingCost: { type: Number, default: 0 },
-  discount: { type: Number, default: 0 },
   total: { type: Number, required: true },
   
   // Payment
@@ -64,10 +62,7 @@ const orderSchema = new mongoose.Schema({
   careInstructions: [String], // Care instructions for ordered plants
   seasonalNotes: String, // Seasonal care notes
   
-  // Feedback Information
-  feedbackRequested: { type: Boolean, default: false },
-  feedbackSubmitted: { type: Boolean, default: false },
-  feedbackId: { type: mongoose.Schema.Types.ObjectId, ref: 'Feedback' }
+  // (feedback removed)
   
 }, { timestamps: true });
 
@@ -96,11 +91,11 @@ orderSchema.pre('validate', async function(next) {
 // Method to calculate total
 orderSchema.methods.calculateTotal = function() {
   const itemsTotal = this.items.reduce((sum, item) => {
-    return sum + (item.price * item.quantity - item.discount);
+    return sum + (item.price * item.quantity);
   }, 0);
-  
+
   this.subtotal = itemsTotal;
-  this.total = this.subtotal + this.tax + this.shippingCost - this.discount;
+  this.total = this.subtotal + this.tax + this.shippingCost;
   return this.total;
 };
 

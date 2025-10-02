@@ -97,11 +97,6 @@ const userSchema = new mongoose.Schema({
     default: true 
   },
   
-  // Wishlist
-  wishlist: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product'
-  }],
   
   // Account Status & Dates
   isActive: {

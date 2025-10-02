@@ -70,13 +70,6 @@ function Navbar() {
               >
                 Order Management
               </Link>
-              <Link
-                to="/admin/dashboard?tab=feedback"
-                className={`navbar-item ${location.pathname.startsWith('/admin') && new URLSearchParams(location.search).get('tab') === 'feedback' ? 'active' : ''}`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Feedback Management
-              </Link>
             </>
           )}
 

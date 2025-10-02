@@ -36,3 +36,43 @@
     transform: rotate(360deg);
   }
 }
+
+/* SweetAlert2 custom classes defined in src/utils/swal.js */
+.swal-popup {
+  border-radius: 12px !important;
+  padding: 1.25rem !important;
+  box-shadow: 0 8px 32px rgba(2, 6, 23, 0.35) !important;
+}
+.swal-title {
+  font-size: 1.25rem !important;
+  margin-bottom: 0.25rem !important;
+  color: #0f172a !important;
+}
+.swal-content {
+  color: #374151 !important;
+  font-size: 0.98rem !important;
+  margin-bottom: 0.75rem !important;
+}
+.swal-confirm,
+.swal-cancel {
+  padding: 0.5rem 0.9rem !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  border: none !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+}
+.swal-confirm {
+  background-color: #16a34a !important; /* green */
+  color: #ffffff !important;
+  margin-left: 0.5rem !important;
+}
+.swal-cancel {
+  background-color: transparent !important;
+  color: #374151 !important;
+  border: 1px solid #d1d5db !important;
+}
+.swal-confirm:focus, .swal-cancel:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+}

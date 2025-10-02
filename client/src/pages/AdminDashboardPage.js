@@ -6,7 +6,6 @@ import Footer from '../components/Footer';
 import UserManagement from '../components/UserManagement';
 import ProductManagement from '../components/ProductManagement';
 import OrderManagement from '../components/OrderManagement';
-import FeedbackManagement from '../components/FeedbackManagement';
 
 export default function AdminDashboardPage() {
 	const [activeTab, setActiveTab] = useState('dashboard');
@@ -28,8 +27,6 @@ export default function AdminDashboardPage() {
 				return <ProductManagement />;
 			case 'orders':
 				return <OrderManagement />;
-			case 'feedback':
-				return <FeedbackManagement />;
 			default:
 				return (
 					<div style={{ padding: '2rem', textAlign: 'center' }}>
@@ -80,16 +77,7 @@ export default function AdminDashboardPage() {
 								<p style={{ color: '#666' }}>Process and track customer orders</p>
 							</div>
 							
-							<div style={{
-								background: 'white',
-								padding: '1.5rem',
-								borderRadius: '12px',
-								boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-								cursor: 'pointer'
-							}} onClick={() => setActiveTab('feedback')}>
-								<h3 style={{ color: '#2e7d32', marginBottom: '0.5rem' }}>Feedback Management</h3>
-								<p style={{ color: '#666' }}>Review and respond to customer feedback</p>
-							</div>
+							{/* Feedback management removed */}
 						</div>
 					</div>
 				);

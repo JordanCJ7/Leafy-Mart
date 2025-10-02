@@ -77,8 +77,7 @@ exports.getUserById = async (req, res) => {
     const { id } = req.params;
     
     const user = await User.findById(id)
-      .select('-password')
-      .populate('wishlist', 'name price image');
+      .select('-password');
 
     if (!user) {
       return res.status(404).json({
@@ -479,21 +478,13 @@ exports.getOrderHistory = async (req, res) => {
   }
 };
 
-// Delete account (self - soft delete)
+// Delete account (self - hard delete)
 exports.deleteAccount = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { password } = req.body;
 
-    if (!password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password is required to delete account'
-      });
-    }
-
-    // Get user with password
-    const user = await User.findById(userId).select('+password');
+    // Get user 
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -501,21 +492,12 @@ exports.deleteAccount = async (req, res) => {
       });
     }
 
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password is incorrect'
-      });
-    }
-
-    // Soft delete by deactivating account
-    await User.findByIdAndUpdate(userId, { isActive: false });
+    // Hard delete - remove user completely from database
+    await User.findByIdAndDelete(userId);
 
     res.json({
       success: true,
-      message: 'Account deactivated successfully'
+      message: 'Account deleted successfully'
     });
   } catch (error) {
     console.error('Delete account error:', error);
