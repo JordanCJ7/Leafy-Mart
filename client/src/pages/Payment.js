@@ -95,12 +95,11 @@ export default function Payment() {
         try {
           // Get the database product by its string ID
           const product = await getProductById(item.id);
-          if (product && product._id) {
+            if (product && product._id) {
             orderItems.push({
               productId: product._id, // Use MongoDB ObjectId
               quantity: item.quantity,
-              price: item.price,
-              discount: 0
+              price: item.price
             });
           } else {
             throw new Error(`Product not found in database: ${item.id}`);
