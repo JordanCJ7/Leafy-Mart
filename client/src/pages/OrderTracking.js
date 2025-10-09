@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '../contexts/AuthContext';
-import { getUserOrders, createFeedback } from '../services/api';
+import { getUserOrders, createFeedback, cancelOrder } from '../services/api';
 import { Package, Truck, CheckCircle, Clock, X, MapPin, Calendar, CreditCard, Star, MessageSquare } from 'lucide-react';
 import { toast, alert, confirm } from '../utils/swal';
 
@@ -51,6 +51,7 @@ export default function OrderTracking() {
     productFeedback: []
   });
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const [cancellingOrders, setCancellingOrders] = useState(new Set());
 
   useEffect(() => {
     if (isLoggedIn && token) {
@@ -142,6 +143,54 @@ export default function OrderTracking() {
     }
     
     setFeedbackData({ ...feedbackData, productFeedback: newProductFeedback });
+  };
+
+  const handleCancelOrder = async (order) => {
+    console.log('Cancel order clicked for:', order._id, 'Status:', order.status);
+    console.log('Token available:', !!token);
+    
+    try {
+      const result = await confirm(
+        'Cancel Order',
+        `Are you sure you want to cancel order #${order.orderNumber || order._id}? This action cannot be undone.`,
+        'Yes, Cancel Order',
+        'Keep Order'
+      );
+
+      console.log('Confirmation result:', result);
+      if (!result) return;
+
+      console.log('Setting cancelling state for order:', order._id);
+      setCancellingOrders(prev => new Set([...prev, order._id]));
+
+      console.log('Making API call to cancel order...');
+      const response = await cancelOrder(order._id, token);
+      console.log('API response:', response);
+      
+      if (response.error) {
+        throw new Error(response.error);
+      }
+
+      console.log('Order cancelled successfully, showing toast...');
+      toast({ 
+        title: 'Order Cancelled', 
+        text: 'Your order has been successfully cancelled. Stock has been restored.',
+        icon: 'success' 
+      });
+      
+      console.log('Refreshing orders...');
+      fetchOrders(); // Refresh orders
+    } catch (error) {
+      console.error('Failed to cancel order:', error);
+      alert('Failed to cancel order', error.message);
+    } finally {
+      console.log('Removing cancelling state for order:', order._id);
+      setCancellingOrders(prev => {
+        const updated = new Set(prev);
+        updated.delete(order._id);
+        return updated;
+      });
+    }
   };
 
   const renderStars = (rating, onRatingChange) => {
@@ -454,6 +503,26 @@ export default function OrderTracking() {
                       Write Review
                     </button>
                   )}
+
+                  {order.status === 'Pending' && (
+                    <button
+                      onClick={() => handleCancelOrder(order)}
+                      disabled={cancellingOrders.has(order._id)}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        border: '1px solid #dc3545',
+                        background: 'transparent',
+                        color: '#dc3545',
+                        borderRadius: '6px',
+                        cursor: cancellingOrders.has(order._id) ? 'not-allowed' : 'pointer',
+                        fontWeight: '600',
+                        fontSize: '0.9rem',
+                        opacity: cancellingOrders.has(order._id) ? 0.6 : 1
+                      }}
+                    >
+                      {cancellingOrders.has(order._id) ? 'Cancelling...' : 'Cancel Order'}
+                    </button>
+                  )}
                 </div>
 
                 {selectedOrder?._id === order._id && (
@@ -492,6 +561,12 @@ export default function OrderTracking() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <CheckCircle size={16} color="#28a745" />
                           <span style={{ fontSize: '0.9rem' }}>Order delivered - {new Date(order.deliveryDate).toLocaleDateString()}</span>
+                        </div>
+                      )}
+                      {order.status === 'Cancelled' && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <X size={16} color="#dc3545" />
+                          <span style={{ fontSize: '0.9rem' }}>Order cancelled</span>
                         </div>
                       )}
                     </div>
