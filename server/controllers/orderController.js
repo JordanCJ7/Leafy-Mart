@@ -1,5 +1,28 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const User = require('../models/User');
+
+// Shipping & Tax config (can be overridden with environment variables)
+const TAX_RATE = parseFloat(process.env.TAX_RATE) || 0.02; // 2% default
+const FREE_SHIPPING_THRESHOLD = parseFloat(process.env.FREE_SHIPPING_THRESHOLD) || 10000; // LKR
+const STANDARD_SHIPPING_FEE = parseFloat(process.env.STANDARD_SHIPPING_FEE) || 350; // LKR
+
+// Helper function to calculate membership discount
+const calculateMembershipDiscount = (membershipLevel, subtotal) => {
+  const discountRates = {
+    'Silver': 0.05,     // 5%
+    'Gold': 0.10,       // 10%
+    'Platinum': 0.15    // 15%
+  };
+  
+  const discountPercentage = discountRates[membershipLevel] || 0;
+  const discountAmount = subtotal * discountPercentage;
+  
+  return {
+    discountAmount,
+    discountPercentage: discountPercentage * 100 // Convert to percentage
+  };
+};
 
 // Create a new order
 exports.createOrder = async (req, res) => {
@@ -10,6 +33,12 @@ exports.createOrder = async (req, res) => {
 		};
 
 		console.log('createOrder - incoming orderData:', JSON.stringify(orderData, null, 2));
+		
+		// Get customer information to apply membership discount
+		const customer = await User.findById(orderData.customerId);
+		if (!customer) {
+			return res.status(400).json({ error: 'Customer not found' });
+		}
 		
 		// Validate and calculate totals
 		if (orderData.items && orderData.items.length > 0) {
@@ -29,20 +58,45 @@ exports.createOrder = async (req, res) => {
 		
 		const order = new Order(orderData);
 		
-		// Calculate total if not provided
-		if (!order.total) {
-			order.calculateTotal();
-		}
+		// Calculate subtotal
+		const itemsTotal = order.items.reduce((sum, item) => {
+			return sum + (item.price * item.quantity);
+		}, 0);
+		order.subtotal = itemsTotal;
+		
+		// Apply membership discount
+		const { discountAmount, discountPercentage } = calculateMembershipDiscount(
+			customer.membershipLevel, 
+			order.subtotal
+		);
+		order.discount = discountAmount;
+		order.discountPercentage = discountPercentage;
+
+		// Calculate tax (use TAX_RATE) and shipping cost
+		// Allow overriding tax/shipping via request if needed (but default to configured rules)
+		order.tax = typeof order.tax === 'number' ? order.tax : parseFloat((order.subtotal * TAX_RATE).toFixed(2));
+
+		// Shipping fee: free over threshold, otherwise standard fee
+		const calculateShippingFee = (subtotal) => {
+			if (!subtotal || subtotal <= 0) return 0;
+			return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_FEE;
+		};
+		order.shippingCost = typeof order.shippingCost === 'number' ? order.shippingCost : calculateShippingFee(order.subtotal);
+		
+		// Calculate total (subtotal - discount + tax + shipping)
+		order.calculateTotal();
 		
 		const savedOrder = await order.save();
 		
-		// Update product stock
-		for (let item of orderData.items) {
-			await Product.findByIdAndUpdate(
-				item.productId,
-				{ $inc: { stock: -item.quantity } }
-			);
-		}
+		// DO NOT update product stock here - stock will be decremented when order is confirmed by admin
+		// This prevents inventory from being locked for pending/unconfirmed orders
+		
+		// Update customer's purchase history and membership level
+		// Note: We record the purchase immediately for membership tier calculation
+		// If order is cancelled later, this could be adjusted, but typically membership
+		// benefits are given based on order placement rather than fulfillment
+		customer.recordPurchase(order.total);
+		await customer.save();
 		
 		res.status(201).json(savedOrder);
 	} catch (err) {
@@ -164,6 +218,13 @@ exports.updateOrderStatus = async (req, res) => {
 	try {
 		const { status, trackingNumber, notes } = req.body;
 		
+		// Fetch the current order to check previous status
+		const order = await Order.findById(req.params.id).populate('items.productId');
+		
+		if (!order) {
+			return res.status(404).json({ error: 'Order not found' });
+		}
+		
 		const updateData = { status };
 		
 		if (trackingNumber) {
@@ -183,17 +244,40 @@ exports.updateOrderStatus = async (req, res) => {
 			updateData.actualDelivery = new Date();
 		}
 		
-		const order = await Order.findByIdAndUpdate(
+		// Decrement stock when order is confirmed for the first time
+		// Only deduct stock if not already deducted and status is being changed to Confirmed or Processing
+		if (!order.stockDeducted && (status === 'Confirmed' || status === 'Processing')) {
+			// Verify stock availability before confirming
+			for (let item of order.items) {
+				const product = await Product.findById(item.productId);
+				if (!product) {
+					return res.status(400).json({ error: `Product not found: ${item.productId}` });
+				}
+				if (product.stock < item.quantity) {
+					return res.status(400).json({ 
+						error: `Insufficient stock for ${product.name}. Available: ${product.stock}, Required: ${item.quantity}` 
+					});
+				}
+			}
+			
+			// All checks passed, decrement stock
+			for (let item of order.items) {
+				await Product.findByIdAndUpdate(
+					item.productId,
+					{ $inc: { stock: -item.quantity } }
+				);
+			}
+			
+			updateData.stockDeducted = true;
+		}
+		
+		const updatedOrder = await Order.findByIdAndUpdate(
 			req.params.id,
 			updateData,
 			{ new: true }
 		).populate('customerId', 'name email phone');
 		
-		if (!order) {
-			return res.status(404).json({ error: 'Order not found' });
-		}
-		
-		res.json(order);
+		res.json(updatedOrder);
 	} catch (err) {
 		res.status(400).json({ error: err.message });
 	}
@@ -244,12 +328,14 @@ exports.cancelOrder = async (req, res) => {
 			return res.status(400).json({ error: 'Cannot cancel shipped or delivered orders' });
 		}
 		
-		// Restore product stock
-		for (let item of order.items) {
-			await Product.findByIdAndUpdate(
-				item.productId,
-				{ $inc: { stock: item.quantity } }
-			);
+		// Restore product stock ONLY if it was already deducted
+		if (order.stockDeducted) {
+			for (let item of order.items) {
+				await Product.findByIdAndUpdate(
+					item.productId,
+					{ $inc: { stock: item.quantity } }
+				);
+			}
 		}
 		
 		order.status = 'Cancelled';

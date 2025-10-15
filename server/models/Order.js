@@ -20,6 +20,8 @@ const orderSchema = new mongoose.Schema({
   
   // Pricing
   subtotal: { type: Number, required: true },
+  discount: { type: Number, default: 0 }, // Membership discount
+  discountPercentage: { type: Number, default: 0 }, // Store the discount percentage applied
   tax: { type: Number, default: 0 },
   shippingCost: { type: Number, default: 0 },
   total: { type: Number, required: true },
@@ -57,6 +59,7 @@ const orderSchema = new mongoose.Schema({
   // Order Processing
   processedBy: String, // Admin who processed the order
   processedAt: Date,
+  stockDeducted: { type: Boolean, default: false }, // Track if inventory has been decremented
   
   // Plant Care Information
   careInstructions: [String], // Care instructions for ordered plants
@@ -95,7 +98,8 @@ orderSchema.methods.calculateTotal = function() {
   }, 0);
 
   this.subtotal = itemsTotal;
-  this.total = this.subtotal + this.tax + this.shippingCost;
+  // Total = subtotal - discount + tax + shipping
+  this.total = this.subtotal - this.discount + this.tax + this.shippingCost;
   return this.total;
 };
 
