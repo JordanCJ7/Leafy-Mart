@@ -8,8 +8,7 @@ const existingProducts = [
   {
     id: 'tulsi',
     name: 'Tulsi (Holy Basil)',
-    priceLKR: 1200,
-    priceDisplay: 'LKR 1,200',
+  priceLKR: 1200,
     category: 'Herbs',
     tags: ['medicinal', 'herb', 'balcony'],
     stock: 24,
@@ -19,8 +18,7 @@ const existingProducts = [
   {
     id: 'money-plant',
     name: 'Money Plant (Pothos)',
-    priceLKR: 1800,
-    priceDisplay: 'LKR 1,800',
+  priceLKR: 1800,
     category: 'Indoor Vines',
     tags: ['easy-care', 'trailing', 'low-light'],
     stock: 40,
@@ -30,8 +28,7 @@ const existingProducts = [
   {
     id: 'snake-plant',
     name: 'Snake Plant (Sansevieria)',
-    priceLKR: 3000,
-    priceDisplay: 'LKR 3,000',
+  priceLKR: 3000,
     category: 'Air Purifiers',
     tags: ['low-light', 'statement', 'indoors'],
     stock: 15,
@@ -41,8 +38,7 @@ const existingProducts = [
   {
     id: 'areca-palm',
     name: 'Areca Palm',
-    priceLKR: 5500,
-    priceDisplay: 'LKR 5,500',
+  priceLKR: 5500,
     category: 'Palms',
     tags: ['air-purifying', 'office', 'tropical'],
     stock: 6,
@@ -52,8 +48,7 @@ const existingProducts = [
   {
     id: 'hibiscus',
     name: 'Hibiscus',
-    priceLKR: 2400,
-    priceDisplay: 'LKR 2,400',
+  priceLKR: 2400,
     category: 'Flowering Shrubs',
     tags: ['tropical', 'large-space', 'fragrant'],
     stock: 12,
@@ -63,8 +58,7 @@ const existingProducts = [
   {
     id: 'peace-lily',
     name: 'Peace Lily',
-    priceLKR: 3600,
-    priceDisplay: 'LKR 3,600',
+  priceLKR: 3600,
     category: 'Shade Plants',
     tags: ['shade-tolerant', 'flowering', 'clean-air'],
     stock: 10,
@@ -74,8 +68,7 @@ const existingProducts = [
   {
     id: 'rubber-plant',
     name: 'Rubber Plant (Ficus elastica)',
-    priceLKR: 4200,
-    priceDisplay: 'LKR 4,200',
+  priceLKR: 4200,
     category: 'Foliage',
     tags: ['statement', 'low-light', 'indoors'],
     stock: 8,
@@ -85,8 +78,7 @@ const existingProducts = [
   {
     id: 'zz-plant',
     name: 'ZZ Plant (Zamioculcas)',
-    priceLKR: 2900,
-    priceDisplay: 'LKR 2,900',
+  priceLKR: 2900,
     category: 'Low-Maintenance',
     tags: ['low-light', 'drought-tolerant', 'office'],
     stock: 22,
@@ -96,8 +88,7 @@ const existingProducts = [
   {
     id: 'spider-plant',
     name: 'Spider Plant',
-    priceLKR: 1500,
-    priceDisplay: 'LKR 1,500',
+  priceLKR: 1500,
     category: 'Hanging & Trailing',
     tags: ['easy-care', 'air-purifying', 'kids-friendly'],
     stock: 30,
@@ -107,8 +98,7 @@ const existingProducts = [
   {
     id: 'fiddle-leaf-fig',
     name: 'Fiddle Leaf Fig',
-    priceLKR: 6800,
-    priceDisplay: 'LKR 6,800',
+  priceLKR: 6800,
     category: 'Statement Trees',
     tags: ['statement', 'indoors', 'decorative'],
     stock: 4,
@@ -118,8 +108,7 @@ const existingProducts = [
   {
     id: 'jade-plant',
     name: 'Jade Plant',
-    priceLKR: 1800,
-    priceDisplay: 'LKR 1,800',
+  priceLKR: 1800,
     category: 'Succulents & Cacti',
     tags: ['drought-tolerant', 'outdoor', 'low-light'],
     stock: 35,
@@ -129,8 +118,7 @@ const existingProducts = [
   {
     id: 'jasmine',
     name: 'Jasmine',
-    priceLKR: 3200,
-    priceDisplay: 'LKR 3,200',
+  priceLKR: 3200,
     category: 'Fragrant Climbers',
     tags: ['fragrant', 'climbing', 'flowering'],
     stock: 18,
