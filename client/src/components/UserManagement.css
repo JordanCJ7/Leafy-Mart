@@ -30,6 +30,14 @@
 
 .user-management-header {
   margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.user-management-header > div {
+  flex: 1;
 }
 
 .user-management-header h1 {
@@ -42,6 +50,37 @@
 .user-management-header p {
   color: var(--text-secondary);
   font-size: 1.1rem;
+}
+
+.btn-generate-report {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, var(--green-600), var(--green-700));
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+}
+
+.btn-generate-report:hover {
+  background: linear-gradient(135deg, var(--green-700), var(--green-600));
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.btn-generate-report:active {
+  transform: translateY(0);
+}
+
+.btn-generate-report svg {
+  stroke-width: 2.5;
 }
 
 /* Loading */

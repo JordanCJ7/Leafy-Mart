@@ -13,10 +13,26 @@
   border-bottom: 2px solid #e8f5e8;
 }
 
+.product-management-header > div:first-child {
+  flex: 1;
+}
+
 .product-management-header h2 {
   color: #2e7d32;
-  margin: 0;
+  margin: 0 0 0.5rem 0;
   font-size: 1.8rem;
+}
+
+.product-management-header p {
+  color: #666;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
 }
 
 .product-controls {
@@ -180,6 +196,22 @@
 .btn-primary {
   background: #2e7d32;
   color: white;
+}
+
+.btn-primary:hover {
+  background: #1b5e20;
+}
+
+.btn-report {
+  background: linear-gradient(135deg, #388e3c, #2e7d32);
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-report:hover {
+  background: linear-gradient(135deg, #2e7d32, #1b5e20);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
 .btn-primary:hover {

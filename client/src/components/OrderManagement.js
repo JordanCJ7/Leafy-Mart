@@ -20,6 +20,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { toast, alert } from '../utils/swal';
+import { generateOrderReport } from '../utils/reportGenerator';
 
 const statusColors = {
   'Pending': '#ffa726',
@@ -171,6 +172,18 @@ export default function OrderManagement() {
     return `LKR ${n.toLocaleString()}`;
   };
 
+  const handleGenerateReport = async () => {
+    try {
+      // Fetch all orders for the report
+      const allOrdersData = await getAllOrders(token, { ...filters, page: 1, limit: 1000 });
+      generateOrderReport(allOrdersData.orders, stats);
+      toast({ title: 'Report generated successfully!', icon: 'success' });
+    } catch (error) {
+      console.error('Error generating report:', error);
+      alert('Failed to generate report', error.message);
+    }
+  };
+
   if (loading && !orders.length) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center' }}>
@@ -183,7 +196,41 @@ export default function OrderManagement() {
     <div style={{ padding: '2rem', background: '#f8f9fa' }}>
       {/* Header with Stats */}
       <div style={{ marginBottom: '2rem' }}>
-        <h2 style={{ color: '#2e7d32', marginBottom: '1rem' }}>Order Management</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <div>
+            <h2 style={{ color: '#2e7d32', margin: '0 0 0.5rem 0' }}>Order Management</h2>
+            <p style={{ color: '#666', margin: 0, fontSize: '0.95rem' }}>Track and manage customer orders</p>
+          </div>
+          <button 
+            onClick={handleGenerateReport}
+            style={{
+              background: 'linear-gradient(135deg, #388e3c, #2e7d32)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '0.75rem 1.5rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              fontSize: '1rem',
+              fontWeight: '600',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 6px 12px rgba(0,0,0,0.15)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+            }}
+          >
+            <Download size={20} />
+            Generate Report
+          </button>
+        </div>
         
         {stats && (
           <div style={{ 

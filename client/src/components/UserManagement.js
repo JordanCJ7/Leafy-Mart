@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Download } from 'lucide-react';
+import { generateUserReport } from '../utils/reportGenerator';
 import './UserManagement.css';
 
 const UserManagement = () => {
@@ -192,6 +194,30 @@ const UserManagement = () => {
     return `LKR ${amount.toLocaleString()}`;
   };
 
+  const handleGenerateReport = async () => {
+    try {
+      // Fetch all users for the report (without pagination)
+      const token = getAuthToken();
+      const response = await fetch(`${API_BASE}/users/admin/users?limit=1000`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        generateUserReport(data.data.users, userStats?.overview);
+        setSuccess('Report generated successfully!');
+      } else {
+        setError('Failed to fetch data for report');
+      }
+    } catch (error) {
+      setError('Failed to generate report');
+    }
+  };
+
   if (loading && users.length === 0) {
     return (
       <div className="user-management">
@@ -206,8 +232,18 @@ const UserManagement = () => {
   return (
     <div className="user-management">
       <div className="user-management-header">
-        <h1>User Management</h1>
-        <p>Manage customer accounts, view statistics, and handle user operations</p>
+        <div>
+          <h1>User Management</h1>
+          <p>Manage customer accounts, view statistics, and handle user operations</p>
+        </div>
+        <button 
+          className="btn-generate-report"
+          onClick={handleGenerateReport}
+          title="Generate PDF Report"
+        >
+          <Download size={20} />
+          Generate Report
+        </button>
       </div>
 
       {error && (
