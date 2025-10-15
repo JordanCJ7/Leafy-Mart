@@ -108,7 +108,6 @@ exports.updateUser = async (req, res) => {
     
     // Remove fields that shouldn't be updated directly
     delete updateData.password;
-    delete updateData.loyaltyPoints;
     delete updateData.totalPurchases;
     delete updateData.totalSpent;
 
@@ -201,50 +200,6 @@ exports.reactivateUser = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to reactivate user',
-      error: error.message
-    });
-  }
-};
-
-// Reset user password (Admin)
-exports.resetUserPassword = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { newPassword } = req.body;
-
-    if (!newPassword || newPassword.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password must be at least 6 characters long'
-      });
-    }
-
-    // Hash new password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-    const user = await User.findByIdAndUpdate(
-      id,
-      { password: hashedPassword },
-      { new: true }
-    ).select('-password');
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    res.json({
-      success: true,
-      message: 'Password reset successfully'
-    });
-  } catch (error) {
-    console.error('Reset password error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to reset password',
       error: error.message
     });
   }
