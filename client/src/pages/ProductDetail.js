@@ -207,19 +207,38 @@ export default function ProductDetail() {
               marginBottom: '1rem',
               display: 'flex',
               flexWrap: 'wrap',
-              gap: '6px'
+              gap: '8px'
             }}>
-              {(product.tags || product.tags === undefined) && (product.tags || []).map(tag => (
-                <span key={tag} style={{
-                  background: '#f0f0f0',
-                  color: '#555',
-                  padding: '4px 8px',
-                  borderRadius: '12px',
-                  fontSize: '0.85rem'
-                }}>
-                  #{tag}
-                </span>
-              ))}
+              {(product.tags || product.tags === undefined) && (product.tags || []).map((tag) => {
+                // Stable color selection based on tag string
+                const palette = [
+                  '#e8f5e9', // green
+                  '#f3e5f5', // purple
+                  '#e3f2fd', // blue
+                  '#fff3e0', // orange
+                  '#fff8e1', // yellow
+                  '#fbe9e7', // pink
+                  '#e0f2f1', // teal
+                  '#ede7f6'  // lavender
+                ];
+                const hash = String(tag).split('').reduce((s, ch) => s + ch.charCodeAt(0), 0);
+                const bg = palette[hash % palette.length];
+                const textColor = '#263238';
+
+                return (
+                  <span key={tag} style={{
+                    background: bg,
+                    color: textColor,
+                    padding: '6px 10px',
+                    borderRadius: '999px',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    boxShadow: 'inset 0 -1px 0 rgba(0,0,0,0.03)'
+                  }}>
+                    {String(tag)}
+                  </span>
+                );
+              })}
             </div>
             
             <div style={{ 

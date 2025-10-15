@@ -26,19 +26,15 @@ exports.getProductById = async (req, res) => {
 // Add product
 exports.addProduct = async (req, res) => {
 	try {
-		// Generate unique ID from name if not provided
-		if (!req.body.id) {
-			req.body.id = req.body.name
-				.toLowerCase()
-				.replace(/[^a-z0-9]/g, '-')
-				.replace(/-+/g, '-')
-				.trim('-');
-		}
+		// If an id was provided but is an empty string, remove it so model can auto-generate
+		if (req.body.id === '') delete req.body.id;
 
-		// Check if product ID already exists
-		const existingProduct = await Product.findOne({ id: req.body.id });
-		if (existingProduct) {
-			return res.status(400).json({ error: 'Product with this ID already exists' });
+		// If caller supplied an explicit id, check uniqueness
+		if (req.body.id) {
+			const existingProduct = await Product.findOne({ id: req.body.id });
+			if (existingProduct) {
+				return res.status(400).json({ error: 'Product with this ID already exists' });
+			}
 		}
 
 		const product = new Product(req.body);
@@ -56,9 +52,11 @@ exports.addProduct = async (req, res) => {
 // Update product
 exports.updateProduct = async (req, res) => {
 	try {
+		// Do not allow updating the product `id` via this endpoint
+		if (req.body.id) delete req.body.id;
 		const updated = await Product.findOneAndUpdate(
-			{ id: req.params.id }, 
-			req.body, 
+			{ id: req.params.id },
+			req.body,
 			{ new: true, runValidators: true }
 		);
 		

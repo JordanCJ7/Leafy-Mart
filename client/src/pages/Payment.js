@@ -23,6 +23,12 @@ export default function Payment() {
   }
   summary = summary || { items: [], subtotal: 0, shipping: 0, tax: 0, total: 0 };
 
+  // Normalize fields for backward compatibility (cart may store shipping or shippingCost)
+  summary.shipping = summary.shipping !== undefined ? summary.shipping : (summary.shippingCost || 0);
+  summary.shippingCost = summary.shippingCost !== undefined ? summary.shippingCost : (summary.shipping || 0);
+  summary.discount = summary.discount || 0;
+  summary.discountPercentage = summary.discountPercentage || 0;
+
   const [processing, setProcessing] = useState(false);
   const [status, setStatus] = useState(null);
 
@@ -114,7 +120,9 @@ export default function Payment() {
         items: orderItems,
         subtotal: summary.subtotal,
         tax: summary.tax,
-        shippingCost: summary.shipping,
+        shippingCost: summary.shippingCost,
+        discount: summary.discount,
+        discountPercentage: summary.discountPercentage,
         total: summary.total,
         paymentMethod: method === 'card' ? 'Card' : 'Digital Wallet',
         paymentStatus: 'Paid',
@@ -200,9 +208,16 @@ export default function Payment() {
                 <span style={{ color: '#666' }}>Subtotal</span>
                 <strong>LKR {summary.subtotal.toLocaleString()}</strong>
               </div>
+
+              {summary.discount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <span style={{ color: '#666' }}>Discount ({summary.discountPercentage || 0}%):</span>
+                  <strong style={{ color: '#28a745' }}>- LKR {summary.discount.toLocaleString()}</strong>
+                </div>
+              )}
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                 <span style={{ color: '#666' }}>Shipping</span>
-                <strong style={{ color: summary.shipping === 0 ? '#28a745' : '#333' }}>{summary.shipping === 0 ? 'FREE' : `LKR ${summary.shipping.toLocaleString()}`}</strong>
+                <strong style={{ color: summary.shippingCost === 0 ? '#28a745' : '#333' }}>{summary.shippingCost === 0 ? 'FREE' : `LKR ${summary.shippingCost.toLocaleString()}`}</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                 <span style={{ color: '#666' }}>Tax</span>
