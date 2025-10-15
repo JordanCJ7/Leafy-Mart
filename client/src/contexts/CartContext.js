@@ -19,12 +19,18 @@ export const CartProvider = ({ children }) => {
       const existingItemIndex = prevItems.findIndex(item => item.id === product.id);
       
       if (existingItemIndex !== -1) {
-        // Item already exists, update quantity
+        // Item already exists, update quantity but cap at available stock
         const updatedItems = [...prevItems];
-        updatedItems[existingItemIndex].quantity += quantity;
+        const newQuantity = Math.min(
+          updatedItems[existingItemIndex].quantity + quantity,
+          product.stock
+        );
+        updatedItems[existingItemIndex].quantity = newQuantity;
+        updatedItems[existingItemIndex].stock = product.stock; // Update stock info
         return updatedItems;
       } else {
-        // New item, add to cart
+        // New item, add to cart (cap initial quantity at stock)
+        const cappedQuantity = Math.min(quantity, product.stock);
         return [...prevItems, {
           id: product.id,
           name: product.name,
@@ -32,7 +38,7 @@ export const CartProvider = ({ children }) => {
           priceDisplay: product.priceDisplay,
           image: product.img,
           category: product.category,
-          quantity: quantity,
+          quantity: cappedQuantity,
           stock: product.stock,
           addedAt: new Date().toISOString()
         }];
@@ -51,11 +57,14 @@ export const CartProvider = ({ children }) => {
     }
 
     setCartItems(prevItems => 
-      prevItems.map(item => 
-        item.id === productId 
-          ? { ...item, quantity: newQuantity }
-          : item
-      )
+      prevItems.map(item => {
+        if (item.id === productId) {
+          // Cap quantity at available stock
+          const cappedQuantity = Math.min(newQuantity, item.stock);
+          return { ...item, quantity: cappedQuantity };
+        }
+        return item;
+      })
     );
   };
 

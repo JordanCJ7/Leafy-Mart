@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { verifyAdminToken } from '../services/api';
+import { verifyAdminToken, getUserProfile } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -32,7 +32,21 @@ export const AuthProvider = ({ children }) => {
       const adminToken = localStorage.getItem('adminToken');
       
       if (customerToken && customerData) {
-        setUser(JSON.parse(customerData));
+        let parsed = JSON.parse(customerData);
+        // If membership info missing, fetch profile from API
+        if (!parsed.membershipLevel || typeof parsed.membershipLevel === 'undefined') {
+          try {
+            const profile = await getUserProfile(customerToken);
+            if (profile && profile.success && profile.user) {
+              parsed = profile.user;
+              // persist back to localStorage
+              localStorage.setItem('customerData', JSON.stringify(parsed));
+            }
+          } catch (err) {
+            console.warn('Could not refresh user profile:', err);
+          }
+        }
+        setUser(parsed);
         setToken(customerToken);
         setIsLoggedIn(true);
         setIsAdmin(false);
@@ -58,7 +72,22 @@ export const AuthProvider = ({ children }) => {
   const loginCustomer = (customerData, tokenValue) => {
     localStorage.setItem('customerToken', tokenValue);
     localStorage.setItem('customerData', JSON.stringify(customerData));
-    setUser(customerData);
+    // If incoming login doesn't include membership info, try to fetch fresh profile
+    (async () => {
+      let enriched = customerData;
+      if (!customerData.membershipLevel) {
+        try {
+          const profile = await getUserProfile(tokenValue);
+          if (profile && profile.success && profile.user) {
+            enriched = profile.user;
+            localStorage.setItem('customerData', JSON.stringify(enriched));
+          }
+        } catch (err) {
+          // ignore and continue with provided data
+        }
+      }
+      setUser(enriched);
+    })();
     setToken(tokenValue);
     setIsLoggedIn(true);
     setIsAdmin(false);

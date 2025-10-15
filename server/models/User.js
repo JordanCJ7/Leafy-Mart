@@ -73,10 +73,6 @@ const userSchema = new mongoose.Schema({
   },
   
   // Loyalty Program
-  loyaltyPoints: { 
-    type: Number, 
-    default: 0 
-  },
   membershipLevel: {
     type: String,
     enum: ['Bronze', 'Silver', 'Gold', 'Platinum'],
@@ -130,24 +126,16 @@ userSchema.virtual('lastName').get(function() {
 
 // Method to calculate membership level based on total spent
 userSchema.methods.updateMembershipLevel = function() {
-  if (this.totalSpent >= 50000) { // 50,000 LKR
+  if (this.totalSpent > 100000) { // > 100,000 LKR
     this.membershipLevel = 'Platinum';
-  } else if (this.totalSpent >= 25000) { // 25,000 LKR
+  } else if (this.totalSpent > 50000) { // > 50,000 LKR
     this.membershipLevel = 'Gold';
-  } else if (this.totalSpent >= 10000) { // 10,000 LKR
+  } else if (this.totalSpent > 20000) { // > 20,000 LKR
     this.membershipLevel = 'Silver';
   } else {
     this.membershipLevel = 'Bronze';
   }
   return this.membershipLevel;
-};
-
-// Method to add loyalty points
-userSchema.methods.addLoyaltyPoints = function(purchaseAmount) {
-  // 1 point per 100 LKR spent
-  const pointsEarned = Math.floor(purchaseAmount / 100);
-  this.loyaltyPoints += pointsEarned;
-  return pointsEarned;
 };
 
 // Method to record purchase
@@ -159,8 +147,7 @@ userSchema.methods.recordPurchase = function(amount) {
   // Update membership level based on new spending
   this.updateMembershipLevel();
   
-  // Add loyalty points
-  return this.addLoyaltyPoints(amount);
+  return this.membershipLevel;
 };
 
 // Index for efficient queries (email already indexed via unique: true)

@@ -13,10 +13,17 @@ export default function CartPage() {
   const { isLoggedIn, user } = useAuth();
   const navigate = useNavigate();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [stockWarning, setStockWarning] = useState(null);
 
-  const handleQuantityChange = (productId, currentQuantity, change) => {
+  const handleQuantityChange = (productId, currentQuantity, change, maxStock) => {
     const newQuantity = currentQuantity + change;
     if (newQuantity > 0) {
+      // Check if trying to exceed stock
+      if (newQuantity > maxStock) {
+        setStockWarning(`Maximum available stock is ${maxStock}`);
+        setTimeout(() => setStockWarning(null), 3000);
+        return;
+      }
       updateQuantity(productId, newQuantity);
     }
   };
@@ -37,8 +44,13 @@ export default function CartPage() {
     const orderSummary = {
       items: cartItems,
       subtotal,
-      shipping,
+      // keep both keys for compatibility
+      shipping: shipping,
+      shippingCost: shipping,
       tax,
+      discount,
+      discountPercentage: discountPercentage * 100,
+      membershipLevel,
       total
     };
 
@@ -53,9 +65,31 @@ export default function CartPage() {
   };
 
   const subtotal = getCartTotal();
-  const shipping = subtotal > 5000 ? 0 : 500; // Free shipping over LKR 5000
-  const tax = Math.round(subtotal * 0.02); // 2% tax
-  const total = subtotal + shipping + tax;
+
+  // Shipping and tax rules (keep in sync with backend defaults)
+  const FREE_SHIPPING_THRESHOLD = 10000; // LKR - free shipping when subtotal >= threshold
+  const STANDARD_SHIPPING_FEE = 350; // LKR
+  const TAX_RATE = 0.02; // 2% tax used in frontend display (keep existing UX)
+
+  // Membership discount rates (mirror backend)
+  const membershipRates = {
+    'Silver': 0.05,
+    'Gold': 0.10,
+    'Platinum': 0.15
+  };
+
+  const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_FEE;
+  const tax = Math.round(subtotal * TAX_RATE);
+
+  // Calculate membership discount if user is logged in and has a membershipLevel
+  // Be resilient: accept user.membershipLevel or user.membership and be case-insensitive
+  const rawMembership = user?.membershipLevel || user?.membership || null;
+  const membershipLevel = rawMembership ? String(rawMembership).trim() : null;
+  const normalizedLevel = membershipLevel ? membershipLevel.charAt(0).toUpperCase() + membershipLevel.slice(1).toLowerCase() : null;
+  const discountPercentage = normalizedLevel ? (membershipRates[normalizedLevel] || 0) : 0;
+  const discount = Math.round(subtotal * discountPercentage);
+
+  const total = subtotal - discount + shipping + tax;
 
   if (cartItems.length === 0) {
     return (
@@ -115,6 +149,23 @@ export default function CartPage() {
       flexDirection: 'column' 
     }}>
       <Navbar />
+      {/* Stock Warning Message */}
+      {stockWarning && (
+        <div style={{
+          position: 'fixed',
+          top: '80px',
+          right: '20px',
+          background: '#ff9800',
+          color: 'white',
+          padding: '12px 20px',
+          borderRadius: '8px',
+          zIndex: 1000,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          fontWeight: '600'
+        }}>
+          ⚠️ {stockWarning}
+        </div>
+      )}
       <div style={{ flex: 1, padding: '2rem 1rem', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
         <div style={{ marginBottom: '2rem' }}>
           <h1 style={{ color: '#388e3c', marginBottom: '0.5rem' }}>Shopping Cart</h1>
@@ -160,7 +211,7 @@ export default function CartPage() {
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <button
-                    onClick={() => handleQuantityChange(item.id, item.quantity, -1)}
+                    onClick={() => handleQuantityChange(item.id, item.quantity, -1, item.stock)}
                     style={{
                       border: '1px solid #ddd',
                       background: '#f8f9fa',
@@ -186,17 +237,19 @@ export default function CartPage() {
                   </span>
                   
                   <button
-                    onClick={() => handleQuantityChange(item.id, item.quantity, 1)}
+                    onClick={() => handleQuantityChange(item.id, item.quantity, 1, item.stock)}
+                    disabled={item.quantity >= item.stock}
                     style={{
                       border: '1px solid #ddd',
-                      background: '#f8f9fa',
+                      background: item.quantity >= item.stock ? '#e0e0e0' : '#f8f9fa',
                       borderRadius: '4px',
                       width: '32px',
                       height: '32px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      cursor: 'pointer'
+                      cursor: item.quantity >= item.stock ? 'not-allowed' : 'pointer',
+                      opacity: item.quantity >= item.stock ? 0.5 : 1
                     }}
                   >
                     <Plus size={16} />
@@ -293,12 +346,19 @@ export default function CartPage() {
                 </span>
               </div>
               
+              {discount > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', color: '#28a745' }}>
+                  <span style={{ color: '#666' }}>Discount ({Math.round(discountPercentage * 100)}%):</span>
+                  <span style={{ fontWeight: '600' }}>- LKR {discount.toLocaleString()}</span>
+                </div>
+              )}
+
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                 <span style={{ color: '#666' }}>Tax:</span>
                 <span style={{ fontWeight: '600' }}>LKR {tax.toLocaleString()}</span>
               </div>
-              
-              {shipping === 0 && subtotal < 10000 && (
+
+              {shipping === 0 && (
                 <p style={{ 
                   fontSize: '0.8rem', 
                   color: '#28a745', 

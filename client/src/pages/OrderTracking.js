@@ -404,6 +404,78 @@ export default function OrderTracking() {
                       <span>LKR {(item.price * item.quantity).toLocaleString()}</span>
                     </div>
                   ))}
+                  
+                  {/* Cost Breakdown */}
+                  <div style={{ 
+                    marginTop: '1rem', 
+                    paddingTop: '0.75rem', 
+                    borderTop: '1px solid #e0e0e0' 
+                  }}>
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between',
+                      padding: '0.25rem 0',
+                      fontSize: '0.9rem',
+                      color: '#666'
+                    }}>
+                      <span>Subtotal:</span>
+                      <span>LKR {(order.subtotal || 0).toLocaleString()}</span>
+                    </div>
+                    
+                    {order.discount > 0 && (
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between',
+                        padding: '0.25rem 0',
+                        fontSize: '0.9rem',
+                        color: '#28a745'
+                      }}>
+                        <span>Discount ({order.discountPercentage || 0}%):</span>
+                        <span>- LKR {(order.discount || 0).toLocaleString()}</span>
+                      </div>
+                    )}
+                    
+                    {order.tax > 0 && (
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between',
+                        padding: '0.25rem 0',
+                        fontSize: '0.9rem',
+                        color: '#666'
+                      }}>
+                        <span>Taxes:</span>
+                        <span>LKR {(order.tax || 0).toLocaleString()}</span>
+                      </div>
+                    )}
+                    
+                    {order.shippingCost > 0 && (
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between',
+                        padding: '0.25rem 0',
+                        fontSize: '0.9rem',
+                        color: '#666'
+                      }}>
+                        <span>Shipping Fee:</span>
+                        <span>LKR {(order.shippingCost || 0).toLocaleString()}</span>
+                      </div>
+                    )}
+                    
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between',
+                      padding: '0.5rem 0',
+                      paddingTop: '0.75rem',
+                      borderTop: '2px solid #388e3c',
+                      marginTop: '0.5rem',
+                      fontSize: '1rem',
+                      fontWeight: '700',
+                      color: '#388e3c'
+                    }}>
+                      <span>Grand Total:</span>
+                      <span>LKR {order.total.toLocaleString()}</span>
+                    </div>
+                  </div>
                 </div>
 
                 <div style={{ 

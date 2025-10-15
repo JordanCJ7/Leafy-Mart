@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Save, X, Search, Filter, Upload } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Search, Filter, Upload, Download } from 'lucide-react';
 import { uploadProductImage } from '../services/api';
 import { toast, alert, confirm } from '../utils/swal';
+import { generateProductReport } from '../utils/reportGenerator';
 import './ProductManagement.css';
 
 const ProductManagement = () => {
@@ -299,6 +300,16 @@ const ProductManagement = () => {
     }
   };
 
+  const handleGenerateReport = () => {
+    try {
+      generateProductReport(filteredProducts, options);
+      toast({ title: 'Report generated successfully!', icon: 'success' });
+    } catch (error) {
+      console.error('Error generating report:', error);
+      alert('Error', 'Failed to generate report');
+    }
+  };
+
   const handleDelete = async (productId) => {
     const ok = await confirm('Delete product', 'Are you sure you want to delete this product?');
     if (!ok) return;
@@ -353,11 +364,20 @@ const ProductManagement = () => {
   return (
     <div className="product-management">
       <div className="product-management-header">
-        <h2>Product Management</h2>
-        <button className="btn btn-primary" onClick={openAddModal}>
-          <Plus size={18} />
-          Add New Plant
-        </button>
+        <div>
+          <h2>Product Management</h2>
+          <p>Manage your plant inventory and product information</p>
+        </div>
+        <div className="header-actions">
+          <button className="btn btn-report" onClick={handleGenerateReport}>
+            <Download size={18} />
+            Generate Report
+          </button>
+          <button className="btn btn-primary" onClick={openAddModal}>
+            <Plus size={18} />
+            Add New Plant
+          </button>
+        </div>
       </div>
 
       {/* Search and Filter Controls */}

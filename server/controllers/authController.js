@@ -47,7 +47,11 @@ const registerCustomer = async (req, res) => {
                 id: customer._id,
                 name: customer.name,
                 email: customer.email,
-                role: customer.role
+                role: customer.role,
+                phone: customer.phone,
+                membershipLevel: customer.membershipLevel,
+                totalSpent: customer.totalSpent,
+                totalPurchases: customer.totalPurchases
             },
             token
         });
@@ -94,7 +98,11 @@ const loginCustomer = async (req, res) => {
                 id: customer._id,
                 name: customer.name,
                 email: customer.email,
-                role: customer.role
+                role: customer.role,
+                phone: customer.phone,
+                membershipLevel: customer.membershipLevel,
+                totalSpent: customer.totalSpent,
+                totalPurchases: customer.totalPurchases
             },
             token
         });
@@ -141,7 +149,11 @@ const loginAdmin = async (req, res) => {
                 id: admin._id,
                 name: admin.name,
                 email: admin.email,
-                role: admin.role
+                role: admin.role,
+                phone: admin.phone,
+                membershipLevel: admin.membershipLevel,
+                totalSpent: admin.totalSpent,
+                totalPurchases: admin.totalPurchases
             },
             token
         });
@@ -166,18 +178,22 @@ const getUserProfile = async (req, res) => {
             });
         }
 
-        res.json({
-            success: true,
-            user: {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email,
-                    role: user.role,
-                    phone: user.phone,
-                    address: user.address,
-                    plantPreferences: user.plantPreferences
-                }
-        });
+    res.json({
+        success: true,
+        user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            phone: user.phone,
+            address: user.address,
+            plantPreferences: user.plantPreferences,
+            membershipLevel: user.membershipLevel,
+            totalSpent: user.totalSpent,
+            totalPurchases: user.totalPurchases,
+            lastPurchase: user.lastPurchase
+        }
+    });
     } catch (error) {
         console.error('Get profile error:', error);
         res.status(500).json({ 

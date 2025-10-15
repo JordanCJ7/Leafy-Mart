@@ -5,7 +5,7 @@ const productSchema = new mongoose.Schema({
   name: { type: String, required: true },
   desc: { type: String, required: true },
   priceLKR: { type: Number, required: true },
-  priceDisplay: { type: String },
+  // priceDisplay is derived from priceLKR for presentation; implemented as a virtual below
   category: { 
     type: String, 
     required: true,
@@ -21,10 +21,39 @@ const productSchema = new mongoose.Schema({
   supplier: { type: String }
 }, { timestamps: true });
 
-// Auto-generate priceDisplay before validation so required validation passes
-productSchema.pre('validate', function(next) {
-  if (this.priceLKR) {
-    this.priceDisplay = `LKR ${this.priceLKR.toLocaleString()}`;
+// Include virtuals when converting documents to JSON or Objects so frontend receives priceDisplay
+productSchema.set('toJSON', { virtuals: true });
+productSchema.set('toObject', { virtuals: true });
+
+// Virtual getter for formatted price display (not stored in DB)
+productSchema.virtual('priceDisplay').get(function() {
+  if (typeof this.priceLKR === 'number') {
+    return `LKR ${this.priceLKR.toLocaleString()}`;
+  }
+  return '';
+});
+
+// Auto-generate product `id` in the pattern Pnnn (P001, P002, ...)
+productSchema.pre('validate', async function(next) {
+  try {
+    if (!this.id) {
+      // Find the product with the highest numeric P### id
+      const Product = mongoose.model('Product');
+      const doc = await Product.find({ id: /^P\d{3}$/ }).sort({ id: -1 }).limit(1).lean();
+      let nextNum = 1;
+      if (doc && doc.length > 0) {
+        const match = doc[0].id.match(/^P(\d{3})$/);
+        if (match) {
+          nextNum = parseInt(match[1], 10) + 1;
+        }
+      }
+
+      const padded = String(nextNum).padStart(3, '0');
+      this.id = `P${padded}`;
+    }
+  } catch (err) {
+    console.warn('Failed to auto-generate product id:', err);
+    // Let validation continue; if id is required and missing, validation will fail
   }
   next();
 });

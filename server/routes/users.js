@@ -10,7 +10,6 @@ router.get('/admin/users/:id', protect, admin, userController.getUserById);
 router.put('/admin/users/:id', protect, admin, userController.updateUser);
 router.delete('/admin/users/:id', protect, admin, userController.deleteUser);
 router.put('/admin/users/:id/reactivate', protect, admin, userController.reactivateUser);
-router.put('/admin/users/:id/reset-password', protect, admin, userController.resetUserPassword);
 
 // Customer profile routes (self-management)
 router.get('/profile', protect, (req, res) => {
