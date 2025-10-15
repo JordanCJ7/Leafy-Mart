@@ -18,9 +18,7 @@ const UserManagement = () => {
   // Modal states
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [newPassword, setNewPassword] = useState('');
   
   // Statistics
   const [userStats, setUserStats] = useState(null);
@@ -101,12 +99,6 @@ const UserManagement = () => {
     setShowDeleteModal(true);
   };
 
-  const handleResetPassword = (user) => {
-    setSelectedUser(user);
-    setShowResetPasswordModal(true);
-    setNewPassword('');
-  };
-
   const updateUser = async () => {
     try {
       const token = getAuthToken();
@@ -176,32 +168,6 @@ const UserManagement = () => {
         fetchUsers();
       } else {
         setError(data.message || 'Failed to reactivate user');
-      }
-    } catch (error) {
-      setError('Network error occurred');
-    }
-  };
-
-  const resetPassword = async () => {
-    try {
-      const token = getAuthToken();
-      const response = await fetch(`${API_BASE}/users/admin/users/${selectedUser._id}/reset-password`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ newPassword })
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        setSuccess('Password reset successfully');
-        setShowResetPasswordModal(false);
-        setNewPassword('');
-      } else {
-        setError(data.message || 'Failed to reset password');
       }
     } catch (error) {
       setError('Network error occurred');
@@ -349,10 +315,10 @@ const UserManagement = () => {
                     className="membership-badge" 
                     style={{ backgroundColor: getMembershipBadgeColor(user.membershipLevel) }}
                   >
-                    {user.membershipLevel}
+                    {user.role === 'admin' ? 'N/A' : user.membershipLevel}
                   </span>
                 </td>
-                <td>{formatCurrency(user.totalSpent || 0)}</td>
+                <td>{user.role === 'admin' ? 'N/A' : formatCurrency(user.totalSpent || 0)}</td>
                 <td>{formatDate(user.registrationDate)}</td>
                 <td>
                   <span className={`status-badge ${user.isActive ? 'active' : 'inactive'}`}>
@@ -366,12 +332,6 @@ const UserManagement = () => {
                       onClick={() => handleEditUser(user)}
                     >
                       Edit
-                    </button>
-                    <button 
-                      className="btn-reset"
-                      onClick={() => handleResetPassword(user)}
-                    >
-                      Reset PWD
                     </button>
                     {user.isActive ? (
                       <button 
@@ -432,7 +392,9 @@ const UserManagement = () => {
                 <input
                   type="text"
                   value={selectedUser.name}
-                  onChange={(e) => setSelectedUser({...selectedUser, name: e.target.value})}
+                  readOnly
+                  disabled
+                  style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
                 />
               </div>
               
@@ -441,7 +403,9 @@ const UserManagement = () => {
                 <input
                   type="email"
                   value={selectedUser.email}
-                  onChange={(e) => setSelectedUser({...selectedUser, email: e.target.value})}
+                  readOnly
+                  disabled
+                  style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
                 />
               </div>
               
@@ -450,12 +414,14 @@ const UserManagement = () => {
                 <input
                   type="text"
                   value={selectedUser.phone || ''}
-                  onChange={(e) => setSelectedUser({...selectedUser, phone: e.target.value})}
+                  readOnly
+                  disabled
+                  style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
                 />
               </div>
               
               <div className="form-group">
-                <label>Role</label>
+                <label>Role *</label>
                 <select
                   value={selectedUser.role}
                   onChange={(e) => setSelectedUser({...selectedUser, role: e.target.value})}
@@ -464,6 +430,10 @@ const UserManagement = () => {
                   <option value="admin">Admin</option>
                 </select>
               </div>
+              
+              <p style={{ fontSize: '0.85rem', color: '#666', marginTop: '1rem' }}>
+                Note: Only the role can be modified. Other user details cannot be changed by administrators.
+              </p>
             </div>
             
             <div className="modal-footer">
@@ -498,44 +468,6 @@ const UserManagement = () => {
               </button>
               <button className="btn-delete" onClick={deleteUser}>
                 Deactivate User
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Reset Password Modal */}
-      {showResetPasswordModal && selectedUser && (
-        <div className="modal-overlay" onClick={() => setShowResetPasswordModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Reset Password</h3>
-              <button onClick={() => setShowResetPasswordModal(false)}>×</button>
-            </div>
-            
-            <div className="modal-body">
-              <p>Reset password for <strong>{selectedUser.name}</strong></p>
-              <div className="form-group">
-                <label>New Password</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password (min 6 characters)"
-                />
-              </div>
-            </div>
-            
-            <div className="modal-footer">
-              <button className="btn-cancel" onClick={() => setShowResetPasswordModal(false)}>
-                Cancel
-              </button>
-              <button 
-                className="btn-save" 
-                onClick={resetPassword}
-                disabled={newPassword.length < 6}
-              >
-                Reset Password
               </button>
             </div>
           </div>
