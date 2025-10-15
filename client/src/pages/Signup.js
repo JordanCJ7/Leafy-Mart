@@ -19,20 +19,62 @@ const Signup = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({
+    email: '',
+    phone: '',
+    password: ''
+  });
   
   const navigate = useNavigate();
   const { loginCustomer: loginUser } = useAuth();
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
+
+    // Clear field-specific error when user types
+    if (fieldErrors[name]) {
+      setFieldErrors({
+        ...fieldErrors,
+        [name]: ''
+      });
+    }
+  };
+
+  const validateEmail = (email) => {
+    if (!email.includes('@')) {
+      return 'Email must contain an @ symbol';
+    }
+    return '';
+  };
+
+  const validatePhone = (phone) => {
+    if (phone && !/^\d{10}$/.test(phone)) {
+      return 'Phone number must be exactly 10 digits (Sri Lankan format)';
+    }
+    return '';
+  };
+
+  const validatePassword = (password) => {
+    if (password.length < 6) {
+      return 'Password must be at least 6 characters long';
+    }
+    return '';
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    
+    // Reset field errors
+    const errors = {
+      email: '',
+      phone: '',
+      password: ''
+    };
 
     // Validation
     if (!formData.name || !formData.email || !formData.password) {
@@ -40,13 +82,35 @@ const Signup = () => {
       return;
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+    // Email validation
+    const emailError = validateEmail(formData.email);
+    if (emailError) {
+      errors.email = emailError;
+    }
+
+    // Phone validation (only if provided)
+    if (formData.phone) {
+      const phoneError = validatePhone(formData.phone);
+      if (phoneError) {
+        errors.phone = phoneError;
+      }
+    }
+
+    // Password validation
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) {
+      errors.password = passwordError;
+    }
+
+    // Check if there are any validation errors
+    if (errors.email || errors.phone || errors.password) {
+      setFieldErrors(errors);
+      setError('Please fix the validation errors below');
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
       return;
     }
 
@@ -208,7 +272,7 @@ const Signup = () => {
                   style={{
                     width: '100%',
                     padding: '15px 15px 15px 50px',
-                    border: '2px solid #e8f5e8',
+                    border: fieldErrors.email ? '2px solid #dc3545' : '2px solid #e8f5e8',
                     borderRadius: '12px',
                     fontSize: '16px',
                     transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
@@ -217,6 +281,11 @@ const Signup = () => {
                   }}
                 />
               </div>
+              {fieldErrors.email && (
+                <p style={{ color: '#dc3545', fontSize: '12px', marginTop: '4px', marginBottom: '0' }}>
+                  {fieldErrors.email}
+                </p>
+              )}
             </div>
 
             {/* Password Input */}
@@ -251,7 +320,7 @@ const Signup = () => {
                   style={{
                     width: '100%',
                     padding: '15px 50px 15px 50px',
-                    border: '2px solid #e8f5e8',
+                    border: fieldErrors.password ? '2px solid #dc3545' : '2px solid #e8f5e8',
                     borderRadius: '12px',
                     fontSize: '16px',
                     transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
@@ -277,6 +346,11 @@ const Signup = () => {
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
+              {fieldErrors.password && (
+                <p style={{ color: '#dc3545', fontSize: '12px', marginTop: '4px', marginBottom: '0' }}>
+                  {fieldErrors.password}
+                </p>
+              )}
             </div>
 
             {/* Confirm Password Input */}
@@ -370,7 +444,7 @@ const Signup = () => {
                   style={{
                     width: '100%',
                     padding: '15px 15px 15px 50px',
-                    border: '2px solid #e8f5e8',
+                    border: fieldErrors.phone ? '2px solid #dc3545' : '2px solid #e8f5e8',
                     borderRadius: '12px',
                     fontSize: '16px',
                     transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
@@ -379,6 +453,11 @@ const Signup = () => {
                   }}
                 />
               </div>
+              {fieldErrors.phone && (
+                <p style={{ color: '#dc3545', fontSize: '12px', marginTop: '4px', marginBottom: '0' }}>
+                  {fieldErrors.phone}
+                </p>
+              )}
             </div>
 
             {/* Submit Button */}
