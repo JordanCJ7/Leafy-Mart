@@ -116,12 +116,25 @@ export default function OrderManagement() {
 
   const handleUpdateOrder = async (orderId, updateData) => {
     try {
-      const response = await updateOrderStatusAdmin(orderId, updateData, token);
-  if (response._id) {
+      // Remove trackingNumber from updateData as it will be auto-generated on backend
+      const { trackingNumber, ...dataToSend } = updateData;
+      
+      const response = await updateOrderStatusAdmin(orderId, dataToSend, token);
+      if (response._id) {
         // Update the order in the list
         setOrders(orders.map(order => 
           order._id === orderId ? response : order
         ));
+        
+        // Show the auto-generated tracking number to the user
+        const generatedTrackingNumber = response.generatedTrackingNumber || response.trackingNumber;
+        if (generatedTrackingNumber) {
+          toast({ 
+            title: `Order updated! Tracking #: ${generatedTrackingNumber}`, 
+            icon: 'success' 
+          });
+        }
+        
         setShowUpdateModal(false);
         fetchStats(); // Refresh stats
       }
@@ -596,20 +609,32 @@ export default function OrderManagement() {
 
             <div style={{ marginBottom: '1rem' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-                Tracking Number:
+                Auto-Generated Tracking Number:
               </label>
-              <input
-                type="text"
-                value={updateData.trackingNumber}
-                onChange={(e) => setUpdateData({ ...updateData, trackingNumber: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
+              <div style={{
+                padding: '0.75rem',
+                background: '#f8f9fa',
+                border: '1px solid #dee2e6',
+                borderRadius: '4px',
+                fontWeight: 'bold',
+                color: '#2e7d32',
+                fontSize: '1.1rem'
+              }}>
+                ℹ️ Tracking number will be auto-generated on submission (sequential per order)
+              </div>
+              {updateData.trackingNumber && (
+                <div style={{
+                  marginTop: '0.5rem',
+                  padding: '0.75rem',
+                  background: '#d4edda',
+                  border: '1px solid #c3e6cb',
                   borderRadius: '4px',
-                  border: '1px solid #ddd'
-                }}
-                placeholder="Enter tracking number"
-              />
+                  color: '#155724',
+                  fontWeight: 'bold'
+                }}>
+                  ✓ Current Tracking: {updateData.trackingNumber}
+                </div>
+              )}
             </div>
 
             <div style={{ marginBottom: '1rem' }}>
