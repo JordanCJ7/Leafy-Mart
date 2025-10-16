@@ -216,7 +216,7 @@ exports.getAllOrders = async (req, res) => {
 // Update order status (admin)
 exports.updateOrderStatus = async (req, res) => {
 	try {
-		const { status, trackingNumber, notes } = req.body;
+		const { status, notes } = req.body;
 		
 		// Fetch the current order to check previous status
 		const order = await Order.findById(req.params.id).populate('items.productId');
@@ -225,11 +225,13 @@ exports.updateOrderStatus = async (req, res) => {
 			return res.status(404).json({ error: 'Order not found' });
 		}
 		
-		const updateData = { status };
+		// Generate tracking number for this status update (sequential per order)
+		const trackingNumber = order.addStatusUpdate(status, req.user.name || req.user.email, notes);
 		
-		if (trackingNumber) {
-			updateData.trackingNumber = trackingNumber;
-		}
+		const updateData = { 
+			status,
+			trackingNumber // Store the current tracking number
+		};
 		
 		if (notes) {
 			updateData.notes = notes;
@@ -271,13 +273,19 @@ exports.updateOrderStatus = async (req, res) => {
 			updateData.stockDeducted = true;
 		}
 		
+		// Update status history in the document before saving
+		updateData.statusHistory = order.statusHistory;
+		
 		const updatedOrder = await Order.findByIdAndUpdate(
 			req.params.id,
 			updateData,
 			{ new: true }
 		).populate('customerId', 'name email phone');
 		
-		res.json(updatedOrder);
+		res.json({
+			...updatedOrder.toObject(),
+			generatedTrackingNumber: trackingNumber // Return the generated tracking number in response
+		});
 	} catch (err) {
 		res.status(400).json({ error: err.message });
 	}
