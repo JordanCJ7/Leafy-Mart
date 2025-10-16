@@ -1,5 +1,24 @@
 const mongoose = require('mongoose');
 
+// Status History Schema - tracks each status update with its tracking number
+const statusHistorySchema = new mongoose.Schema({
+  status: {
+    type: String,
+    enum: ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+    required: true
+  },
+  trackingNumber: {
+    type: String, // Format: #001, #002, etc.
+    required: true
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now
+  },
+  updatedBy: String, // Admin name or email
+  notes: String
+}, { _id: true });
+
 const orderSchema = new mongoose.Schema({
   customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   
@@ -50,7 +69,10 @@ const orderSchema = new mongoose.Schema({
   // Delivery Information
   estimatedDelivery: Date,
   actualDelivery: Date,
-  trackingNumber: String,
+  trackingNumber: String, // Current/latest tracking number
+  
+  // Status History - tracks all status updates with sequential tracking numbers
+  statusHistory: [statusHistorySchema],
   
   // Special Instructions
   notes: String,
@@ -101,6 +123,30 @@ orderSchema.methods.calculateTotal = function() {
   // Total = subtotal - discount + tax + shipping
   this.total = this.subtotal - this.discount + this.tax + this.shippingCost;
   return this.total;
+};
+
+// Method to generate next tracking number for this order
+orderSchema.methods.generateTrackingNumber = function() {
+  // Count existing status history entries to determine next sequence number
+  const sequenceNumber = this.statusHistory.length + 1;
+  // Format as #001, #002, etc. (hash + zero-padded 3 digits)
+  const trackingNumber = '#' + String(sequenceNumber).padStart(3, '0');
+  return trackingNumber;
+};
+
+// Method to add status update to history with tracking number
+orderSchema.methods.addStatusUpdate = function(status, updatedBy, notes) {
+  const trackingNumber = this.generateTrackingNumber();
+  
+  this.statusHistory.push({
+    status,
+    trackingNumber,
+    updatedBy,
+    notes,
+    timestamp: new Date()
+  });
+  
+  return trackingNumber;
 };
 
 module.exports = mongoose.model('Order', orderSchema);

@@ -22,7 +22,8 @@ const Signup = () => {
   const [fieldErrors, setFieldErrors] = useState({
     email: '',
     phone: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
   
   const navigate = useNavigate();
@@ -65,6 +66,13 @@ const Signup = () => {
     return '';
   };
 
+  const validatePasswordMatch = (password, confirmPassword) => {
+    if (password && confirmPassword && password !== confirmPassword) {
+      return 'Passwords do not match';
+    }
+    return '';
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -73,7 +81,8 @@ const Signup = () => {
     const errors = {
       email: '',
       phone: '',
-      password: ''
+      password: '',
+      confirmPassword: ''
     };
 
     // Validation
@@ -102,8 +111,14 @@ const Signup = () => {
       errors.password = passwordError;
     }
 
+    // Password match validation
+    const passwordMatchError = validatePasswordMatch(formData.password, formData.confirmPassword);
+    if (passwordMatchError) {
+      errors.confirmPassword = passwordMatchError;
+    }
+
     // Check if there are any validation errors
-    if (errors.email || errors.phone || errors.password) {
+    if (errors.email || errors.phone || errors.password || errors.confirmPassword) {
       setFieldErrors(errors);
       setError('Please fix the validation errors below');
       return;
@@ -346,9 +361,20 @@ const Signup = () => {
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              {fieldErrors.password && (
-                <p style={{ color: '#dc3545', fontSize: '12px', marginTop: '4px', marginBottom: '0' }}>
-                  {fieldErrors.password}
+              {fieldErrors.password && fieldErrors.password.length > 0 && (
+                <p style={{ 
+                  color: '#dc3545', 
+                  fontSize: '12px', 
+                  marginTop: '6px', 
+                  marginBottom: '0',
+                  padding: '6px 8px',
+                  background: '#f8d7da',
+                  border: '1px solid #f5c6cb',
+                  borderRadius: '4px',
+                  display: 'block',
+                  visibility: 'visible'
+                }}>
+                  ⚠️ {fieldErrors.password}
                 </p>
               )}
             </div>
@@ -385,7 +411,7 @@ const Signup = () => {
                   style={{
                     width: '100%',
                     padding: '15px 50px 15px 50px',
-                    border: '2px solid #e8f5e8',
+                    border: fieldErrors.confirmPassword ? '2px solid #dc3545' : '2px solid #e8f5e8',
                     borderRadius: '12px',
                     fontSize: '16px',
                     transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
@@ -411,6 +437,22 @@ const Signup = () => {
                   {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
+              {fieldErrors.confirmPassword && fieldErrors.confirmPassword.length > 0 && (
+                <p style={{ 
+                  color: '#dc3545', 
+                  fontSize: '12px', 
+                  marginTop: '6px', 
+                  marginBottom: '0',
+                  padding: '6px 8px',
+                  background: '#f8d7da',
+                  border: '1px solid #f5c6cb',
+                  borderRadius: '4px',
+                  display: 'block',
+                  visibility: 'visible'
+                }}>
+                  ⚠️ {fieldErrors.confirmPassword}
+                </p>
+              )}
             </div>
 
             {/* Phone Number - Optional */}
