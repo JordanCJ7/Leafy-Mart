@@ -468,7 +468,7 @@ const ProductManagement = () => {
                     </button>
                     <button 
                       className="btn btn-danger btn-sm"
-                      onClick={() => handleDelete(product._id || product.id)}
+                      onClick={() => handleDelete(product.id)}
                     >
                       <Trash2 size={16} />
                     </button>
